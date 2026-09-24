@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v5 — Paragraph Formatting
+## Current version: v6 — Lists
 
-Text alignment, line spacing, and indentation controls are live in the toolbar
-at `/editor`. Bullet/numbered/nested lists land in v6.
+Bullet and numbered lists are live in the toolbar at `/editor`, with Tab/Shift+Tab
+nesting. Undo/redo and autosave-draft land in v7.

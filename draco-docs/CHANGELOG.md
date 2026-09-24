@@ -3,6 +3,14 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v6 — Lists
+- Bullet list and numbered list toggle buttons
+- Nested lists via Tab (nest) / Shift+Tab (un-nest), using StarterKit's
+  built-in list-item keymap
+- Verified the Tab precedence concern flagged in v5: ListItem's Tab handler
+  returns false outside a list, so it correctly falls through to the v5
+  Indent extension for regular paragraphs — no conflict, nothing to fix
+
 ## v5 — Paragraph Formatting
 - Text alignment: left, center, right, justify
 - Line spacing selector (1, 1.15, 1.5, 2) via TipTap's bundled LineHeight extension
