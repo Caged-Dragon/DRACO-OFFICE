@@ -1,0 +1,65 @@
+name: Release
+
+# Runs whenever a tag like v1.0.0, v0.02.0, v12.3.1 is pushed.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package source zip
+        run: |
+          zip -r "docwrite-app-${GITHUB_REF_NAME}.zip" . \
+            -x "node_modules/*" \
+            -x ".next/*" \
+            -x ".git/*"
+
+      - name: Package production build zip
+        run: |
+          zip -r "docwrite-app-${GITHUB_REF_NAME}-build.zip" .next public package.json package-lock.json next.config.ts
+
+      # Pulls the matching "## vN — Theme" section out of CHANGELOG.md to use
+      # as the release notes. If the tag has no matching heading yet, GitHub
+      # falls back to an auto-generated list of commits instead.
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION_NUM=$(echo "${GITHUB_REF_NAME}" | sed -E 's/^v0*([0-9]+)\..*/\1/')
+          awk -v ver="## v${VERSION_NUM} " '
+            $0 ~ "^" ver { found=1; print; next }
+            found && /^## v/ { exit }
+            found { print }
+          ' CHANGELOG.md > release_notes.md
+          echo "Extracted notes:"
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: |
+            docwrite-app-${{ github.ref_name }}.zip
+            docwrite-app-${{ github.ref_name }}-build.zip
