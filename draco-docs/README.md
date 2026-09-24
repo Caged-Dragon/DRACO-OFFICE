@@ -6,9 +6,18 @@ versions) packaged for Android, iOS, Windows, and macOS from one codebase.
 
 ## Release plan
 
-Built in 100 versions, released as tagged GitHub Releases (zip/installer per tag).
+Built in 100 versions, released as tagged GitHub Releases (zip/installer per tag,
+published automatically by `.github/workflows/release.yml`).
 Versions 1–50 cover a complete offline-first single-user editor with .docx
 import/export. Versions 51–100 (collaboration, cloud sync, and beyond) TBD.
+
+**Tag scheme:** `v0.01.0` → `v0.99.0` = versions 1–99, `v1.00.0` = version 100.
+To ship a version, tag it and push:
+
+```bash
+git tag v0.02.0   # for version 2
+git push --tags
+```
 
 See `CHANGELOG.md` for what each version ships.
 
@@ -29,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v1 — Project Foundation
+## Current version: v2 — Editor Core
 
-Project scaffold, PWA installability, and base routing (dashboard / editor /
-settings placeholders). The actual rich-text editing engine ships in v2.
+Rich-text editing (TipTap/ProseMirror) is live at `/editor`, with cursor and
+selection tracking. Text formatting controls (bold/italic/underline) ship in v3.

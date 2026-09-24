@@ -1,6 +1,8 @@
 name: Release
 
-# Runs whenever a tag like v1.0.0, v0.02.0, v12.3.1 is pushed.
+# Runs whenever a version tag is pushed, using the project's numbering scheme:
+# v0.01.0 -> v0.99.0 = versions 1-99, v1.00.0 = version 100
+# (i.e. version number = major*100 + minor)
 on:
   push:
     tags:
@@ -45,7 +47,18 @@ jobs:
       - name: Extract changelog section
         id: changelog
         run: |
-          VERSION_NUM=$(echo "${GITHUB_REF_NAME}" | sed -E 's/^v0*([0-9]+)\..*/\1/')
+          # Tag scheme: v<major>.<minor>.<patch> where
+          # version number = major*100 + minor
+          # e.g. v0.01.0 -> 1, v0.50.0 -> 50, v0.99.0 -> 99, v1.00.0 -> 100
+          VERSION_NUM=$(python3 -c "
+          import re, sys
+          m = re.match(r'^v(\d+)\.(\d+)\.\d+$', '${GITHUB_REF_NAME}')
+          if not m:
+              sys.exit('Tag \"${GITHUB_REF_NAME}\" does not match v<major>.<minor>.<patch>')
+          major, minor = int(m.group(1)), int(m.group(2))
+          print(major * 100 + minor)
+          ")
+          echo "Resolved version number: ${VERSION_NUM}"
           awk -v ver="## v${VERSION_NUM} " '
             $0 ~ "^" ver { found=1; print; next }
             found && /^## v/ { exit }
