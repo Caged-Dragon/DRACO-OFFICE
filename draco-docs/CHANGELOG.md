@@ -3,6 +3,17 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v9 — Page Layout
+- Page size selector: Letter, A4, Legal
+- Orientation: portrait / landscape (swaps the page's width/height)
+- Margin presets: Narrow, Normal, Moderate, Wide
+- Settings persist to `localStorage`, separate from the document draft
+- Visual rework: the editor now renders as an actual white "page" on a dark
+  canvas, sized in real inches and centered — like Word/Docs page view —
+  instead of a borderless dark panel. Margin presets are applied as the
+  page's padding, so this is also the first version where the editor
+  visually shows margins, not just a config value with no visible effect
+
 ## v8 — Document Structure
 - Heading dropdown: Paragraph, H1–H6 (StarterKit's Heading already supports
   all 6 levels by default, no config needed)

@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v8 — Document Structure
+## Current version: v9 — Page Layout
 
-Headings (H1–H6) and a document title field are live at `/editor`, saved
-alongside body content. Page layout (size, margins, orientation) lands in v9.
+The editor now renders as a real page (Letter/A4/Legal, portrait/landscape,
+with margin presets) at `/editor`. Local save/load of named documents lands in v10.

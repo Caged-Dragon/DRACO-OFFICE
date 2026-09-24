@@ -13,8 +13,16 @@ import ParagraphControls from "./paragraph-controls";
 import ListControls from "./list-controls";
 import HistoryControls from "./history-controls";
 import HeadingControls from "./heading-controls";
+import PageSettingsControls from "./page-settings-controls";
 import Indent from "./indent-extension";
 import { useAutosave, loadDraft } from "./use-autosave";
+import {
+  loadPageSettings,
+  savePageSettings,
+  getPageDimensionsIn,
+  getMarginIn,
+  type PageSettings,
+} from "./page-settings";
 
 export default function DocumentEditor() {
   // Read any saved draft once, synchronously, during the initial render —
@@ -23,6 +31,9 @@ export default function DocumentEditor() {
   // client-side anyway, so there's nothing for this to mismatch against.
   const [initialDraft] = useState(() => loadDraft());
   const [title, setTitle] = useState(initialDraft?.title ?? "");
+  const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
+    loadPageSettings()
+  );
   const [selectionInfo, setSelectionInfo] = useState({
     hasSelection: false,
     from: 0,
@@ -48,8 +59,7 @@ export default function DocumentEditor() {
     ],
     editorProps: {
       attributes: {
-        class:
-          "prose prose-invert max-w-none focus:outline-none min-h-[70vh] px-4 py-6",
+        class: "prose max-w-none focus:outline-none",
       },
     },
     onSelectionUpdate: ({ editor }) => {
@@ -94,8 +104,24 @@ export default function DocumentEditor() {
       <div className="border-b border-slate-800 px-4 py-2">
         <ListControls editor={editor} />
       </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
+      <div className="border-b border-slate-800 px-4 py-2">
+        <PageSettingsControls
+          settings={pageSettings}
+          onChange={(next) => {
+            setPageSettings(next);
+            savePageSettings(next);
+          }}
+        />
+      </div>
+      <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
+        <div
+          className="mx-auto bg-white shadow-xl"
+          style={{
+            width: `${getPageDimensionsIn(pageSettings).width}in`,
+            minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
+            padding: `${getMarginIn(pageSettings)}in`,
+          }}
+        >
           <input
             type="text"
             value={title}
@@ -105,7 +131,7 @@ export default function DocumentEditor() {
             }}
             placeholder="Untitled document"
             aria-label="Document title"
-            className="w-full bg-transparent text-3xl font-bold text-slate-100 placeholder-slate-600 focus:outline-none px-4 pt-8"
+            className="w-full bg-transparent text-3xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none pb-4"
           />
           <EditorContent editor={editor} />
         </div>
