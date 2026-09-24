@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v6 — Lists
+## Current version: v7 — History
 
-Bullet and numbered lists are live in the toolbar at `/editor`, with Tab/Shift+Tab
-nesting. Undo/redo and autosave-draft land in v7.
+Undo/redo and autosave (to localStorage, with draft restore on load) are live
+at `/editor`. Headings and a title page land in v8.

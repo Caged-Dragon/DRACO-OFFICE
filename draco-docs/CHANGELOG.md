@@ -3,6 +3,16 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v7 — History
+- Undo/redo toolbar buttons (disabled state reflects `editor.can()`), plus
+  the standard Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z shortcuts from StarterKit's
+  bundled UndoRedo extension
+- Autosave: document content is debounced (800ms) and saved to
+  `localStorage` as JSON on every edit
+- Draft restore: on load, any saved draft is restored into the editor
+- "Saving… / Saved" indicator in the status bar
+- SSR-safe: localStorage access is guarded so the server render doesn't crash
+
 ## v6 — Lists
 - Bullet list and numbered list toggle buttons
 - Nested lists via Tab (nest) / Shift+Tab (un-nest), using StarterKit's
