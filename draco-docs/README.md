@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v2 — Editor Core
+## Current version: v3 — Text Basics
 
-Rich-text editing (TipTap/ProseMirror) is live at `/editor`, with cursor and
-selection tracking. Text formatting controls (bold/italic/underline) ship in v3.
+Bold, italic, underline, and strikethrough formatting are live via the toolbar
+at `/editor`, with keyboard shortcuts. Font family/size/color land in v4.

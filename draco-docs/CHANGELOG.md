@@ -3,6 +3,11 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v3 — Text Basics
+- Formatting toolbar: bold, italic, underline, strikethrough
+- Buttons highlight active state based on cursor/selection
+- Standard keyboard shortcuts (Ctrl/Cmd+B, I, U) work via TipTap's built-in bindings
+
 ## v2 — Editor Core
 - Rich-text editing engine (TipTap/ProseMirror) wired into the `/editor` route
 - Live cursor position and selection-length tracking

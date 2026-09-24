@@ -3,7 +3,9 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useEffect, useState } from "react";
+import Underline from "@tiptap/extension-underline";
+import { useState } from "react";
+import FormattingToolbar from "./formatting-toolbar";
 
 export default function DocumentEditor() {
   const [selectionInfo, setSelectionInfo] = useState({
@@ -16,6 +18,7 @@ export default function DocumentEditor() {
     immediatelyRender: false,
     extensions: [
       StarterKit,
+      Underline,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -30,14 +33,15 @@ export default function DocumentEditor() {
       const { from, to, empty } = editor.state.selection;
       setSelectionInfo({ hasSelection: !empty, from, to });
     },
+    onTransaction: () => {
+      // Re-render so toolbar button active-states (bold/italic/etc.)
+      // reflect marks toggled at the current selection.
+      setSelectionInfo((s) => ({ ...s }));
+    },
   });
 
-  // Keep selection state in sync on mount / editor swap.
-  useEffect(() => {
-    if (!editor) return;
-    const { from, to, empty } = editor.state.selection;
-    setSelectionInfo({ hasSelection: !empty, from, to });
-  }, [editor]);
+  // Initial selectionInfo state already matches a fresh editor's cursor
+  // position (from: 0, to: 0, no selection), so no sync effect is needed.
 
   if (!editor) {
     return (
@@ -49,14 +53,14 @@ export default function DocumentEditor() {
 
   return (
     <div className="flex-1 flex flex-col">
+      <FormattingToolbar editor={editor} />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto">
           <EditorContent editor={editor} />
         </div>
       </div>
 
-      {/* Cursor / selection status bar — foundation other versions build on
-          (word count in v17, formatting toolbar in v3, etc.) */}
+      {/* Cursor / selection status bar (word count lands in v17) */}
       <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-500 flex items-center gap-4">
         <span>
           {selectionInfo.hasSelection
