@@ -3,6 +3,19 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v10 — Local Save/Load
+- Native file format: `.dwdoc` (JSON: title, TipTap content, page settings, format version)
+- "Save to disk" and "Open…" buttons, using the File System Access API where
+  supported (Chrome/Edge) with a download/`<input type="file">` fallback for
+  browsers that lack it (Firefox, Safari)
+- Opening a file replaces the current document's title, content, and page
+  settings, and immediately re-syncs the autosaved draft to match
+- Added ambient TypeScript types for the File System Access API subset used
+  (`showSaveFilePicker`/`showOpenFilePicker` aren't in the default DOM lib yet)
+- Verified the serialize/parse round-trip behaviorally (round-trip, missing
+  fields falling back to defaults, invalid files rejected), not just via
+  the type-checker
+
 ## v9 — Page Layout
 - Page size selector: Letter, A4, Legal
 - Orientation: portrait / landscape (swaps the page's width/height)

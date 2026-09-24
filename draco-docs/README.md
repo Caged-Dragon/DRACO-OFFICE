@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v9 — Page Layout
+## Current version: v10 — Local Save/Load
 
-The editor now renders as a real page (Letter/A4/Legal, portrait/landscape,
-with margin presets) at `/editor`. Local save/load of named documents lands in v10.
+Documents can be saved to and opened from disk as `.dwdoc` files at `/editor`
+(File System Access API, with a download/upload fallback). Tables land in v11.
