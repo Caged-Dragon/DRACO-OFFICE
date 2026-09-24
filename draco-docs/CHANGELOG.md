@@ -3,6 +3,21 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v8 — Document Structure
+- Heading dropdown: Paragraph, H1–H6 (StarterKit's Heading already supports
+  all 6 levels by default, no config needed)
+- Title page: a document title field above the body, persisted alongside
+  content in the same autosaved draft
+- Cleanup: removed a duplicate `Underline` registration — StarterKit bundles
+  it by default in this TipTap version, so the separate package/import from
+  v3 was redundant
+- Reworked autosave (`use-autosave.ts`) to fix 4 lint errors surfaced by the
+  stricter React Compiler hook rules: no ref writes during render, no
+  synchronous `setState` inside effect bodies. Draft loading now happens via
+  a lazy `useState` initializer instead of a mount effect, and title saves
+  are triggered directly from the input's `onChange` instead of a
+  title-watching effect
+
 ## v7 — History
 - Undo/redo toolbar buttons (disabled state reflects `editor.can()`), plus
   the standard Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z shortcuts from StarterKit's

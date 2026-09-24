@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v7 — History
+## Current version: v8 — Document Structure
 
-Undo/redo and autosave (to localStorage, with draft restore on load) are live
-at `/editor`. Headings and a title page land in v8.
+Headings (H1–H6) and a document title field are live at `/editor`, saved
+alongside body content. Page layout (size, margins, orientation) lands in v9.
