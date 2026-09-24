@@ -3,6 +3,14 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v5 — Paragraph Formatting
+- Text alignment: left, center, right, justify
+- Line spacing selector (1, 1.15, 1.5, 2) via TipTap's bundled LineHeight extension
+- Indentation: custom extension (no stable official one exists yet), with
+  increase/decrease buttons and Tab/Shift+Tab shortcuts
+- Note: Tab-to-indent may need a precedence check later once list items
+  (which also use Tab, for sinking) land in v6
+
 ## v4 — Font Controls
 - Font family selector (Default, Serif, Sans, Mono)
 - Font size selector (Small, Normal, Large, Huge)

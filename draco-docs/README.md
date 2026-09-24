@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v4 — Font Controls
+## Current version: v5 — Paragraph Formatting
 
-Font family, size, text color, and highlight controls are live in the toolbar
-at `/editor`. Paragraph formatting (alignment, spacing, indentation) lands in v5.
+Text alignment, line spacing, and indentation controls are live in the toolbar
+at `/editor`. Bullet/numbered/nested lists land in v6.
