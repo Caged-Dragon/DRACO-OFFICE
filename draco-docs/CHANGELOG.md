@@ -3,6 +3,14 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v4 — Font Controls
+- Font family selector (Default, Serif, Sans, Mono)
+- Font size selector (Small, Normal, Large, Huge)
+- Text color swatches (7 preset colors)
+- Highlight color swatches with a "none" option to clear
+- Corrected TipTap 3 extension imports (TextStyle/FontFamily/FontSize/Color
+  ship bundled in `@tiptap/extension-text-style`, not as separate packages)
+
 ## v3 — Text Basics
 - Formatting toolbar: bold, italic, underline, strikethrough
 - Buttons highlight active state based on cursor/selection

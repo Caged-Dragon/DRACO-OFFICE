@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v3 — Text Basics
+## Current version: v4 — Font Controls
 
-Bold, italic, underline, and strikethrough formatting are live via the toolbar
-at `/editor`, with keyboard shortcuts. Font family/size/color land in v4.
+Font family, size, text color, and highlight controls are live in the toolbar
+at `/editor`. Paragraph formatting (alignment, spacing, indentation) lands in v5.
