@@ -3,6 +3,20 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v13 — Links
+- Auto-linking: typed/pasted URLs become links automatically (TipTap's Link
+  extension, `autolink: true` — no extra code needed)
+- Manual link button with an inline URL popover to add/edit a link, and a
+  separate remove-link button
+- URLs without a protocol are normalized to `https://`
+- `openOnClick` disabled so a plain click edits the link instead of
+  navigating away; Ctrl/Cmd+click opens it in a new tab instead (added via
+  a custom `handleClick`, matching the Word/Docs convention)
+- Caught and fixed a lint error during development: the URL popover
+  originally pre-filled itself via a `useEffect` watching `open`, which
+  triggers a synchronous `setState`-in-effect violation. Moved the pre-fill
+  into the toggle button's own `onClick` instead
+
 ## v12 — Images
 - Insert image from a local file (converted to a base64 data URL client-side —
   no upload backend exists yet, consistent with the offline-first, local-storage

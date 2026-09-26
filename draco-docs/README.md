@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v12 — Images
+## Current version: v13 — Links
 
-Images can be inserted, resized, and text-wrapped (left/right/none) at
-`/editor`. Hyperlinks land in v13.
+Auto-linking plus manual add/edit/remove links are live at `/editor`
+(Ctrl/Cmd+click to open). Headers/footers and page numbers land in v14.

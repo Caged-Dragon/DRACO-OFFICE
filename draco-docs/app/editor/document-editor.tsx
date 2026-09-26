@@ -8,6 +8,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import WrappableImage from "./image-extension";
+import Link from "@tiptap/extension-link";
 import { useState } from "react";
 import FormattingToolbar from "./formatting-toolbar";
 import FontControls from "./font-controls";
@@ -19,6 +20,7 @@ import PageSettingsControls from "./page-settings-controls";
 import FileControls from "./file-controls";
 import TableControls from "./table-controls";
 import ImageControls from "./image-controls";
+import LinkControls from "./link-controls";
 import Indent from "./indent-extension";
 import { useAutosave, loadDraft } from "./use-autosave";
 import type { DocWriteFile } from "./file-format";
@@ -66,6 +68,10 @@ export default function DocumentEditor() {
         allowBase64: true,
         resize: { enabled: true, minWidth: 60, minHeight: 60 },
       }),
+      Link.configure({
+        autolink: true,
+        openOnClick: false, // clicking edits it in our editor instead of navigating away
+      }),
       Indent,
       Placeholder.configure({
         placeholder: "Start writing…",
@@ -74,6 +80,15 @@ export default function DocumentEditor() {
     editorProps: {
       attributes: {
         class: "prose max-w-none focus:outline-none",
+      },
+      handleClick: (view, pos, event) => {
+        if (!(event.metaKey || event.ctrlKey)) return false;
+        const attrs = editor?.getAttributes("link");
+        if (attrs?.href) {
+          window.open(attrs.href, "_blank", "noopener,noreferrer");
+          return true;
+        }
+        return false;
       },
     },
     onSelectionUpdate: ({ editor }) => {
@@ -122,6 +137,9 @@ export default function DocumentEditor() {
         <HistoryControls editor={editor} />
       </div>
       <FormattingToolbar editor={editor} />
+      <div className="border-b border-slate-800 px-4 py-2">
+        <LinkControls editor={editor} />
+      </div>
       <div className="border-b border-slate-800 px-4 py-2">
         <FontControls editor={editor} />
       </div>
