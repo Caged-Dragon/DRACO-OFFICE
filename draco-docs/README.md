@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v13 — Links
+## Current version: v14 — Headers/Footers
 
-Auto-linking plus manual add/edit/remove links are live at `/editor`
-(Ctrl/Cmd+click to open). Headers/footers and page numbers land in v14.
+Header/footer text and a page-number toggle are live at `/editor` (page
+numbering is a placeholder until real pagination lands in v29). Find & Replace lands in v15.

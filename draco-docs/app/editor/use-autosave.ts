@@ -5,8 +5,21 @@ import type { Editor } from "@tiptap/react";
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
-export type Draft = {
+export type DocMeta = {
   title: string;
+  header: string;
+  footer: string;
+  showPageNumber: boolean;
+};
+
+export const DEFAULT_DOC_META: DocMeta = {
+  title: "",
+  header: "",
+  footer: "",
+  showPageNumber: false,
+};
+
+export type Draft = DocMeta & {
   content: Record<string, unknown>;
 };
 
@@ -19,11 +32,15 @@ export function loadDraft(): Draft | null {
     const raw = window.localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    // Back-compat: v7 stored the raw TipTap JSON directly, with no title.
+    // Back-compat: v7 stored raw TipTap JSON with no metadata at all;
+    // v8-v13 stored {title, content} with no header/footer/page-number.
     if (parsed && typeof parsed === "object" && "type" in parsed) {
-      return { title: "", content: parsed };
+      return { ...DEFAULT_DOC_META, content: parsed };
     }
-    return parsed;
+    if (parsed && typeof parsed === "object" && "content" in parsed) {
+      return { ...DEFAULT_DOC_META, ...parsed };
+    }
+    return null;
   } catch {
     // Corrupt or inaccessible storage shouldn't crash the editor.
     return null;
@@ -35,28 +52,29 @@ function saveDraft(draft: Draft) {
 }
 
 /**
- * Debounced autosave, persisting {title, content} together.
+ * Debounced autosave, persisting {title, header, footer, showPageNumber,
+ * content} together.
  *
  * `scheduleSave` is a plain callback (not tucked inside an effect body), so
- * it's safe to call both from the title <input>'s onChange (a real event
- * handler) and from TipTap's own "update" event listener (also fires
- * asynchronously, never synchronously during the effect's own execution) —
- * avoiding the "setState synchronously in an effect" pitfall entirely.
+ * it's safe to call both from an <input onChange> (a real event handler)
+ * and from TipTap's own "update" event listener (also fires asynchronously,
+ * never synchronously during the effect's own execution) — avoiding the
+ * "setState synchronously in an effect" pitfall entirely.
  */
 export function useAutosave(editor: Editor | null) {
   const [status, setStatus] = useState<SaveStatus>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const titleRef = useRef("");
+  const metaRef = useRef<DocMeta>(DEFAULT_DOC_META);
 
   const scheduleSave = useCallback(
-    (title: string) => {
+    (meta: DocMeta) => {
       if (!editor) return;
-      titleRef.current = title;
+      metaRef.current = meta;
       setStatus("saving");
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         try {
-          saveDraft({ title: titleRef.current, content: editor.getJSON() });
+          saveDraft({ ...metaRef.current, content: editor.getJSON() });
           setStatus("saved");
         } catch {
           // Storage full or unavailable — fail silently, keep editing.
@@ -68,7 +86,7 @@ export function useAutosave(editor: Editor | null) {
 
   useEffect(() => {
     if (!editor) return;
-    const handleUpdate = () => scheduleSave(titleRef.current);
+    const handleUpdate = () => scheduleSave(metaRef.current);
     editor.on("update", handleUpdate);
     return () => {
       editor.off("update", handleUpdate);

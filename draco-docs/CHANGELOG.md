@@ -3,6 +3,20 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v14 — Headers/Footers
+- Editable header and footer text fields, rendered at the top/bottom of the
+  page (only taking up space when non-empty)
+- "Show page number" toggle
+- Honest limitation, not silently hidden: page numbering currently shows a
+  static "Page 1", since there's no real multi-page pagination yet — the
+  editor is still one continuous scrollable page visually. Real page-by-page
+  numbering depends on the pagination work that print (v29) will need anyway
+- Extended the persisted schema (autosave draft + `.dwdoc` file format) to
+  `{title, header, footer, showPageNumber, content, pageSettings}`, bumped
+  file format to version 2, and verified — behaviorally, not just via
+  types — that older v1-format files and pre-v14 drafts still load correctly
+  with header/footer/showPageNumber defaulting sensibly
+
 ## v13 — Links
 - Auto-linking: typed/pasted URLs become links automatically (TipTap's Link
   extension, `autolink: true` — no extra code needed)

@@ -21,6 +21,7 @@ import FileControls from "./file-controls";
 import TableControls from "./table-controls";
 import ImageControls from "./image-controls";
 import LinkControls from "./link-controls";
+import HeaderFooterControls from "./header-footer-controls";
 import Indent from "./indent-extension";
 import { useAutosave, loadDraft } from "./use-autosave";
 import type { DocWriteFile } from "./file-format";
@@ -39,6 +40,11 @@ export default function DocumentEditor() {
   // client-side anyway, so there's nothing for this to mismatch against.
   const [initialDraft] = useState(() => loadDraft());
   const [title, setTitle] = useState(initialDraft?.title ?? "");
+  const [header, setHeader] = useState(initialDraft?.header ?? "");
+  const [footer, setFooter] = useState(initialDraft?.footer ?? "");
+  const [showPageNumber, setShowPageNumber] = useState(
+    initialDraft?.showPageNumber ?? false
+  );
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
   );
@@ -121,15 +127,26 @@ export default function DocumentEditor() {
         <FileControls
           getDocument={() => ({
             title,
+            header,
+            footer,
+            showPageNumber,
             content: editor.getJSON(),
             pageSettings,
           })}
           onOpen={(file: DocWriteFile) => {
             editor.commands.setContent(file.content);
             setTitle(file.title);
+            setHeader(file.header);
+            setFooter(file.footer);
+            setShowPageNumber(file.showPageNumber);
             setPageSettings(file.pageSettings);
             savePageSettings(file.pageSettings);
-            scheduleSave(file.title);
+            scheduleSave({
+              title: file.title,
+              header: file.header,
+              footer: file.footer,
+              showPageNumber: file.showPageNumber,
+            });
           }}
         />
       </div>
@@ -167,27 +184,85 @@ export default function DocumentEditor() {
           }}
         />
       </div>
+      <div className="border-b border-slate-800 px-4 py-2">
+        <HeaderFooterControls
+          header={header}
+          footer={footer}
+          showPageNumber={showPageNumber}
+          onChange={(next) => {
+            setHeader(next.header);
+            setFooter(next.footer);
+            setShowPageNumber(next.showPageNumber);
+            scheduleSave({ title, ...next });
+          }}
+        />
+      </div>
       <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
         <div
-          className="mx-auto bg-white shadow-xl"
+          className="mx-auto bg-white shadow-xl flex flex-col"
           style={{
             width: `${getPageDimensionsIn(pageSettings).width}in`,
             minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
-            padding: `${getMarginIn(pageSettings)}in`,
           }}
         >
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              scheduleSave(e.target.value);
+          {header && (
+            <div
+              className="text-xs text-slate-500 border-b border-slate-200 pb-2"
+              style={{
+                paddingLeft: `${getMarginIn(pageSettings)}in`,
+                paddingRight: `${getMarginIn(pageSettings)}in`,
+                paddingTop: `${getMarginIn(pageSettings) / 2}in`,
+              }}
+            >
+              {header}
+            </div>
+          )}
+
+          <div
+            className="flex-1"
+            style={{
+              padding: `${getMarginIn(pageSettings)}in`,
+              paddingTop: header ? "1rem" : `${getMarginIn(pageSettings)}in`,
+              paddingBottom:
+                footer || showPageNumber
+                  ? "1rem"
+                  : `${getMarginIn(pageSettings)}in`,
             }}
-            placeholder="Untitled document"
-            aria-label="Document title"
-            className="w-full bg-transparent text-3xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none pb-4"
-          />
-          <EditorContent editor={editor} />
+          >
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                scheduleSave({ title: e.target.value, header, footer, showPageNumber });
+              }}
+              placeholder="Untitled document"
+              aria-label="Document title"
+              className="w-full bg-transparent text-3xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none pb-4"
+            />
+            <EditorContent editor={editor} />
+          </div>
+
+          {(footer || showPageNumber) && (
+            <div
+              className="text-xs text-slate-500 border-t border-slate-200 pt-2 flex items-center justify-between"
+              style={{
+                paddingLeft: `${getMarginIn(pageSettings)}in`,
+                paddingRight: `${getMarginIn(pageSettings)}in`,
+                paddingBottom: `${getMarginIn(pageSettings) / 2}in`,
+              }}
+            >
+              <span>{footer}</span>
+              {showPageNumber && (
+                <span>
+                  Page 1{" "}
+                  <span className="text-slate-400">
+                    (multi-page numbering arrives with real pagination in v29)
+                  </span>
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

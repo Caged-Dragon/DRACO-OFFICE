@@ -1,13 +1,16 @@
 import type { PageSettings } from "./page-settings";
 import { DEFAULT_PAGE_SETTINGS } from "./page-settings";
 
-export const FILE_FORMAT_VERSION = 1;
+export const FILE_FORMAT_VERSION = 2;
 export const FILE_EXTENSION = "dwdoc";
 export const MIME_TYPE = "application/vnd.docwrite+json";
 
 export type DocWriteFile = {
   formatVersion: number;
   title: string;
+  header: string;
+  footer: string;
+  showPageNumber: boolean;
   content: Record<string, unknown>;
   pageSettings: PageSettings;
 };
@@ -42,6 +45,10 @@ export function parseDocument(raw: string): DocWriteFile {
   return {
     formatVersion: p.formatVersion ?? 1,
     title: typeof p.title === "string" ? p.title : "",
+    // v1 files (format version 1) predate header/footer/page numbers.
+    header: typeof p.header === "string" ? p.header : "",
+    footer: typeof p.footer === "string" ? p.footer : "",
+    showPageNumber: typeof p.showPageNumber === "boolean" ? p.showPageNumber : false,
     content: p.content as Record<string, unknown>,
     pageSettings: { ...DEFAULT_PAGE_SETTINGS, ...p.pageSettings },
   };
