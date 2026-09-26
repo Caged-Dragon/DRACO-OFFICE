@@ -3,6 +3,19 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v12 — Images
+- Insert image from a local file (converted to a base64 data URL client-side —
+  no upload backend exists yet, consistent with the offline-first, local-storage
+  scope for v1–50)
+- Resize via drag handles, using TipTap's built-in `resize` option on the
+  Image extension (no custom NodeView needed)
+- Text wrap: a custom `wrap` attribute (none/left/right) extending the base
+  Image node, rendered as float/margin CSS — TipTap has no built-in concept
+  of text-wrap for images
+- Known limitation to revisit later: base64-embedded images inflate `.dwdoc`
+  file size by roughly a third versus the original file. Fine for now; would
+  want real asset storage before this app handles image-heavy documents
+
 ## v11 — Tables
 - Insert table (3×3 with header row by default)
 - Add/delete rows and columns, from a context-sensitive toolbar row that

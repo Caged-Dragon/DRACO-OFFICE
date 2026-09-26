@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v11 — Tables
+## Current version: v12 — Images
 
-Tables with resizable columns, row/column add-delete, and cell merge/split are
-live at `/editor`. Image insert/resize lands in v12.
+Images can be inserted, resized, and text-wrapped (left/right/none) at
+`/editor`. Hyperlinks land in v13.
