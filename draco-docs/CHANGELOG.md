@@ -3,6 +3,16 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v11 — Tables
+- Insert table (3×3 with header row by default)
+- Add/delete rows and columns, from a context-sensitive toolbar row that
+  only appears while the cursor is inside a table
+- Merge/split cells, toggle header row
+- Column resizing (drag handles), via TipTap's `resizable: true` table option
+- Added dedicated CSS for table borders, the resize handle, and selected-cell
+  highlighting — Tailwind Typography's default table styles don't cover
+  editable/resizable tables
+
 ## v10 — Local Save/Load
 - Native file format: `.dwdoc` (JSON: title, TipTap content, page settings, format version)
 - "Save to disk" and "Open…" buttons, using the File System Access API where

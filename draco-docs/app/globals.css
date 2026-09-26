@@ -18,3 +18,49 @@ body {
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
 }
+
+/* Table editing (v11) — resize handle and selected-cell highlight aren't
+   covered by Tailwind Typography's default table styles. */
+.tableWrapper {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.6rem;
+  vertical-align: top;
+  position: relative;
+}
+
+.ProseMirror th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror .selectedCell {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #3b82f6;
+  cursor: col-resize;
+  pointer-events: none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}

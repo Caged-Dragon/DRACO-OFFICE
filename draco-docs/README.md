@@ -38,7 +38,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 ```
 
-## Current version: v10 — Local Save/Load
+## Current version: v11 — Tables
 
-Documents can be saved to and opened from disk as `.dwdoc` files at `/editor`
-(File System Access API, with a download/upload fallback). Tables land in v11.
+Tables with resizable columns, row/column add-delete, and cell merge/split are
+live at `/editor`. Image insert/resize lands in v12.
