@@ -3,6 +3,26 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v15 — Find & Replace
+- Custom extension (no maintained official/community one exists for this
+  TipTap version): ProseMirror decorations highlight all matches, with the
+  current match distinguished visually
+- Search input with live match count (`N / total`), next/previous navigation
+  (also via Enter / Shift+Enter)
+- Replace current match, or replace all
+- Known limitation, documented rather than hidden: matching is per text
+  node, so a match split across a formatting-mark boundary (e.g. searching
+  "hello" where only "hel" is bold) won't be found
+- Verified the match-finding and replace-ordering logic against a real
+  ProseMirror document and Transaction (not just type-checked): correct
+  positions for multi-paragraph case-insensitive matches, correct
+  replace-all behavior when replacing back-to-front so earlier match
+  positions don't shift, and correct single-match replace leaving other
+  matches untouched
+- README.md rewritten to a professional/industry-standard structure
+  (badges, features checklist, tech stack, project structure, roadmap,
+  known limitations) — the template for all versions going forward
+
 ## v14 — Headers/Footers
 - Editable header and footer text fields, rendered at the top/bottom of the
   page (only taking up space when non-empty)

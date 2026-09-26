@@ -64,3 +64,13 @@ body {
 .ProseMirror.resize-cursor {
   cursor: col-resize;
 }
+
+/* Find & Replace (v15) */
+.ProseMirror .search-match {
+  background: rgba(250, 204, 21, 0.4);
+}
+
+.ProseMirror .search-match-current {
+  background: rgba(249, 115, 22, 0.6);
+  outline: 1px solid #f97316;
+}

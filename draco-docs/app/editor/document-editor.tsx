@@ -22,6 +22,8 @@ import TableControls from "./table-controls";
 import ImageControls from "./image-controls";
 import LinkControls from "./link-controls";
 import HeaderFooterControls from "./header-footer-controls";
+import FindReplaceControls from "./find-replace-controls";
+import FindAndReplace from "./find-replace-extension";
 import Indent from "./indent-extension";
 import { useAutosave, loadDraft } from "./use-autosave";
 import type { DocWriteFile } from "./file-format";
@@ -79,6 +81,7 @@ export default function DocumentEditor() {
         openOnClick: false, // clicking edits it in our editor instead of navigating away
       }),
       Indent,
+      FindAndReplace,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -150,8 +153,9 @@ export default function DocumentEditor() {
           }}
         />
       </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      <div className="border-b border-slate-800 px-4 py-2 flex items-center justify-between">
         <HistoryControls editor={editor} />
+        <FindReplaceControls editor={editor} />
       </div>
       <FormattingToolbar editor={editor} />
       <div className="border-b border-slate-800 px-4 py-2">
