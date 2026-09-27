@@ -24,6 +24,8 @@ import LinkControls from "./link-controls";
 import HeaderFooterControls from "./header-footer-controls";
 import FindReplaceControls from "./find-replace-controls";
 import FindAndReplace from "./find-replace-extension";
+import SpellCheck from "./spellcheck-extension";
+import SpellCheckControls from "./spellcheck-controls";
 import Indent from "./indent-extension";
 import { useAutosave, loadDraft } from "./use-autosave";
 import type { DocWriteFile } from "./file-format";
@@ -82,6 +84,7 @@ export default function DocumentEditor() {
       }),
       Indent,
       FindAndReplace,
+      SpellCheck,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -188,7 +191,7 @@ export default function DocumentEditor() {
           }}
         />
       </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      <div className="border-b border-slate-800 px-4 py-2 flex items-center justify-between">
         <HeaderFooterControls
           header={header}
           footer={footer}
@@ -200,6 +203,7 @@ export default function DocumentEditor() {
             scheduleSave({ title, ...next });
           }}
         />
+        <SpellCheckControls editor={editor} />
       </div>
       <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
         <div

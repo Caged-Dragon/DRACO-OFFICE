@@ -3,6 +3,29 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v16 — Spell Check
+- **New project policy, effective this version onward:** isolated, self-contained
+  implementations preferred over external npm packages or external services —
+  see the new "Security & Dependency Policy" section in README.md
+- Dictionary-based spell checking, fully self-built: no npm package installed,
+  no external spell-check API, no data leaves the browser
+- Bundled dictionary (`app/editor/dictionary.ts`): ~5,000 words, self-authored
+  from a base word list plus generated inflections — not fetched from any
+  external source or system dictionary
+- Squiggly-underline decorations (custom CSS gradient, no external asset) for
+  words not found in the dictionary or the user's local custom dictionary
+- "Add to dictionary" per flagged word, persisted to `localStorage`
+- On/off toggle, and a panel listing all currently flagged words with
+  edit-distance-based suggestions
+- **New dependencies added: none.** Confirmed via `npm ls` that `package.json`
+  was untouched this version
+- Found real gaps via behavioral testing, not just type-checking: the first
+  version of the bundled dictionary flagged ordinary words ("fox", "fine",
+  "test") and failed on contractions ("it's") as false positives. Fixed by
+  expanding the word list and re-running the same test suite until it
+  actually passed — documented as an explicit known limitation rather than
+  claimed as complete coverage
+
 ## v15 — Find & Replace
 - Custom extension (no maintained official/community one exists for this
   TipTap version): ProseMirror decorations highlight all matches, with the

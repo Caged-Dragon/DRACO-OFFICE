@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.15.0-blue)
+![Version](https://img.shields.io/badge/version-v0.16.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -33,7 +33,7 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for the detailed, version-by-version histor
 
 ## Features
 
-Current as of **v0.15.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.16.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -49,7 +49,8 @@ Current as of **v0.15.0**. Checked items are shipped; the rest are on the [Roadm
 - [x] Hyperlinks — auto-linking and manual add/edit/remove
 - [x] Headers, footers, and a page-number placeholder
 - [x] Find & Replace
-- [ ] Word count, spell check, templates, styles, and more — see Roadmap
+- [x] Spell check (dictionary-based, fully local — no external service)
+- [ ] Word count, templates, styles, and more — see Roadmap
 
 ## Tech Stack
 
@@ -143,7 +144,7 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 | Range     | Scope                                                              |
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
-| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles — 🚧 in progress (v15/v20) |
+| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles — 🚧 in progress (v16/v20) |
 | v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |
@@ -155,6 +156,18 @@ Tracked honestly as they're found, not hidden. Full detail in `CHANGELOG.md`; su
 - **Images** are embedded as base64, inflating `.dwdoc` file size ~33% versus the source file. No asset storage backend yet.
 - **Find & Replace** only matches text within a single formatting run — a match split across a bold/italic boundary won't be found.
 - **Page numbering** is a static placeholder ("Page 1") until real multi-page pagination lands alongside print support.
+- **Spell check** uses a compact (~5,000-word) bundled dictionary, not a full system dictionary — uncommon or technical words will be flagged. "Add to dictionary" exists specifically to close real gaps as they come up.
+
+## Security & Dependency Policy
+
+**Effective from v0.16.0 onward:** new features are built as self-contained, isolated code within this repo wherever practical, rather than by adding external npm packages or calling external services.
+
+- No new runtime dependency on a third-party npm package unless the capability genuinely cannot be built in-house within reasonable scope (the project still depends on its original core stack — Next.js, TipTap/ProseMirror, Tailwind — established in earlier versions).
+- No document content, keystrokes, or user data is ever sent to an external API. Spell check, for example, runs against a dictionary bundled directly in this repo rather than a cloud spell-check service.
+- No runtime fetches from external CDNs or third-party endpoints for core functionality.
+- Each version's `CHANGELOG.md` entry notes explicitly whether any new dependency was added and why.
+
+This is a security and supply-chain posture as much as a technical one: fewer external dependencies means a smaller attack surface and no silent data leaving the user's browser.
 
 ## Contributing
 
