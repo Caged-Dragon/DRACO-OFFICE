@@ -27,6 +27,7 @@ import FindAndReplace from "./find-replace-extension";
 import SpellCheck from "./spellcheck-extension";
 import SpellCheckControls from "./spellcheck-controls";
 import Indent from "./indent-extension";
+import { computeTextStats, formatReadingTime } from "./text-stats";
 import { useAutosave, loadDraft } from "./use-autosave";
 import type { DocWriteFile } from "./file-format";
 import {
@@ -274,13 +275,32 @@ export default function DocumentEditor() {
         </div>
       </div>
 
-      {/* Cursor / selection status bar (word count lands in v17) */}
+      {/* Cursor / selection / word-count status bar */}
       <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-500 flex items-center gap-4">
         <span>
           {selectionInfo.hasSelection
-            ? `Selection: ${selectionInfo.to - selectionInfo.from} chars`
+            ? (() => {
+                const selectedText = editor.state.doc.textBetween(
+                  selectionInfo.from,
+                  selectionInfo.to,
+                  " "
+                );
+                const selStats = computeTextStats(selectedText);
+                return `Selection: ${selStats.words} words, ${
+                  selectionInfo.to - selectionInfo.from
+                } chars`;
+              })()
             : `Cursor at ${selectionInfo.from}`}
         </span>
+        {(() => {
+          const stats = computeTextStats(editor.getText({ blockSeparator: "\n\n" }));
+          return (
+            <span>
+              {stats.words} words · {stats.characters} characters ·{" "}
+              {formatReadingTime(stats.readingTimeMinutes)}
+            </span>
+          );
+        })()}
         <span>
           {saveStatus === "saving" && "Saving…"}
           {saveStatus === "saved" && "Saved"}

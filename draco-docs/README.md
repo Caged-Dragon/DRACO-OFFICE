@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.16.0-blue)
+![Version](https://img.shields.io/badge/version-v0.17.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -33,7 +33,7 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for the detailed, version-by-version histor
 
 ## Features
 
-Current as of **v0.16.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.17.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -50,7 +50,8 @@ Current as of **v0.16.0**. Checked items are shipped; the rest are on the [Roadm
 - [x] Headers, footers, and a page-number placeholder
 - [x] Find & Replace
 - [x] Spell check (dictionary-based, fully local — no external service)
-- [ ] Word count, templates, styles, and more — see Roadmap
+- [x] Word/character count and reading time
+- [ ] Templates, styles, and more — see Roadmap
 
 ## Tech Stack
 
@@ -144,7 +145,7 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 | Range     | Scope                                                              |
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
-| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles — 🚧 in progress (v16/v20) |
+| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles — 🚧 in progress (v17/v20) |
 | v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |

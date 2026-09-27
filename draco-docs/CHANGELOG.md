@@ -3,6 +3,20 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v17 — Word Stats
+- Word count, character count, and reading time, shown live in the status bar
+- Selection now also shows its own word count (not just character count),
+  matching Word/Docs convention
+- Reading time computed at 200 words/minute, rounded up, with a 1-minute
+  floor for any non-empty document
+- Pure, dependency-free calculation (`text-stats.ts`) — behaviorally tested
+  for edge cases before wiring it in: empty doc, whitespace-only doc,
+  multiple/leading/trailing spaces not inflating word count, paragraph
+  breaks counted as word separators, and reading-time rounding at exact
+  boundaries (200 words = 1 min, 201 words = 2 min)
+- **New dependencies added: none** — no `npm install` run this version,
+  consistent with the isolation policy from v16
+
 ## v16 — Spell Check
 - **New project policy, effective this version onward:** isolated, self-contained
   implementations preferred over external npm packages or external services —
