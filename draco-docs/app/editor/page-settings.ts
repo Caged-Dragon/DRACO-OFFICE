@@ -1,3 +1,5 @@
+import { DEFAULT_STYLE_SET_ID, isStyleSetId, type StyleSetId } from "./style-sets";
+
 export type PageSize = "A4" | "Letter" | "Legal";
 export type Orientation = "portrait" | "landscape";
 export type MarginPreset = "normal" | "narrow" | "moderate" | "wide";
@@ -6,13 +8,45 @@ export type PageSettings = {
   size: PageSize;
   orientation: Orientation;
   margin: MarginPreset;
+  styleSet: StyleSetId;
 };
 
 export const DEFAULT_PAGE_SETTINGS: PageSettings = {
   size: "Letter",
   orientation: "portrait",
   margin: "normal",
+  styleSet: DEFAULT_STYLE_SET_ID,
 };
+
+/**
+ * Merge untrusted/partial settings (old localStorage entries, .dwdoc files
+ * from earlier versions, hand-edited files) over the defaults, and make sure
+ * the style set is one that actually exists.
+ */
+export function sanitizePageSettings(input: unknown): PageSettings {
+  const partial =
+    input && typeof input === "object" ? (input as Partial<PageSettings>) : {};
+  const d = DEFAULT_PAGE_SETTINGS;
+  // Every field is validated against its allowed values, so a stale or
+  // hand-edited value can never reach the layout code (which indexes into
+  // lookup tables and would throw on an unknown key).
+  return {
+    size: (["A4", "Letter", "Legal"] as const).includes(partial.size as PageSize)
+      ? (partial.size as PageSize)
+      : d.size,
+    orientation: (["portrait", "landscape"] as const).includes(
+      partial.orientation as Orientation
+    )
+      ? (partial.orientation as Orientation)
+      : d.orientation,
+    margin: (["narrow", "normal", "moderate", "wide"] as const).includes(
+      partial.margin as MarginPreset
+    )
+      ? (partial.margin as MarginPreset)
+      : d.margin,
+    styleSet: isStyleSetId(partial.styleSet) ? partial.styleSet : d.styleSet,
+  };
+}
 
 // Base dimensions in inches, portrait orientation.
 const PAGE_DIMENSIONS_IN: Record<PageSize, { width: number; height: number }> = {
@@ -48,7 +82,7 @@ export function loadPageSettings(): PageSettings {
   try {
     const raw = window.localStorage.getItem(PAGE_SETTINGS_KEY);
     if (!raw) return DEFAULT_PAGE_SETTINGS;
-    return { ...DEFAULT_PAGE_SETTINGS, ...JSON.parse(raw) };
+    return sanitizePageSettings(JSON.parse(raw));
   } catch {
     return DEFAULT_PAGE_SETTINGS;
   }

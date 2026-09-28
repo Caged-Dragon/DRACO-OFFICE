@@ -3,6 +3,43 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v19 — Styles
+- **Document style sets**: Default, Classic, Modern, Formal, Minimal. Each is a
+  named typography theme (heading/body font, heading/body color, line height)
+  applied document-wide via CSS variables. System font stacks only — no web
+  fonts, no external requests. Direct formatting (e.g. a font chosen via the
+  v4 toolbar) still overrides the style set, as expected
+- The selected style set is saved with the document's page settings, so it
+  round-trips through `.dwdoc` files and localStorage. No file-format
+  version bump needed: the new field is additive and defaults safely
+- Block styles: Quote and Code block toggles
+- **Clear formatting**: removes bold/italic/underline/strike/highlight,
+  color, font family/size, line height, and alignment; resets headings/lists
+  to plain paragraphs and resets indent. **Links are deliberately kept**
+- **Hardening**: page settings from localStorage or a `.dwdoc` file now pass
+  through one `sanitizePageSettings()` that validates *every* field (size,
+  orientation, margin, style set) against its allowed values. Previously a
+  hand-edited file with e.g. `size: "Foo"` would crash the layout code —
+  a gap that had existed since v10. Tested with corrupt, hostile, and
+  prototype-pollution-shaped input
+- **Bug fix (affected v13–v18): duplicate `Link` extension.** StarterKit
+  bundles Link in this TipTap version; v13 registered it a second time.
+  That logged a "duplicate extension" warning and made it ambiguous which
+  config won — meaning v13's `openOnClick: false` (edit-in-place,
+  Ctrl/Cmd+click to open) may not have applied. Link is now configured
+  through `StarterKit.configure({ link: ... })`. Verified in a headless
+  editor built from the app's real extension list: zero duplicates, and
+  `openOnClick === false` / `autolink === true` confirmed. This is the same
+  class of bug as the `Underline` duplicate fixed in v8; this time the
+  whole extension list was cross-checked against StarterKit's bundle
+- **Dependencies: net −1.** Removed the now-redundant direct
+  `@tiptap/extension-link` dependency (still present transitively via
+  StarterKit). Nothing added. Testing used jsdom installed in a throwaway
+  directory outside the project; it is not in `package.json`
+- Testing: style-set resolution and sanitizer logic verified with unit-style
+  checks; the clear-formatting chain verified end to end in a real headless
+  TipTap editor with the real extensions on richly-formatted content
+
 ## v18 — Templates
 - Template picker in the editor toolbar: Blank, Resume, Cover Letter,
   Business Letter, and Report starters

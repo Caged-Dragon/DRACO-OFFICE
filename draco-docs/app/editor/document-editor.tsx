@@ -8,7 +8,6 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import WrappableImage from "./image-extension";
-import Link from "@tiptap/extension-link";
 import { useState } from "react";
 import FormattingToolbar from "./formatting-toolbar";
 import FontControls from "./font-controls";
@@ -17,6 +16,8 @@ import ListControls from "./list-controls";
 import HistoryControls from "./history-controls";
 import HeadingControls from "./heading-controls";
 import PageSettingsControls from "./page-settings-controls";
+import StyleControls from "./style-controls";
+import { styleSetToCssVars } from "./style-sets";
 import FileControls from "./file-controls";
 import TemplateControls from "./template-controls";
 import TableControls from "./table-controls";
@@ -64,7 +65,16 @@ export default function DocumentEditor() {
     immediatelyRender: false,
     content: initialDraft?.content,
     extensions: [
-      StarterKit,
+      // StarterKit bundles Link in this TipTap version, so it's configured
+      // here rather than registered separately (a second registration
+      // produced a "duplicate extension" warning and made it ambiguous
+      // which config applied).
+      StarterKit.configure({
+        link: {
+          autolink: true,
+          openOnClick: false, // clicking edits it in our editor instead of navigating away
+        },
+      }),
       TextStyle,
       FontFamily,
       FontSize,
@@ -79,10 +89,6 @@ export default function DocumentEditor() {
       WrappableImage.configure({
         allowBase64: true,
         resize: { enabled: true, minWidth: 60, minHeight: 60 },
-      }),
-      Link.configure({
-        autolink: true,
-        openOnClick: false, // clicking edits it in our editor instead of navigating away
       }),
       Indent,
       FindAndReplace,
@@ -186,6 +192,17 @@ export default function DocumentEditor() {
         <HeadingControls editor={editor} />
       </div>
       <div className="border-b border-slate-800 px-4 py-2">
+        <StyleControls
+          editor={editor}
+          styleSet={pageSettings.styleSet}
+          onStyleSetChange={(id) => {
+            const next = { ...pageSettings, styleSet: id };
+            setPageSettings(next);
+            savePageSettings(next);
+          }}
+        />
+      </div>
+      <div className="border-b border-slate-800 px-4 py-2">
         <ListControls editor={editor} />
       </div>
       <div className="border-b border-slate-800 px-4 py-2">
@@ -220,10 +237,13 @@ export default function DocumentEditor() {
       <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
         <div
           className="mx-auto bg-white shadow-xl flex flex-col"
-          style={{
-            width: `${getPageDimensionsIn(pageSettings).width}in`,
-            minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
-          }}
+          style={
+            {
+              ...styleSetToCssVars(pageSettings.styleSet),
+              width: `${getPageDimensionsIn(pageSettings).width}in`,
+              minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
+            } as React.CSSProperties
+          }
         >
           {header && (
             <div
@@ -258,7 +278,8 @@ export default function DocumentEditor() {
               }}
               placeholder="Untitled document"
               aria-label="Document title"
-              className="w-full bg-transparent text-3xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none pb-4"
+              style={{ fontFamily: "var(--doc-heading-font)", color: "var(--doc-heading-color)" }}
+              className="w-full bg-transparent text-3xl font-bold placeholder-slate-400 focus:outline-none pb-4"
             />
             <EditorContent editor={editor} />
           </div>

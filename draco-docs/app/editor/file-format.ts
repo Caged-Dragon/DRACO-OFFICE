@@ -1,5 +1,5 @@
 import type { PageSettings } from "./page-settings";
-import { DEFAULT_PAGE_SETTINGS } from "./page-settings";
+import { sanitizePageSettings } from "./page-settings";
 
 export const FILE_FORMAT_VERSION = 2;
 export const FILE_EXTENSION = "dwdoc";
@@ -50,7 +50,7 @@ export function parseDocument(raw: string): DocWriteFile {
     footer: typeof p.footer === "string" ? p.footer : "",
     showPageNumber: typeof p.showPageNumber === "boolean" ? p.showPageNumber : false,
     content: p.content as Record<string, unknown>,
-    pageSettings: { ...DEFAULT_PAGE_SETTINGS, ...p.pageSettings },
+    pageSettings: sanitizePageSettings(p.pageSettings),
   };
 }
 

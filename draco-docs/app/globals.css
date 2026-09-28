@@ -88,3 +88,22 @@ body {
   background-position: bottom;
   padding-bottom: 1px;
 }
+
+/* Document style sets (v19) — driven by CSS variables set on the page
+   container from the selected style set. System font stacks only.
+   .ProseMirror.prose (two classes) outranks Typography's single-class rules. */
+.ProseMirror.prose {
+  color: var(--doc-body-color, inherit);
+  font-family: var(--doc-body-font, inherit);
+  line-height: var(--doc-line-height, 1.6);
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  color: var(--doc-heading-color, inherit);
+  font-family: var(--doc-heading-font, inherit);
+}
