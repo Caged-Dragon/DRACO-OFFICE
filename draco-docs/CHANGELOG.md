@@ -3,6 +3,24 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v18 — Templates
+- Template picker in the editor toolbar: Blank, Resume, Cover Letter,
+  Business Letter, and Report starters
+- Templates are authored directly as TipTap JSON in `templates.ts` — no
+  external files, no network fetch, consistent with the isolation policy
+- Choosing a template replaces the current content and sets the title;
+  if the document already has content, a confirmation prompt appears first
+  so nothing is overwritten silently
+- Header, footer, page settings are left untouched when applying a template
+- Validated every template's JSON against a ProseMirror schema (`doc.check()`)
+  before wiring it in, since a malformed node would only fail at runtime,
+  not at type-check time. All 5 valid, IDs unique
+- Scope note: templates apply from inside the editor. Starting from a
+  template directly off the dashboard would need query-param routing plus a
+  Suspense boundary for a statically prerendered route — deliberately
+  deferred rather than adding that complexity here
+- **New dependencies added: none**
+
 ## v17 — Word Stats
 - Word count, character count, and reading time, shown live in the status bar
 - Selection now also shows its own word count (not just character count),

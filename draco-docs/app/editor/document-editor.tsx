@@ -18,6 +18,7 @@ import HistoryControls from "./history-controls";
 import HeadingControls from "./heading-controls";
 import PageSettingsControls from "./page-settings-controls";
 import FileControls from "./file-controls";
+import TemplateControls from "./template-controls";
 import TableControls from "./table-controls";
 import ImageControls from "./image-controls";
 import LinkControls from "./link-controls";
@@ -131,6 +132,7 @@ export default function DocumentEditor() {
   return (
     <div className="flex-1 flex flex-col">
       <div className="border-b border-slate-800 px-4 py-2">
+        <div className="flex items-center gap-2">
         <FileControls
           getDocument={() => ({
             title,
@@ -156,6 +158,15 @@ export default function DocumentEditor() {
             });
           }}
         />
+        <TemplateControls
+          hasContent={editor.getText().trim().length > 0 || title.trim().length > 0}
+          onSelect={(template) => {
+            editor.commands.setContent(template.content);
+            setTitle(template.title);
+            scheduleSave({ title: template.title, header, footer, showPageNumber });
+          }}
+        />
+        </div>
       </div>
       <div className="border-b border-slate-800 px-4 py-2 flex items-center justify-between">
         <HistoryControls editor={editor} />
