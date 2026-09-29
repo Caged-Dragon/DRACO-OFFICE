@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.19.0-blue)
+![Version](https://img.shields.io/badge/version-v0.20.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -33,7 +33,7 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for the detailed, version-by-version histor
 
 ## Features
 
-Current as of **v0.19.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.20.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -53,7 +53,8 @@ Current as of **v0.19.0**. Checked items are shipped; the rest are on the [Roadm
 - [x] Word/character count and reading time
 - [x] Document templates — resume, cover letter, business letter, report
 - [x] Document style sets (Default, Classic, Modern, Formal, Minimal), quote/code blocks, clear formatting
-- [ ] Accessibility, comments, track changes, and more — see Roadmap
+- [x] Accessibility — WCAG AA color contrast (automated check), keyboard navigation, screen-reader labels, light/dark/system page theme
+- [ ] Comments, track changes, and more — see Roadmap
 
 ## Tech Stack
 
@@ -66,6 +67,7 @@ Current as of **v0.19.0**. Checked items are shipped; the rest are on the [Roadm
 | Mobile packaging  | Capacitor *(planned)*                            |
 | Desktop packaging | Tauri *(planned)*                                |
 | CI/CD             | GitHub Actions (`.github/workflows/release.yml`) |
+| Accessibility CI  | `npm run check:contrast` — WCAG AA audit, no external service |
 
 ## Getting Started
 
@@ -101,6 +103,17 @@ npm start
 ```bash
 npx eslint app/editor
 ```
+
+### Accessibility check
+
+```bash
+npm run check:contrast
+```
+
+Verifies WCAG AA contrast for every document theme (light/dark) × style set ×
+color palette combination, plus scans the source for known-low-contrast
+utility classes and form controls with no accessible name. Run this after
+touching any color or adding any `<input>`/`<select>`/`<textarea>`.
 
 ## Project Structure
 
@@ -147,8 +160,8 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 | Range     | Scope                                                              |
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
-| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles — 🚧 in progress (v19/v20) |
-| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export |
+| v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles, accessibility — ✅ done |
+| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 next |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |
 
@@ -160,6 +173,7 @@ Tracked honestly as they're found, not hidden. Full detail in `CHANGELOG.md`; su
 - **Find & Replace** only matches text within a single formatting run — a match split across a bold/italic boundary won't be found.
 - **Page numbering** is a static placeholder ("Page 1") until real multi-page pagination lands alongside print support.
 - **Spell check** uses a compact (~5,000-word) bundled dictionary, not a full system dictionary — uncommon or technical words will be flagged. "Add to dictionary" exists specifically to close real gaps as they come up.
+- **Accessibility verification is automated, not manual.** `check:contrast` proves color math and scans for known anti-patterns; it does not replace testing with an actual screen reader or real keyboard-only use. No manual screen-reader pass has been done as of v20.
 
 ## Security & Dependency Policy
 

@@ -41,7 +41,7 @@ body {
 }
 
 .ProseMirror th {
-  background: #f1f5f9;
+  background: var(--doc-th-bg, #f1f5f9);
   font-weight: 600;
   text-align: left;
 }
@@ -106,4 +106,21 @@ body {
 .ProseMirror h6 {
   color: var(--doc-heading-color, inherit);
   font-family: var(--doc-heading-font, inherit);
+}
+
+/* Accessibility (v20) — a visible focus ring everywhere, since some
+   controls in this app use focus:outline-none for a custom look and rely
+   on this global rule to stay keyboard-navigable (WCAG 2.4.7). !important
+   is deliberate: no per-component style should be able to silently drop
+   focus visibility again the way outline-none did before this version. */
+:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Title placeholder needs to track the theme (light/dark page), which a
+   static Tailwind placeholder-* utility can't do — see check:contrast. */
+.doc-title-input::placeholder {
+  color: var(--doc-muted);
+  opacity: 1;
 }

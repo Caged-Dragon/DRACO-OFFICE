@@ -47,14 +47,14 @@ export default function SpellCheckControls({ editor }: { editor: Editor }) {
                 <div className="text-xs text-slate-200 font-medium">
                   {word}
                 </div>
-                <div className="text-[10px] text-slate-500">
+                <div className="text-xs text-slate-400">
                   {suggestFor(word).join(", ") || "no suggestions"}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => editor.chain().addWordToDictionary(word).run()}
-                className="text-[10px] px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                className="text-xs px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
               >
                 Add to dictionary
               </button>

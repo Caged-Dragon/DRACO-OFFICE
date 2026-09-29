@@ -65,6 +65,7 @@ export default function LinkControls({ editor }: { editor: Editor }) {
           <input
             type="text"
             autoFocus
+            aria-label="Link URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => {

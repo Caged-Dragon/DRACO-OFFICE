@@ -97,7 +97,7 @@ export default function FontControls({ editor }: { editor: Editor }) {
                 editor.chain().focus().unsetHighlight().run();
               }
             }}
-            className="w-5 h-5 rounded-md border border-slate-700 flex items-center justify-center text-[9px] text-slate-400"
+            className="w-5 h-5 rounded-md border border-slate-700 flex items-center justify-center text-xs text-slate-400"
             style={{ backgroundColor: h.value ?? "transparent" }}
           >
             {!h.value && "×"}

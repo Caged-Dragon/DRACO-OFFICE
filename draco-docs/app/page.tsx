@@ -29,12 +29,12 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="rounded-lg border border-dashed border-slate-800 p-12 text-center text-slate-500">
+        <div className="rounded-lg border border-dashed border-slate-800 p-12 text-center text-slate-400">
           No documents yet. Create one to get started.
         </div>
       </main>
 
-      <footer className="border-t border-slate-800 px-6 py-3 text-xs text-slate-500">
+      <footer className="border-t border-slate-800 px-6 py-3 text-xs text-slate-400">
         DocWrite v1.0.0 &middot; installable as an app on this device
       </footer>
     </div>

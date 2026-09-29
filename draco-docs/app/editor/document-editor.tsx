@@ -18,6 +18,15 @@ import HeadingControls from "./heading-controls";
 import PageSettingsControls from "./page-settings-controls";
 import StyleControls from "./style-controls";
 import { styleSetToCssVars } from "./style-sets";
+import ToolbarRow from "./toolbar-row";
+import AccessibilityControls from "./accessibility-controls";
+import { useSystemPrefersDark } from "./use-system-dark";
+import {
+  loadPreferences,
+  savePreferences,
+  resolveTheme,
+  type PageThemePreference,
+} from "./preferences";
 import FileControls from "./file-controls";
 import TemplateControls from "./template-controls";
 import TableControls from "./table-controls";
@@ -55,6 +64,14 @@ export default function DocumentEditor() {
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
   );
+  // Viewing preference, not document data: deliberately separate from
+  // pageSettings so opening someone else's .dwdoc never changes how YOUR
+  // editor looks, and your theme choice never travels inside a shared file.
+  const [pageThemePref, setPageThemePref] = useState<PageThemePreference>(
+    () => loadPreferences().pageTheme
+  );
+  const systemPrefersDark = useSystemPrefersDark();
+  const resolvedTheme = resolveTheme(pageThemePref, systemPrefersDark);
   const [selectionInfo, setSelectionInfo] = useState({
     hasSelection: false,
     from: 0,
@@ -129,7 +146,7 @@ export default function DocumentEditor() {
 
   if (!editor) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
         Loading editor…
       </div>
     );
@@ -137,8 +154,13 @@ export default function DocumentEditor() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="border-b border-slate-800 px-4 py-2">
-        <div className="flex items-center gap-2">
+      <a
+        href="#editor-page"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-blue-600 focus:text-white focus:px-3 focus:py-2 focus:rounded-md focus:text-sm"
+      >
+        Skip to document
+      </a>
+      <ToolbarRow label="File actions" className="flex items-center gap-2">
         <FileControls
           getDocument={() => ({
             title,
@@ -172,26 +194,27 @@ export default function DocumentEditor() {
             scheduleSave({ title: template.title, header, footer, showPageNumber });
           }}
         />
-        </div>
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2 flex items-center justify-between">
+      </ToolbarRow>
+      <ToolbarRow label="History and find & replace" className="flex items-center justify-between">
         <HistoryControls editor={editor} />
         <FindReplaceControls editor={editor} />
-      </div>
-      <FormattingToolbar editor={editor} />
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Text formatting" className="flex items-center gap-1">
+        <FormattingToolbar editor={editor} />
+      </ToolbarRow>
+      <ToolbarRow label="Links">
         <LinkControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Font">
         <FontControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Paragraph formatting">
         <ParagraphControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2 flex items-center gap-3">
+      </ToolbarRow>
+      <ToolbarRow label="Headings" className="flex items-center gap-3">
         <HeadingControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Document style">
         <StyleControls
           editor={editor}
           styleSet={pageSettings.styleSet}
@@ -201,17 +224,17 @@ export default function DocumentEditor() {
             savePageSettings(next);
           }}
         />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Lists">
         <ListControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Table">
         <TableControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Image">
         <ImageControls editor={editor} />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2">
+      </ToolbarRow>
+      <ToolbarRow label="Page settings">
         <PageSettingsControls
           settings={pageSettings}
           onChange={(next) => {
@@ -219,8 +242,8 @@ export default function DocumentEditor() {
             savePageSettings(next);
           }}
         />
-      </div>
-      <div className="border-b border-slate-800 px-4 py-2 flex items-center justify-between">
+      </ToolbarRow>
+      <ToolbarRow label="Header, footer, and spell check" className="flex items-center justify-between">
         <HeaderFooterControls
           header={header}
           footer={footer}
@@ -233,13 +256,26 @@ export default function DocumentEditor() {
           }}
         />
         <SpellCheckControls editor={editor} />
-      </div>
+      </ToolbarRow>
+      <ToolbarRow label="Accessibility" className="flex items-center justify-between">
+        <AccessibilityControls
+          preference={pageThemePref}
+          resolved={resolvedTheme}
+          onChange={(next) => {
+            setPageThemePref(next);
+            savePreferences({ pageTheme: next });
+          }}
+        />
+      </ToolbarRow>
       <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
         <div
-          className="mx-auto bg-white shadow-xl flex flex-col"
+          id="editor-page"
+          tabIndex={-1}
+          className="mx-auto shadow-xl flex flex-col focus:outline-none"
           style={
             {
-              ...styleSetToCssVars(pageSettings.styleSet),
+              ...styleSetToCssVars(pageSettings.styleSet, resolvedTheme),
+              backgroundColor: "var(--doc-page-bg)",
               width: `${getPageDimensionsIn(pageSettings).width}in`,
               minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
             } as React.CSSProperties
@@ -247,8 +283,10 @@ export default function DocumentEditor() {
         >
           {header && (
             <div
-              className="text-xs text-slate-500 border-b border-slate-200 pb-2"
+              className="text-xs pb-2"
               style={{
+                color: "var(--doc-muted)",
+                borderBottom: "1px solid var(--doc-border)",
                 paddingLeft: `${getMarginIn(pageSettings)}in`,
                 paddingRight: `${getMarginIn(pageSettings)}in`,
                 paddingTop: `${getMarginIn(pageSettings) / 2}in`,
@@ -279,15 +317,17 @@ export default function DocumentEditor() {
               placeholder="Untitled document"
               aria-label="Document title"
               style={{ fontFamily: "var(--doc-heading-font)", color: "var(--doc-heading-color)" }}
-              className="w-full bg-transparent text-3xl font-bold placeholder-slate-400 focus:outline-none pb-4"
+              className="doc-title-input w-full bg-transparent text-3xl font-bold focus:outline-none pb-4"
             />
             <EditorContent editor={editor} />
           </div>
 
           {(footer || showPageNumber) && (
             <div
-              className="text-xs text-slate-500 border-t border-slate-200 pt-2 flex items-center justify-between"
+              className="text-xs pt-2 flex items-center justify-between"
               style={{
+                color: "var(--doc-muted)",
+                borderTop: "1px solid var(--doc-border)",
                 paddingLeft: `${getMarginIn(pageSettings)}in`,
                 paddingRight: `${getMarginIn(pageSettings)}in`,
                 paddingBottom: `${getMarginIn(pageSettings) / 2}in`,
@@ -297,7 +337,7 @@ export default function DocumentEditor() {
               {showPageNumber && (
                 <span>
                   Page 1{" "}
-                  <span className="text-slate-400">
+                  <span className="opacity-70">
                     (multi-page numbering arrives with real pagination in v29)
                   </span>
                 </span>
@@ -308,7 +348,7 @@ export default function DocumentEditor() {
       </div>
 
       {/* Cursor / selection / word-count status bar */}
-      <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-500 flex items-center gap-4">
+      <div className="border-t border-slate-800 px-4 py-2 text-xs text-slate-400 flex items-center gap-4">
         <span>
           {selectionInfo.hasSelection
             ? (() => {

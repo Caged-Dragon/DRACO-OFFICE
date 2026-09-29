@@ -7,9 +7,9 @@ export default function SettingsPlaceholder() {
         <Link href="/" className="text-sm text-slate-400 hover:text-slate-200">
           &larr; Back
         </Link>
-        <span className="text-sm text-slate-500">Settings</span>
+        <span className="text-sm text-slate-400">Settings</span>
       </header>
-      <main className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+      <main className="flex-1 flex items-center justify-center text-slate-400 text-sm">
         The full preferences panel ships in v47 (Settings).
       </main>
     </div>

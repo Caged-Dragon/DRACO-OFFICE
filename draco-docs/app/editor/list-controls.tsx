@@ -35,7 +35,7 @@ export default function ListControls({ editor }: { editor: Editor }) {
         1≡
       </button>
 
-      <span className="text-[10px] text-slate-600 px-1">
+      <span className="text-xs text-slate-400 px-1">
         Tab nests a list item, Shift+Tab un-nests it
       </span>
     </div>

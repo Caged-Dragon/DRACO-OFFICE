@@ -55,7 +55,7 @@ export default function ImageControls({ editor }: { editor: Editor }) {
 
       {imageSelected && (
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-slate-500 mr-1">
+          <span className="text-xs text-slate-400 mr-1">
             Selected image:
           </span>
           {WRAP_OPTIONS.map((opt) => (

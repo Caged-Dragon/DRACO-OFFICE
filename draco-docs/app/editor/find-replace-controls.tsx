@@ -42,6 +42,7 @@ export default function FindReplaceControls({ editor }: { editor: Editor }) {
       <input
         type="text"
         autoFocus
+        aria-label="Find in document"
         value={term}
         onChange={(e) => runSearch(e.target.value)}
         onKeyDown={(e) => {
@@ -57,7 +58,7 @@ export default function FindReplaceControls({ editor }: { editor: Editor }) {
         placeholder="Find"
         className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 w-36 focus:outline-none"
       />
-      <span className="text-[10px] text-slate-500 w-14">
+      <span className="text-xs text-slate-400 w-14">
         {matchCount > 0 ? `${currentIndex + 1} / ${matchCount}` : "0 / 0"}
       </span>
       <button
@@ -81,6 +82,7 @@ export default function FindReplaceControls({ editor }: { editor: Editor }) {
 
       <input
         type="text"
+        aria-label="Replace with"
         value={replaceTerm}
         onChange={(e) => setReplaceTerm(e.target.value)}
         placeholder="Replace with"

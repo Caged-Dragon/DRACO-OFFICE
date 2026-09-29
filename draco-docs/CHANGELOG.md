@@ -3,6 +3,64 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v20 — Accessibility
+**Last version of the v11–v20 block.**
+
+- **Light / Dark / System page theme.** A per-user *preference*, not
+  document data — deliberately stored separately from `.dwdoc`/page
+  settings, so opening a colleague's file never changes how your editor
+  looks, and your theme never travels inside a file you share. "System"
+  tracks the OS setting live via `useSyncExternalStore` (matchMedia), not
+  an effect+state pattern
+- **Automated WCAG AA contrast enforcement**, added as a new repo script:
+  `npm run check:contrast`. It loads the app's *real* color data (style
+  sets, palettes) through the project's own TypeScript rather than
+  duplicating numbers, computes real contrast ratios, and scans all
+  `.tsx` source for known-low-contrast utility classes and unlabeled form
+  controls. Run against the code as it stood before this version, it
+  failed 19 times — confirming the checker actually catches real problems
+  rather than trivially passing:
+  - `text-slate-500`/`600` on the dark toolbar chrome (as low as 2.6:1
+    against a 4.5:1 requirement)
+  - the v4 font-color swatches on the white page (several under 3:1)
+  - 10px status-bar text, hard to read regardless of color
+  - the title input's placeholder (2.56:1 on white)
+  - 3 `<input>` elements with no accessible name (2 in Find & Replace, 1 in
+    the Link URL popover)
+  All fixed, then the same checker re-run clean (166 checks passing)
+- **Theme-aware color system**: text-color and highlight swatches replaced
+  with named palettes (`color-palettes.ts`) — one set for light pages, one
+  for dark — every entry AA-verified against its page background. Style
+  sets (v19) now carry dark-mode heading/body colors alongside their
+  light-mode ones. Table header background, borders, and header/footer
+  text now follow the theme via CSS custom properties instead of
+  hard-coded hex/Tailwind classes
+- **Keyboard navigation**: toolbar rows are now `role="toolbar"` with
+  arrow-key movement between controls (Home/End too), per the WAI-ARIA
+  toolbar pattern — implemented as a pure, unit-tested function
+  (`toolbar-nav.ts`) plus a thin wrapper component, rather than ad hoc
+  per-row key handling. Text inputs and selects correctly keep their own
+  arrow-key behavior (verified explicitly, since breaking that would make
+  every text field harder to use, the opposite of the goal)
+- **Skip-to-content link** at the top of the editor, jumping keyboard users
+  straight past 15 toolbar rows to the document
+- **Global `:focus-visible` restoration.** Several controls use
+  `focus:outline-none` for their custom active/selected styling; a
+  site-wide `!important` rule guarantees a visible focus ring survives
+  regardless, so no future component can silently drop keyboard
+  visibility the way a few already had
+- **Hardening**: `sanitizePageSettings` extended to validate the new
+  `styleSet`/theme-adjacent fields the same way v19 hardened the rest
+- **New dependencies: none.** The checker script reuses `typescript`,
+  already a devDependency since v1 — confirmed no `npm install` ran this
+  version
+- **Honest limitation, stated rather than implied away:** everything above
+  is verified by math (real contrast ratios), static analysis (source
+  scans), and logic tests (toolbar-nav). None of it is a substitute for
+  testing with an actual screen reader or real keyboard-only navigation in
+  a browser — that has not been done as of this version, and is called
+  out explicitly in README's Known Limitations rather than left unsaid
+
 ## v19 — Styles
 - **Document style sets**: Default, Classic, Modern, Formal, Minimal. Each is a
   named typography theme (heading/body font, heading/body color, line height)
