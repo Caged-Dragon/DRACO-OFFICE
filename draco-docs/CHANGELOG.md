@@ -3,6 +3,103 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v21 — Comments
+**First version of the v21–v30 block.**
+
+- Inline comments: select text, "Add comment" writes a comment anchored to
+  that range. A new `comment` Mark (`comment-extension.ts`) tags the text —
+  a real persisted mark, not a decoration — so it survives save/reload
+- Comments sidebar panel: list, reply threads, resolve/reopen, delete.
+  Unresolved count shown on the toolbar's "Comments" toggle
+- Theme-aware highlighting: commented text gets an amber-ish background in
+  both light and dark page themes (new `--doc-comment-bg` /
+  `--doc-comment-resolved-bg` tokens in `style-sets.ts`), resolved comments
+  fade to a neutral background. Every combination checked by
+  `npm run check:contrast` before being wired in — passed on the first try,
+  194 checks green
+- **Resolving a comment updates the mark itself**, not just the sidebar:
+  `setCommentResolvedById` rewrites the `resolved` attribute on every mark
+  instance for that comment id, so the highlight color actually changes and
+  that change survives a save/reload (verified via `getJSON`/`setContent`
+  round-trip in a real headless editor, not assumed)
+- **Deleting or resolving one comment never touches another.** Comments can
+  sit on adjacent or overlapping text; `removeCommentById` and
+  `setCommentResolvedById` both walk the document and act only on marks
+  matching the specific id. Verified in a real headless TipTap editor with
+  three comments on adjacent words: removing the middle one left the other
+  two, and the document's actual text, completely untouched
+- `inclusive: false` on the mark — typing immediately after a commented
+  word does not silently extend the comment onto new text. Verified
+  explicitly, since the opposite (TipTap's default) would be the kind of
+  subtle bug that's invisible until someone edits right next to a comment
+- Comments extend the autosave draft and `.dwdoc` format (bumped to format
+  version 3). Tested against the real `file-format.ts` and its real
+  dependency chain: v1 files (pre-v14) and v2 files (pre-v21, with
+  header/footer but no comments) both still load correctly, a v3 file with
+  real comment data round-trips, and a corrupted `comments` field is
+  sanitized to `[]` rather than crashing the whole file load
+- Comment data model (`comments.ts`) is pure and framework-free — tested
+  with 20+ cases including hostile input (wrong types, missing fields,
+  non-array `replies`, prototype-pollution-shaped objects), all handled
+  without throwing or leaking unexpected keys
+- Applying a template (v18) now clears comments along with content, since
+  the underlying marks are gone too — comments on text that no longer
+  exists would be meaningless
+- **New dependencies: none.** Comment IDs use `crypto.randomUUID()`, a
+  built-in Web API, not a package
+- **Known limitation, stated plainly:** comments have no concept of an
+  author — there's no account system yet in this single-user phase, so
+  every comment/reply is just a body and a timestamp
+
+## v21.1 — Left Sidebar Layout
+**UI rework, requested directly: move all formatting tools off the top of
+the page into a vertical rail on the left**, so the document isn't pushed
+down by 15 stacked toolbar rows.
+
+- Replaced the 15 horizontal `ToolbarRow`s stacked at the top with a single
+  vertical icon rail (`sidebar-rail.tsx`) on the left edge. One flyout panel
+  open at a time, closed by default — so by default almost the entire
+  viewport is the document, not chrome
+- `toolbar-nav.ts` extended with an `orientation` parameter (horizontal was
+  the only mode before) so the same tested arrow-key logic drives both the
+  vertical rail (Up/Down) and each panel's horizontal control row
+  (Left/Right) — not two parallel implementations. Re-tested including a
+  regression check that existing horizontal callers are byte-for-byte
+  unaffected by the new parameter
+- `ToolbarRow` stripped of its hardcoded `border-b`/padding chrome — it's
+  now a pure accessible-toolbar behavior wrapper, with the panel fully
+  controlling layout, since it no longer lives in a fixed top row
+- Every control component (FileControls, FontControls, TableControls, etc.)
+  is unchanged — only the container around them moved. This was a
+  deliberate scope decision to keep the risk of this refactor contained to
+  layout, not reopen 15 already-tested features
+- **Verification, not assumption, for a refactor of this size:**
+  - Fresh `tsc` build and clean `eslint` after the change
+  - `check:contrast` re-run clean (197 checks) with the new rail/panel UI
+    in place
+  - Wrote a real React-in-jsdom test for the new `SidebarRail` component:
+    renders the right buttons, click opens/toggles-closed, and full
+    keyboard navigation — Up/Down movement, wrapping at both ends, Home/End,
+    and confirming Left/Right (the wrong axis) correctly do nothing
+  - Caught and fixed a real accessibility bug during this work: the rail
+    was originally a `<nav>` with `aria-orientation`, which ESLint's
+    jsx-a11y plugin correctly flagged — `<nav>`'s implicit `role="navigation"`
+    doesn't support that attribute. Changed to `role="toolbar"` on a
+    plain `<div>`, consistent with how every other toolbar in this app is
+    already marked up, rather than suppressing the lint warning
+  - **Caught my own bug mid-task**: an index-based string splice computed
+    `start`/`end` positions, then two unrelated `.replace()` calls shifted
+    the string before those positions were used, corrupting the file into
+    invalid JSX nested inside itself. Caught by the next build step (which
+    failed), diagnosed via a direct file view rather than guessing,
+    restored the known-good pre-refactor file, and redid the edit with the
+    index-dependent splice performed first and the order-independent
+    text-anchor edits done after, which is the actually-correct ordering
+- **New dependencies: none**
+- Tagged `v0.21.1` (patch), not a new `v0.22.0` feature version — this
+  changes how existing v21 features are organized on screen, it doesn't add
+  a new one
+
 ## v20 — Accessibility
 **Last version of the v11–v20 block.**
 

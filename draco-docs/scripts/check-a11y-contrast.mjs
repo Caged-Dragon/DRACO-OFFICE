@@ -76,6 +76,8 @@ for (const theme of ["light", "dark"]) {
     expect(`${tag} heading text`, c.headingColor, t.pageBg);
     expect(`${tag} heading on table header`, c.headingColor, t.thBg);
     expect(`${tag} body on table header`, c.bodyColor, t.thBg);
+    expect(`${tag} body on comment highlight`, c.bodyColor, t.commentBg);
+    expect(`${tag} body on resolved-comment highlight`, c.bodyColor, t.commentResolvedBg);
   }
   expect(`${theme} muted text`, t.muted, t.pageBg);
   expect(`${theme} link`, t.link, t.pageBg);

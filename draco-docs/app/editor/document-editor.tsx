@@ -8,6 +8,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import WrappableImage from "./image-extension";
+import CommentMark from "./comment-extension";
 import { useState } from "react";
 import FormattingToolbar from "./formatting-toolbar";
 import FontControls from "./font-controls";
@@ -19,6 +20,7 @@ import PageSettingsControls from "./page-settings-controls";
 import StyleControls from "./style-controls";
 import { styleSetToCssVars } from "./style-sets";
 import ToolbarRow from "./toolbar-row";
+import SidebarRail from "./sidebar-rail";
 import AccessibilityControls from "./accessibility-controls";
 import { useSystemPrefersDark } from "./use-system-dark";
 import {
@@ -33,6 +35,8 @@ import TableControls from "./table-controls";
 import ImageControls from "./image-controls";
 import LinkControls from "./link-controls";
 import HeaderFooterControls from "./header-footer-controls";
+import CommentControls from "./comment-controls";
+import CommentsPanel from "./comments-panel";
 import FindReplaceControls from "./find-replace-controls";
 import FindAndReplace from "./find-replace-extension";
 import SpellCheck from "./spellcheck-extension";
@@ -40,6 +44,15 @@ import SpellCheckControls from "./spellcheck-controls";
 import Indent from "./indent-extension";
 import { computeTextStats, formatReadingTime } from "./text-stats";
 import { useAutosave, loadDraft } from "./use-autosave";
+import {
+  createComment,
+  addReply,
+  setResolved,
+  updateComment,
+  removeComment,
+  unresolvedCount as countUnresolved,
+  type Comment,
+} from "./comments";
 import type { DocWriteFile } from "./file-format";
 import {
   loadPageSettings,
@@ -61,6 +74,10 @@ export default function DocumentEditor() {
   const [showPageNumber, setShowPageNumber] = useState(
     initialDraft?.showPageNumber ?? false
   );
+  const [comments, setComments] = useState<Comment[]>(
+    initialDraft?.comments ?? []
+  );
+  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
   );
@@ -110,6 +127,7 @@ export default function DocumentEditor() {
       Indent,
       FindAndReplace,
       SpellCheck,
+      CommentMark,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -143,6 +161,7 @@ export default function DocumentEditor() {
   // position (from: 0, to: 0, no selection), so no sync effect is needed.
 
   const { status: saveStatus, scheduleSave } = useAutosave(editor);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
   if (!editor) {
     return (
@@ -152,21 +171,25 @@ export default function DocumentEditor() {
     );
   }
 
-  return (
-    <div className="flex-1 flex flex-col">
-      <a
-        href="#editor-page"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-blue-600 focus:text-white focus:px-3 focus:py-2 focus:rounded-md focus:text-sm"
-      >
-        Skip to document
-      </a>
-      <ToolbarRow label="File actions" className="flex items-center gap-2">
+  const TOOLBAR_GROUPS: {
+    id: string;
+    label: string;
+    icon: string;
+    content: React.ReactNode;
+  }[] = [
+    {
+      id: "file",
+      label: 'File actions',
+      icon: "📁",
+      content: (
+        <>
         <FileControls
           getDocument={() => ({
             title,
             header,
             footer,
             showPageNumber,
+            comments,
             content: editor.getJSON(),
             pageSettings,
           })}
@@ -176,6 +199,7 @@ export default function DocumentEditor() {
             setHeader(file.header);
             setFooter(file.footer);
             setShowPageNumber(file.showPageNumber);
+            setComments(file.comments);
             setPageSettings(file.pageSettings);
             savePageSettings(file.pageSettings);
             scheduleSave({
@@ -183,6 +207,7 @@ export default function DocumentEditor() {
               header: file.header,
               footer: file.footer,
               showPageNumber: file.showPageNumber,
+              comments: file.comments,
             });
           }}
         />
@@ -191,30 +216,86 @@ export default function DocumentEditor() {
           onSelect={(template) => {
             editor.commands.setContent(template.content);
             setTitle(template.title);
-            scheduleSave({ title: template.title, header, footer, showPageNumber });
+            setComments([]);
+            scheduleSave({
+              title: template.title,
+              header,
+              footer,
+              showPageNumber,
+              comments: [],
+            });
           }}
         />
-      </ToolbarRow>
-      <ToolbarRow label="History and find & replace" className="flex items-center justify-between">
+        </>
+      ),
+    },
+    {
+      id: "history",
+      label: 'History and find & replace',
+      icon: "↺",
+      content: (
+        <>
         <HistoryControls editor={editor} />
         <FindReplaceControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Text formatting" className="flex items-center gap-1">
+        </>
+      ),
+    },
+    {
+      id: "format",
+      label: 'Text formatting',
+      icon: "B",
+      content: (
+        <>
         <FormattingToolbar editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Links">
+        </>
+      ),
+    },
+    {
+      id: "links",
+      label: 'Links',
+      icon: "🔗",
+      content: (
+        <>
         <LinkControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Font">
+        </>
+      ),
+    },
+    {
+      id: "font",
+      label: 'Font',
+      icon: "Aa",
+      content: (
+        <>
         <FontControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Paragraph formatting">
+        </>
+      ),
+    },
+    {
+      id: "paragraph",
+      label: 'Paragraph formatting',
+      icon: "¶",
+      content: (
+        <>
         <ParagraphControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Headings" className="flex items-center gap-3">
+        </>
+      ),
+    },
+    {
+      id: "headings",
+      label: 'Headings',
+      icon: "H",
+      content: (
+        <>
         <HeadingControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Document style">
+        </>
+      ),
+    },
+    {
+      id: "style",
+      label: 'Document style',
+      icon: "🎨",
+      content: (
+        <>
         <StyleControls
           editor={editor}
           styleSet={pageSettings.styleSet}
@@ -224,17 +305,45 @@ export default function DocumentEditor() {
             savePageSettings(next);
           }}
         />
-      </ToolbarRow>
-      <ToolbarRow label="Lists">
+        </>
+      ),
+    },
+    {
+      id: "lists",
+      label: 'Lists',
+      icon: "☰",
+      content: (
+        <>
         <ListControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Table">
+        </>
+      ),
+    },
+    {
+      id: "table",
+      label: 'Table',
+      icon: "⊞",
+      content: (
+        <>
         <TableControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Image">
+        </>
+      ),
+    },
+    {
+      id: "image",
+      label: 'Image',
+      icon: "🖼",
+      content: (
+        <>
         <ImageControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Page settings">
+        </>
+      ),
+    },
+    {
+      id: "page",
+      label: 'Page settings',
+      icon: "📄",
+      content: (
+        <>
         <PageSettingsControls
           settings={pageSettings}
           onChange={(next) => {
@@ -242,8 +351,15 @@ export default function DocumentEditor() {
             savePageSettings(next);
           }}
         />
-      </ToolbarRow>
-      <ToolbarRow label="Header, footer, and spell check" className="flex items-center justify-between">
+        </>
+      ),
+    },
+    {
+      id: "headerfooter",
+      label: 'Header, footer, and spell check',
+      icon: "✓",
+      content: (
+        <>
         <HeaderFooterControls
           header={header}
           footer={footer}
@@ -252,12 +368,41 @@ export default function DocumentEditor() {
             setHeader(next.header);
             setFooter(next.footer);
             setShowPageNumber(next.showPageNumber);
-            scheduleSave({ title, ...next });
+            scheduleSave({ title, ...next, comments });
           }}
         />
         <SpellCheckControls editor={editor} />
-      </ToolbarRow>
-      <ToolbarRow label="Accessibility" className="flex items-center justify-between">
+        </>
+      ),
+    },
+    {
+      id: "comments",
+      label: 'Comments',
+      icon: "💬",
+      content: (
+        <>
+        <CommentControls
+          editor={editor}
+          hasSelection={selectionInfo.hasSelection}
+          unresolvedCount={countUnresolved(comments)}
+          panelOpen={commentsPanelOpen}
+          onTogglePanel={() => setCommentsPanelOpen((open) => !open)}
+          onAddComment={(quote, body) => {
+            const comment = createComment(quote, body);
+            setComments((prev) => [...prev, comment]);
+            editor.chain().focus().setComment(comment.id).run();
+            setCommentsPanelOpen(true);
+          }}
+        />
+        </>
+      ),
+    },
+    {
+      id: "accessibility",
+      label: 'Accessibility',
+      icon: "♿",
+      content: (
+        <>
         <AccessibilityControls
           preference={pageThemePref}
           resolved={resolvedTheme}
@@ -266,7 +411,49 @@ export default function DocumentEditor() {
             savePreferences({ pageTheme: next });
           }}
         />
-      </ToolbarRow>
+        </>
+      ),
+    },
+  ];
+  const activeGroup = TOOLBAR_GROUPS.find((g) => g.id === activeGroupId) ?? null;
+
+  return (
+    <div className="flex-1 flex flex-col">
+      <a
+        href="#editor-page"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-blue-600 focus:text-white focus:px-3 focus:py-2 focus:rounded-md focus:text-sm"
+      >
+        Skip to document
+      </a>
+      <div className="flex-1 flex overflow-hidden">
+        <SidebarRail
+          groups={TOOLBAR_GROUPS.map(({ id, label, icon }) => ({ id, label, icon }))}
+          activeId={activeGroupId}
+          onSelect={setActiveGroupId}
+        />
+        {activeGroup && (
+          <div className="w-80 shrink-0 flex flex-col border-r border-slate-800 bg-slate-900 overflow-y-auto">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800 sticky top-0 bg-slate-900">
+              <span className="text-xs font-semibold text-slate-300">
+                {activeGroup.label}
+              </span>
+              <button
+                type="button"
+                aria-label="Close panel"
+                onClick={() => setActiveGroupId(null)}
+                className="text-slate-400 hover:text-slate-200 text-xs px-2 py-1 rounded hover:bg-slate-800"
+              >
+                ✕
+              </button>
+            </div>
+            <ToolbarRow
+              label={activeGroup.label}
+              className="flex flex-wrap items-start content-start gap-3 p-3"
+            >
+              {activeGroup.content}
+            </ToolbarRow>
+          </div>
+        )}
       <div className="flex-1 overflow-y-auto bg-slate-900 py-10">
         <div
           id="editor-page"
@@ -312,7 +499,7 @@ export default function DocumentEditor() {
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
-                scheduleSave({ title: e.target.value, header, footer, showPageNumber });
+                scheduleSave({ title: e.target.value, header, footer, showPageNumber, comments });
               }}
               placeholder="Untitled document"
               aria-label="Document title"
@@ -345,6 +532,26 @@ export default function DocumentEditor() {
             </div>
           )}
         </div>
+        </div>
+        {commentsPanelOpen && (
+          <CommentsPanel
+            comments={comments}
+            onReply={(id, body) => {
+              setComments((prev) => updateComment(prev, id, (c) => addReply(c, body)));
+            }}
+            onToggleResolved={(id) => {
+              const target = comments.find((c) => c.id === id);
+              if (!target) return;
+              const nextResolved = !target.resolved;
+              editor.commands.setCommentResolvedById(id, nextResolved);
+              setComments((prev) => updateComment(prev, id, (c) => setResolved(c, nextResolved)));
+            }}
+            onDelete={(id) => {
+              editor.commands.removeCommentById(id);
+              setComments((prev) => removeComment(prev, id));
+            }}
+          />
+        )}
       </div>
 
       {/* Cursor / selection / word-count status bar */}

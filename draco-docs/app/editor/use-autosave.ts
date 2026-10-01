@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import { sanitizeComments, type Comment } from "./comments";
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
@@ -10,6 +11,7 @@ export type DocMeta = {
   header: string;
   footer: string;
   showPageNumber: boolean;
+  comments: Comment[];
 };
 
 export const DEFAULT_DOC_META: DocMeta = {
@@ -17,6 +19,7 @@ export const DEFAULT_DOC_META: DocMeta = {
   header: "",
   footer: "",
   showPageNumber: false,
+  comments: [],
 };
 
 export type Draft = DocMeta & {
@@ -38,7 +41,12 @@ export function loadDraft(): Draft | null {
       return { ...DEFAULT_DOC_META, content: parsed };
     }
     if (parsed && typeof parsed === "object" && "content" in parsed) {
-      return { ...DEFAULT_DOC_META, ...parsed };
+      // Back-compat: v14-v20 drafts have no `comments` field at all.
+      return {
+        ...DEFAULT_DOC_META,
+        ...parsed,
+        comments: sanitizeComments((parsed as { comments?: unknown }).comments),
+      };
     }
     return null;
   } catch {

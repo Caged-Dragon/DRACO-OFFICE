@@ -124,3 +124,14 @@ body {
   color: var(--doc-muted);
   opacity: 1;
 }
+
+/* Comments (v21) — theme-aware highlight on commented text. */
+.ProseMirror .comment-mark {
+  background: var(--doc-comment-bg);
+  cursor: default;
+  border-radius: 2px;
+}
+
+.ProseMirror .comment-mark[data-resolved="true"] {
+  background: var(--doc-comment-resolved-bg);
+}

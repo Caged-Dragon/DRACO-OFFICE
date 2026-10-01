@@ -21,7 +21,15 @@ export type ResolvedTheme = "light" | "dark";
  */
 export const THEME_TOKENS: Record<
   ResolvedTheme,
-  { pageBg: string; muted: string; border: string; thBg: string; link: string }
+  {
+    pageBg: string;
+    muted: string;
+    border: string;
+    thBg: string;
+    link: string;
+    commentBg: string;
+    commentResolvedBg: string;
+  }
 > = {
   light: {
     pageBg: "#ffffff",
@@ -29,6 +37,8 @@ export const THEME_TOKENS: Record<
     border: "#cbd5e1",
     thBg: "#f1f5f9",
     link: "#1d4ed8",
+    commentBg: "#fef3c7",
+    commentResolvedBg: "#f1f5f9",
   },
   dark: {
     pageBg: "#1e293b",
@@ -36,6 +46,8 @@ export const THEME_TOKENS: Record<
     border: "#475569",
     thBg: "#334155",
     link: "#93c5fd",
+    commentBg: "#78350f",
+    commentResolvedBg: "#334155",
   },
 };
 
@@ -139,5 +151,7 @@ export function styleSetToCssVars(
     "--doc-border": t.border,
     "--doc-th-bg": t.thBg,
     "--doc-link": t.link,
+    "--doc-comment-bg": t.commentBg,
+    "--doc-comment-resolved-bg": t.commentResolvedBg,
   };
 }

@@ -8,13 +8,16 @@
 export function nextToolbarIndex(
   key: string,
   current: number,
-  count: number
+  count: number,
+  orientation: "horizontal" | "vertical" = "horizontal"
 ): number | null {
   if (count <= 0 || current < 0 || current >= count) return null;
+  const forwardKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+  const backwardKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
   switch (key) {
-    case "ArrowRight":
+    case forwardKey:
       return (current + 1) % count;
-    case "ArrowLeft":
+    case backwardKey:
       return (current - 1 + count) % count;
     case "Home":
       return 0;
