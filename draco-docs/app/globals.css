@@ -135,3 +135,25 @@ body {
 .ProseMirror .comment-mark[data-resolved="true"] {
   background: var(--doc-comment-resolved-bg);
 }
+
+/* Track changes (v22) — theme-aware insertion/deletion styling. */
+.ProseMirror .tc-insertion {
+  color: var(--doc-insertion-color);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.ProseMirror .tc-deletion {
+  color: var(--doc-deletion-color);
+  text-decoration: line-through;
+}
+
+.tc-insertion-chip {
+  color: #86efac;
+  text-decoration: underline;
+}
+
+.tc-deletion-chip {
+  color: #fca5a5;
+  text-decoration: line-through;
+}

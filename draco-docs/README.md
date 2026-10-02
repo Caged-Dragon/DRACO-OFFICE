@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.21.1-blue)
+![Version](https://img.shields.io/badge/version-v0.22.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -45,7 +45,7 @@ WAI-ARIA toolbar pattern as before, just vertical now.
 
 ## Features
 
-Current as of **v0.21.1**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.22.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -67,7 +67,8 @@ Current as of **v0.21.1**. Checked items are shipped; the rest are on the [Roadm
 - [x] Document style sets (Default, Classic, Modern, Formal, Minimal), quote/code blocks, clear formatting
 - [x] Accessibility — WCAG AA color contrast (automated check), keyboard navigation, screen-reader labels, light/dark/system page theme
 - [x] Comments — inline, reply threads, resolve/reopen, theme-aware highlighting
-- [ ] Track changes, footnotes, table of contents, and more — see Roadmap
+- [x] Track changes — insertion/deletion markup, accept/reject (single or all), scoped to inline edits
+- [ ] Footnotes, table of contents, and more — see Roadmap
 
 ## Tech Stack
 
@@ -174,7 +175,7 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
 | v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles, accessibility — ✅ done |
-| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v21/v30) |
+| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v22/v30) |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |
 
@@ -188,6 +189,7 @@ Tracked honestly as they're found, not hidden. Full detail in `CHANGELOG.md`; su
 - **Spell check** uses a compact (~5,000-word) bundled dictionary, not a full system dictionary — uncommon or technical words will be flagged. "Add to dictionary" exists specifically to close real gaps as they come up.
 - **Accessibility verification is automated, not manual.** `check:contrast` proves color math and scans for known anti-patterns; it does not replace testing with an actual screen reader or real keyboard-only use. No manual screen-reader pass has been done as of v20.
 - **Comments are per-document, not per-user.** There is no concept of "who" wrote a comment or reply — no accounts exist yet in this offline-first, single-user phase. Every comment/reply just has a body and a timestamp.
+- **Track changes only covers plain inline edits within one block** — normal typing, Backspace/Delete, and typing over a selection. Structural edits (paragraph merges/splits, table edits, block-level paste) are intentionally NOT tracked; they pass through as ordinary untracked edits rather than risking an incorrect rewrite. The on/off toggle is a per-session setting (resets to off on reload) — existing tracked marks in a document still persist and remain actionable.
 
 ## Security & Dependency Policy
 

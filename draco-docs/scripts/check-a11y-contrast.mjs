@@ -81,6 +81,8 @@ for (const theme of ["light", "dark"]) {
   }
   expect(`${theme} muted text`, t.muted, t.pageBg);
   expect(`${theme} link`, t.link, t.pageBg);
+  expect(`${theme} insertion (tracked-change) text`, t.insertionColor, t.pageBg);
+  expect(`${theme} deletion (tracked-change) text`, t.deletionColor, t.pageBg);
   for (const { name, value } of TEXT_PALETTES[theme]) {
     expect(`${theme} palette "${name}"`, value, t.pageBg);
   }
@@ -100,6 +102,8 @@ for (const fg of [200, 300, 400])
     expect(`chrome text-slate-${fg} on slate-${bg}`, slate[fg], slate[bg]);
 expect("chrome placeholder color on slate-900", "#94a3b8", slate[900]);
 expect("white on blue-600 (active buttons)", "#ffffff", "#2563eb");
+expect("track-changes insertion chip on slate-900 panel", "#86efac", slate[900]);
+expect("track-changes deletion chip on slate-900 panel", "#fca5a5", slate[900]);
 
 // ---------- 3. source scans ----------
 function walk(dir, out = []) {

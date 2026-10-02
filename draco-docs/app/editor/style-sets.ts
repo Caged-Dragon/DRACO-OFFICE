@@ -29,6 +29,8 @@ export const THEME_TOKENS: Record<
     link: string;
     commentBg: string;
     commentResolvedBg: string;
+    insertionColor: string;
+    deletionColor: string;
   }
 > = {
   light: {
@@ -39,6 +41,8 @@ export const THEME_TOKENS: Record<
     link: "#1d4ed8",
     commentBg: "#fef3c7",
     commentResolvedBg: "#f1f5f9",
+    insertionColor: "#15803d",
+    deletionColor: "#b91c1c",
   },
   dark: {
     pageBg: "#1e293b",
@@ -48,6 +52,8 @@ export const THEME_TOKENS: Record<
     link: "#93c5fd",
     commentBg: "#78350f",
     commentResolvedBg: "#334155",
+    insertionColor: "#86efac",
+    deletionColor: "#fca5a5",
   },
 };
 
@@ -153,5 +159,7 @@ export function styleSetToCssVars(
     "--doc-link": t.link,
     "--doc-comment-bg": t.commentBg,
     "--doc-comment-resolved-bg": t.commentResolvedBg,
+    "--doc-insertion-color": t.insertionColor,
+    "--doc-deletion-color": t.deletionColor,
   };
 }

@@ -37,6 +37,10 @@ import LinkControls from "./link-controls";
 import HeaderFooterControls from "./header-footer-controls";
 import CommentControls from "./comment-controls";
 import CommentsPanel from "./comments-panel";
+import TrackChanges, { trackChangesPluginKey } from "./track-changes-extension";
+import TrackChangesControls from "./track-changes-controls";
+import TrackChangesPanel from "./track-changes-panel";
+import { listChanges } from "./track-changes";
 import FindReplaceControls from "./find-replace-controls";
 import FindAndReplace from "./find-replace-extension";
 import SpellCheck from "./spellcheck-extension";
@@ -77,7 +81,7 @@ export default function DocumentEditor() {
   const [comments, setComments] = useState<Comment[]>(
     initialDraft?.comments ?? []
   );
-  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [rightPanel, setRightPanel] = useState<"comments" | "changes" | null>(null);
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
   );
@@ -128,6 +132,7 @@ export default function DocumentEditor() {
       FindAndReplace,
       SpellCheck,
       CommentMark,
+      TrackChanges,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -385,15 +390,39 @@ export default function DocumentEditor() {
           editor={editor}
           hasSelection={selectionInfo.hasSelection}
           unresolvedCount={countUnresolved(comments)}
-          panelOpen={commentsPanelOpen}
-          onTogglePanel={() => setCommentsPanelOpen((open) => !open)}
+          panelOpen={rightPanel === "comments"}
+          onTogglePanel={() =>
+            setRightPanel((p) => (p === "comments" ? null : "comments"))
+          }
           onAddComment={(quote, body) => {
             const comment = createComment(quote, body);
             setComments((prev) => [...prev, comment]);
             editor.chain().focus().setComment(comment.id).run();
-            setCommentsPanelOpen(true);
+            setRightPanel("comments");
           }}
         />
+        </>
+      ),
+    },
+    {
+      id: "trackChanges",
+      label: "Track Changes",
+      icon: "\u270E",
+      content: (
+        <>
+          <TrackChangesControls
+            enabled={trackChangesPluginKey.getState(editor.state)?.enabled ?? false}
+            onToggleEnabled={() =>
+              editor.commands.setTrackChangesEnabled(
+                !(trackChangesPluginKey.getState(editor.state)?.enabled ?? false)
+              )
+            }
+            changeCount={listChanges(editor.state.doc).length}
+            panelOpen={rightPanel === "changes"}
+            onTogglePanel={() =>
+              setRightPanel((p) => (p === "changes" ? null : "changes"))
+            }
+          />
         </>
       ),
     },
@@ -533,7 +562,7 @@ export default function DocumentEditor() {
           )}
         </div>
         </div>
-        {commentsPanelOpen && (
+        {rightPanel === "comments" && (
           <CommentsPanel
             comments={comments}
             onReply={(id, body) => {
@@ -550,6 +579,15 @@ export default function DocumentEditor() {
               editor.commands.removeCommentById(id);
               setComments((prev) => removeComment(prev, id));
             }}
+          />
+        )}
+        {rightPanel === "changes" && (
+          <TrackChangesPanel
+            changes={listChanges(editor.state.doc)}
+            onAccept={(id) => editor.commands.acceptChange(id)}
+            onReject={(id) => editor.commands.rejectChange(id)}
+            onAcceptAll={() => editor.commands.acceptAllChanges()}
+            onRejectAll={() => editor.commands.rejectAllChanges()}
           />
         )}
       </div>

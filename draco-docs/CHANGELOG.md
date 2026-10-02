@@ -3,6 +3,54 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v22 — Track Changes
+No free or official TipTap extension exists for this (the real one is a
+paid Tiptap Pro feature) — built from scratch using `appendTransaction`.
+
+- Two new marks, `insertion` and `deletion`, each carrying `changeId`,
+  `author`, `createdAt`. Typing while tracking is on wraps new text in
+  `insertion`; deleting (Backspace/Delete/typing over a selection) does
+  NOT remove the text — it re-inserts it immediately after, marked
+  `deletion`, so it stays visible (strikethrough) until resolved
+- A single replace action (select text, type a replacement) produces one
+  `insertion` + one `deletion` sharing the SAME `changeId`, so Accept/Reject
+  acts on the whole edit as one unit — not two unrelated changes
+- Accept/Reject per change, plus Accept All / Reject All, each correctly
+  inverse to the other (reject an insertion deletes the typed text; reject
+  a deletion restores the original text)
+- Changes panel: one entry per `changeId`, showing inserted/deleted text,
+  author, and timestamp — fully derived by reading the document's own
+  marks (`track-changes.ts`), no separate data array to keep in sync
+- Theme-aware insertion (underline) / deletion (strikethrough) coloring,
+  both themes checked by `check:contrast` before shipping
+- **Deliberately scoped, not just "as far as I got":** the transaction
+  rewrite only engages for a single transaction with exactly one
+  `ReplaceStep`, confined to one block, with flat inline content on both
+  sides. Structural edits (paragraph merges/splits, table edits,
+  block-level paste, multi-step transactions like `setContent`) are left
+  completely untouched — verified explicitly with a `splitBlock()` test
+  that confirms no tracking AND no crash, rather than assuming either
+- **Tested in a real headless editor against actual editing actions, not
+  just the data model**: 29 checks covering tracking on/off, insertion
+  marking, deletion-without-removal, the shared-changeId pairing, accept
+  and reject for pure insertions, pure deletions, and paired replaces,
+  Accept All/Reject All across independent changes, disabling tracking
+  mid-session, the structural-edit safety boundary, and that all mark
+  attributes survive a `getJSON`/`setContent` round-trip (the save/reload
+  path)
+- Caught by the build, not by guessing: a real type error (ProseMirror's
+  `Node.marks` is `readonly Mark[]`, my `listChanges` type wasn't) —
+  fixed immediately, not worked around
+- **Scope decision, stated plainly:** the on/off toggle is a per-session
+  setting, not persisted in `.dwdoc` — it resets to off each time the
+  editor loads. The marks themselves DO persist (they're ordinary document
+  content), so existing tracked changes remain visible and actionable
+  after reopening a file; only "is tracking currently turned on" resets.
+  Revisit this once v51+ brings real collaboration/accounts, where "who
+  has tracking on" becomes a more meaningful document-level property
+- **New dependencies: none** — uses `@tiptap/pm/transform`'s `ReplaceStep`,
+  already present via the existing TipTap stack
+
 ## v21 — Comments
 **First version of the v21–v30 block.**
 
