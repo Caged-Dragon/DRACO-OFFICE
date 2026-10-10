@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.22.0-blue)
+![Version](https://img.shields.io/badge/version-v0.22.1-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -45,7 +45,7 @@ WAI-ARIA toolbar pattern as before, just vertical now.
 
 ## Features
 
-Current as of **v0.22.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.22.1**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough

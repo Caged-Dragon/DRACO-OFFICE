@@ -3,6 +3,38 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v22.1 — Dependency Security Update
+**Environment note first:** this session's sandbox reset between turns,
+losing the working v0.22.0 checkout. The person re-uploaded the v0.22.0
+zip; `npm install` against its lockfile surfaced 10 vulnerabilities that
+hadn't been audited before, so this patch addresses them before v23 builds
+on top of a known-vulnerable dependency tree.
+
+- **Fixed: critical RCE in `next/og` ImageResponse (GHSA-vcvr-r3jv-pc5j)**,
+  plus 6 related Next.js advisories (SSRF in Image Optimization, SSG/ISR
+  cache poisoning, draft-mode content leakage, metadata-route information
+  disclosure, dev-server MCP endpoint disclosure) — all fixed by upgrading
+  `next` 16.3.5 → 16.4.0 (checked against the advisory database directly:
+  every one of the 7 Next.js advisories has a `vulnerable_versions` upper
+  bound of 16.3.8, so 16.4.0 clears all of them). `eslint-config-next`
+  upgraded in lockstep to match
+- **Fixed, non-breaking**: `sharp` and `source-map-js`, via plain
+  `npm audit fix` (no forced/breaking changes needed for these two)
+- **Deliberately NOT "fixed"**: two remaining advisories
+  (`braces`→micromatch→fast-glob, used only by ESLint's internal file
+  globbing; `postcss-selector-parser`, used only by Tailwind's build-time
+  CSS processing) — both build/lint-time only, never shipped to users or
+  exposed to untrusted runtime input. `npm audit fix --force`'s own
+  suggested "fix" for both is a downgrade to an unrelated older major
+  version (`eslint-config-next@14.2.35`, `@tailwindcss/typography@0.5.4`),
+  not a genuine upgrade — the resolver finding a dependency tree that
+  avoids this specific chain, not a patched version of the real issue.
+  Forcing that would trade a low-severity, non-exploitable-in-this-context
+  finding for a real, verified-working toolchain. Documented here instead
+  of silently ignored or blindly forced
+- Verified after the upgrade: clean build, clean lint, `check:contrast`
+  still 210/210, both routes smoke-tested
+
 ## v22 — Track Changes
 No free or official TipTap extension exists for this (the real one is a
 paid Tiptap Pro feature) — built from scratch using `appendTransaction`.
