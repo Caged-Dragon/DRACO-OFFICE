@@ -157,3 +157,25 @@ body {
   color: #fca5a5;
   text-decoration: line-through;
 }
+
+/* Footnotes (v23) — the reference node is empty (atom, no content hole);
+   its visible number comes from the data-number attribute set by the
+   numbering decorations in footnote-extension.ts. */
+.ProseMirror .footnote-ref {
+  cursor: pointer;
+  color: var(--doc-link);
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.ProseMirror .footnote-ref::after {
+  content: "[" attr(data-number) "]";
+}
+
+.footnotes-section:target,
+.footnotes-section li:target {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

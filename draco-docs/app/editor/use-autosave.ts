@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
 import { sanitizeComments, type Comment } from "./comments";
+import { sanitizeFootnotes, type Footnote } from "./footnotes";
 
 export type SaveStatus = "idle" | "saving" | "saved";
 
@@ -12,6 +13,7 @@ export type DocMeta = {
   footer: string;
   showPageNumber: boolean;
   comments: Comment[];
+  footnotes: Footnote[];
 };
 
 export const DEFAULT_DOC_META: DocMeta = {
@@ -20,6 +22,7 @@ export const DEFAULT_DOC_META: DocMeta = {
   footer: "",
   showPageNumber: false,
   comments: [],
+  footnotes: [],
 };
 
 export type Draft = DocMeta & {
@@ -41,11 +44,14 @@ export function loadDraft(): Draft | null {
       return { ...DEFAULT_DOC_META, content: parsed };
     }
     if (parsed && typeof parsed === "object" && "content" in parsed) {
-      // Back-compat: v14-v20 drafts have no `comments` field at all.
+      // Back-compat: v14-v20 drafts have no `comments` field; pre-v23
+      // drafts have no `footnotes` field either.
+      const p = parsed as { comments?: unknown; footnotes?: unknown };
       return {
         ...DEFAULT_DOC_META,
         ...parsed,
-        comments: sanitizeComments((parsed as { comments?: unknown }).comments),
+        comments: sanitizeComments(p.comments),
+        footnotes: sanitizeFootnotes(p.footnotes),
       };
     }
     return null;

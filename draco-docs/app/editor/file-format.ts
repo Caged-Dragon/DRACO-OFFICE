@@ -1,8 +1,9 @@
 import type { PageSettings } from "./page-settings";
 import { sanitizePageSettings } from "./page-settings";
 import { sanitizeComments, type Comment } from "./comments";
+import { sanitizeFootnotes, type Footnote } from "./footnotes";
 
-export const FILE_FORMAT_VERSION = 3;
+export const FILE_FORMAT_VERSION = 4;
 export const FILE_EXTENSION = "dwdoc";
 export const MIME_TYPE = "application/vnd.docwrite+json";
 
@@ -13,6 +14,7 @@ export type DocWriteFile = {
   footer: string;
   showPageNumber: boolean;
   comments: Comment[];
+  footnotes: Footnote[];
   content: Record<string, unknown>;
   pageSettings: PageSettings;
 };
@@ -51,8 +53,9 @@ export function parseDocument(raw: string): DocWriteFile {
     header: typeof p.header === "string" ? p.header : "",
     footer: typeof p.footer === "string" ? p.footer : "",
     showPageNumber: typeof p.showPageNumber === "boolean" ? p.showPageNumber : false,
-    // format versions 1-2 predate comments entirely.
+    // format versions 1-2 predate comments entirely; versions 1-3 predate footnotes.
     comments: sanitizeComments(p.comments),
+    footnotes: sanitizeFootnotes(p.footnotes),
     content: p.content as Record<string, unknown>,
     pageSettings: sanitizePageSettings(p.pageSettings),
   };

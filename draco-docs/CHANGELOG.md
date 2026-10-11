@@ -3,6 +3,50 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v23 — Notes
+- Footnote references: an inline atom node (not a mark — a point reference,
+  not a text range), inserted at the cursor via a toolbar button
+- **Numbers are purely derived, never stored**: a plugin walks the document
+  on every render and numbers references by document order. Delete a note
+  and the rest renumber automatically; the same logic drives both the
+  superscript shown in the text and the list at the bottom, so the two can
+  never disagree (one function, `getFootnoteNumbers`, is the only source
+  of truth)
+- Notes render as a list at the end of the document — not a sidebar panel
+  like Comments/Track Changes — with editable text per note and a delete
+  button. Clicking a superscript reference scrolls smoothly to its note
+- Deleting a note removes every reference to it in the document, not just
+  the first one — footnotes can legitimately be cited more than once
+  ("ibid.")
+- A note whose reference was deleted from the text (but whose entry is
+  still in the data array) is simply not shown in the list, rather than
+  appearing as a confusing orphaned entry — handled by a pure join
+  function (`joinFootnotesWithNumbers`) that only lists notes with a live
+  reference
+- Extends the autosave draft and `.dwdoc` format with `footnotes:
+  Footnote[]`, bumping file format to version 4, with back-compat for v1
+  (pre-comments), v3 (pre-footnotes), and corrupted-field cases
+- **Tested in a real headless editor rendering to actual DOM** — not just
+  the data model: confirmed the live `data-number` attributes that drive
+  the visible superscripts are correct in document order even when notes
+  are inserted out of order, confirmed automatic renumbering after
+  deletion shows up in the real rendered DOM, confirmed deleting a
+  multiply-referenced note removes every instance while leaving unrelated
+  notes untouched, confirmed the atom node deletes cleanly as one unit
+  (not partially), and confirmed the noteId attribute survives a
+  `getJSON`/`setContent` round-trip
+- Separately unit-tested the pure data layer (`footnotes.ts`) with hostile
+  input: non-array/null/wrong-typed fields, missing text, and
+  prototype-pollution-shaped objects — 18 checks total across the data
+  model and the join function
+- Also verified the real `file-format.ts` against actual v1/v3/v4 files
+  and a corrupted `footnotes` field, not just the new code in isolation
+- **Known limitation, stated plainly:** footnotes and endnotes aren't
+  visually distinct yet, since there's no real multi-page pagination (the
+  same honest limitation noted since v9/v14) — "bottom of page" and "end
+  of document" are currently the same single list
+- **New dependencies: none**
+
 ## v22.1 — Dependency Security Update
 **Environment note first:** this session's sandbox reset between turns,
 losing the working v0.22.0 checkout. The person re-uploaded the v0.22.0

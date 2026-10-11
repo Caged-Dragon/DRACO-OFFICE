@@ -57,6 +57,16 @@ import {
   unresolvedCount as countUnresolved,
   type Comment,
 } from "./comments";
+import FootnoteReference, { getFootnoteNumbers } from "./footnote-extension";
+import FootnoteControls from "./footnote-controls";
+import FootnotesSection from "./footnotes-section";
+import {
+  createFootnote,
+  updateFootnoteText,
+  removeFootnote,
+  joinFootnotesWithNumbers,
+  type Footnote,
+} from "./footnotes";
 import type { DocWriteFile } from "./file-format";
 import {
   loadPageSettings,
@@ -80,6 +90,9 @@ export default function DocumentEditor() {
   );
   const [comments, setComments] = useState<Comment[]>(
     initialDraft?.comments ?? []
+  );
+  const [footnotes, setFootnotes] = useState<Footnote[]>(
+    initialDraft?.footnotes ?? []
   );
   const [rightPanel, setRightPanel] = useState<"comments" | "changes" | null>(null);
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
@@ -133,6 +146,7 @@ export default function DocumentEditor() {
       SpellCheck,
       CommentMark,
       TrackChanges,
+      FootnoteReference,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -142,6 +156,17 @@ export default function DocumentEditor() {
         class: "prose max-w-none focus:outline-none",
       },
       handleClick: (view, pos, event) => {
+        const target = event.target as HTMLElement;
+        const noteRef = target.closest?.(".footnote-ref") as HTMLElement | null;
+        if (noteRef) {
+          const noteId = noteRef.getAttribute("data-note-id");
+          if (noteId) {
+            document
+              .getElementById(`footnote-${noteId}`)
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return true;
+          }
+        }
         if (!(event.metaKey || event.ctrlKey)) return false;
         const attrs = editor?.getAttributes("link");
         if (attrs?.href) {
@@ -195,6 +220,7 @@ export default function DocumentEditor() {
             footer,
             showPageNumber,
             comments,
+            footnotes,
             content: editor.getJSON(),
             pageSettings,
           })}
@@ -205,6 +231,7 @@ export default function DocumentEditor() {
             setFooter(file.footer);
             setShowPageNumber(file.showPageNumber);
             setComments(file.comments);
+            setFootnotes(file.footnotes);
             setPageSettings(file.pageSettings);
             savePageSettings(file.pageSettings);
             scheduleSave({
@@ -213,6 +240,7 @@ export default function DocumentEditor() {
               footer: file.footer,
               showPageNumber: file.showPageNumber,
               comments: file.comments,
+              footnotes: file.footnotes,
             });
           }}
         />
@@ -222,12 +250,14 @@ export default function DocumentEditor() {
             editor.commands.setContent(template.content);
             setTitle(template.title);
             setComments([]);
+            setFootnotes([]);
             scheduleSave({
               title: template.title,
               header,
               footer,
               showPageNumber,
               comments: [],
+              footnotes: [],
             });
           }}
         />
@@ -344,6 +374,22 @@ export default function DocumentEditor() {
       ),
     },
     {
+      id: "notes",
+      label: "Notes",
+      icon: "\u2020", // dagger (†) — the traditional footnote-reference glyph
+      content: (
+        <>
+          <FootnoteControls
+            onInsert={() => {
+              const note = createFootnote();
+              setFootnotes((prev) => [...prev, note]);
+              editor.chain().focus().insertFootnoteReference(note.id).run();
+            }}
+          />
+        </>
+      ),
+    },
+    {
       id: "page",
       label: 'Page settings',
       icon: "📄",
@@ -373,7 +419,7 @@ export default function DocumentEditor() {
             setHeader(next.header);
             setFooter(next.footer);
             setShowPageNumber(next.showPageNumber);
-            scheduleSave({ title, ...next, comments });
+            scheduleSave({ title, ...next, comments, footnotes });
           }}
         />
         <SpellCheckControls editor={editor} />
@@ -528,7 +574,7 @@ export default function DocumentEditor() {
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
-                scheduleSave({ title: e.target.value, header, footer, showPageNumber, comments });
+                scheduleSave({ title: e.target.value, header, footer, showPageNumber, comments, footnotes });
               }}
               placeholder="Untitled document"
               aria-label="Document title"
@@ -536,6 +582,17 @@ export default function DocumentEditor() {
               className="doc-title-input w-full bg-transparent text-3xl font-bold focus:outline-none pb-4"
             />
             <EditorContent editor={editor} />
+            <FootnotesSection
+              notes={joinFootnotesWithNumbers(footnotes, getFootnoteNumbers(editor.state.doc))}
+              onTextChange={(id, text) => {
+                setFootnotes((prev) => updateFootnoteText(prev, id, text));
+                scheduleSave({ title, header, footer, showPageNumber, comments, footnotes: updateFootnoteText(footnotes, id, text) });
+              }}
+              onDelete={(id) => {
+                editor.commands.removeFootnoteReferences(id);
+                setFootnotes((prev) => removeFootnote(prev, id));
+              }}
+            />
           </div>
 
           {(footer || showPageNumber) && (
