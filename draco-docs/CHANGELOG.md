@@ -3,6 +3,50 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v24 — TOC
+- Live, read-only table of contents panel — click any entry to smooth-scroll
+  to that heading
+- Headings get a stable `id` attribute, auto-assigned by extending
+  `@tiptap/extension-heading` directly (StarterKit's bundled Heading is
+  disabled via `heading: false`, same fix pattern as Link in v19)
+- Numbering/ordering is purely derived (`getHeadings`), same architecture
+  as `getFootnoteNumbers` (v23) and `listChanges` (v22) — one function
+  walking the live document is the single source of truth, nothing stored
+  separately that could drift out of sync
+- **Default page theme changed from "Match system" to "Light"**, at the
+  person's request. This only changes the fallback for someone who has
+  never touched the setting — anyone with an existing saved preference is
+  completely unaffected
+- **Two real bugs caught by testing before this shipped, not two
+  hypotheticals:**
+  1. `appendTransaction` never fires for the document an editor *starts*
+     with — only for transactions dispatched after mount. Without a fix, a
+     freshly opened file's existing headings would show an empty TOC until
+     the first edit. Fixed by extracting the id-assignment logic into a
+     shared function, exposing it as an explicit `ensureHeadingIds`
+     command, and calling that from the editor's `onCreate`.
+  2. Overriding `addCommands()` on the extended Heading **replaced**
+     `setHeading`/`toggleHeading` instead of merging with them — identical
+     to the `addAttributes()` merge gotcha already documented in this
+     project, just hit again on a different lifecycle hook. Fixed by
+     spreading `...this.parent?.()` into the returned commands object.
+  Both were caught by a real headless-editor test attempting to actually
+  change a heading's level, not by code review — the test failed with
+  `setHeading is not a function`, which is exactly what it should do
+- Heading id **stability** verified explicitly: an id survives an
+  unrelated edit elsewhere in the doc, survives a level change (H1→H3),
+  and stays the same even as the heading's own text is edited — only the
+  TOC's *display* of that heading updates live, never its anchor
+- Duplicate ids (e.g. from pasting a heading within the same document) are
+  detected and the second occurrence gets reassigned a fresh id — verified
+  by forcing a duplicate via a direct transaction and confirming exactly
+  one of the two gets corrected
+- 16 checks total, including that the rendered DOM's actual `id` attribute
+  (not just internal editor state) matches what the TOC panel would read,
+  and that ids survive a `getJSON`/`setContent` round-trip
+- **New dependencies: none** — `@tiptap/extension-heading` was already
+  present transitively via StarterKit
+
 ## v23 — Notes
 - Footnote references: an inline atom node (not a mark — a point reference,
   not a text range), inserted at the cursor via a toolbar button

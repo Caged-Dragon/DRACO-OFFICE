@@ -58,6 +58,8 @@ import {
   type Comment,
 } from "./comments";
 import FootnoteReference, { getFootnoteNumbers } from "./footnote-extension";
+import HeadingWithId, { getHeadings } from "./heading-id-extension";
+import TocPanel from "./toc-panel";
 import FootnoteControls from "./footnote-controls";
 import FootnotesSection from "./footnotes-section";
 import {
@@ -94,7 +96,9 @@ export default function DocumentEditor() {
   const [footnotes, setFootnotes] = useState<Footnote[]>(
     initialDraft?.footnotes ?? []
   );
-  const [rightPanel, setRightPanel] = useState<"comments" | "changes" | null>(null);
+  const [rightPanel, setRightPanel] = useState<
+    "comments" | "changes" | "toc" | null
+  >(null);
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
   );
@@ -115,6 +119,11 @@ export default function DocumentEditor() {
   const editor = useEditor({
     immediatelyRender: false,
     content: initialDraft?.content,
+    // appendTransaction (inside HeadingWithId) never runs for the document
+    // the editor STARTS with — only for transactions dispatched after
+    // mount — so without this, a freshly opened file's existing headings
+    // would show an empty TOC until the first edit. Verified in testing.
+    onCreate: ({ editor }) => editor.commands.ensureHeadingIds(),
     extensions: [
       // StarterKit bundles Link in this TipTap version, so it's configured
       // here rather than registered separately (a second registration
@@ -125,7 +134,11 @@ export default function DocumentEditor() {
           autolink: true,
           openOnClick: false, // clicking edits it in our editor instead of navigating away
         },
+        // Disabled here so HeadingWithId (below) can add the stable `id`
+        // attribute the TOC needs — same pattern as the Link fix above.
+        heading: false,
       }),
+      HeadingWithId,
       TextStyle,
       FontFamily,
       FontSize,
@@ -473,6 +486,34 @@ export default function DocumentEditor() {
       ),
     },
     {
+      id: "toc",
+      label: "Table of Contents",
+      icon: "\uD83D\uDCD1", // 📑 bookmark tabs — distinct from Lists' ☰
+      content: (
+        <>
+          {(() => {
+            const headingCount = getHeadings(editor.state.doc).length;
+            return (
+              <button
+                type="button"
+                onClick={() =>
+                  setRightPanel((p) => (p === "toc" ? null : "toc"))
+                }
+                aria-pressed={rightPanel === "toc"}
+                className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
+                  rightPanel === "toc"
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+                }`}
+              >
+                Table of Contents{headingCount > 0 && ` (${headingCount})`}
+              </button>
+            );
+          })()}
+        </>
+      ),
+    },
+    {
       id: "accessibility",
       label: 'Accessibility',
       icon: "♿",
@@ -646,6 +687,9 @@ export default function DocumentEditor() {
             onAcceptAll={() => editor.commands.acceptAllChanges()}
             onRejectAll={() => editor.commands.rejectAllChanges()}
           />
+        )}
+        {rightPanel === "toc" && (
+          <TocPanel headings={getHeadings(editor.state.doc)} />
         )}
       </div>
 

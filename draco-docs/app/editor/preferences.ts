@@ -11,7 +11,7 @@ export type Preferences = {
   pageTheme: PageThemePreference;
 };
 
-export const DEFAULT_PREFERENCES: Preferences = { pageTheme: "system" };
+export const DEFAULT_PREFERENCES: Preferences = { pageTheme: "light" };
 
 const PREFERENCES_KEY = "docwrite:preferences";
 const THEME_VALUES: readonly PageThemePreference[] = ["light", "dark", "system"];
