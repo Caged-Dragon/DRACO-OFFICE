@@ -3,6 +3,41 @@
 All notable changes to DocWrite are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v25 — References
+- **Bookmarks**: named inline point markers, inserted via a popover.
+  Duplicate names are auto-deduplicated (`"Intro"` → `"Intro (2)"`), matching
+  Word's own rule that bookmark names must be unique — verified directly
+  rather than assumed
+- **Cross-references**: pick any heading or bookmark from a target picker;
+  the inserted reference shows that target's CURRENT live text and updates
+  automatically if the target is renamed — it never stores a stale copy.
+  If the target is later deleted, the reference shows
+  "(missing reference)" instead of breaking or showing stale text
+- A References panel lists all bookmarks with click-to-scroll and delete
+- Click a cross-reference to scroll straight to its target, whether that
+  target is a heading (a real DOM `id`) or a bookmark (`data-bookmark-id`
+  — deliberately NOT a real `id`, to avoid any chance of colliding with or
+  being confused for a heading's id)
+- **The live-updating behavior — the actual point of this feature — was
+  tested directly, not assumed from the architecture.** In a real headless
+  editor: inserted a cross-reference to a heading, edited that heading's
+  text afterward, and confirmed the reference's rendered label changed
+  automatically, with no action taken on the reference itself. Also
+  confirmed: a reference to a genuinely deleted target (the whole heading
+  node removed, not just its text cleared) correctly falls back to
+  "(missing reference)" in the real rendered DOM, and an id that was never
+  in the document at all resolves the same safe way
+- Caught and fixed a test bug during development, not an extension bug:
+  an early version of the "deleted target" test used malformed selection
+  math and threw a ProseMirror selection error; fixed by deleting the
+  whole heading node directly rather than guessing at text-position
+  arithmetic — a reminder that a failing test still needs to be read
+  carefully rather than assumed to indict the code under test
+- 21 checks total across bookmark naming, bookmark CRUD, combined
+  heading+bookmark target resolution, live updates, missing-target safety,
+  and a `getJSON`/`setContent` persistence round-trip
+- **New dependencies: none**
+
 ## v24 — TOC
 - Live, read-only table of contents panel — click any entry to smooth-scroll
   to that heading

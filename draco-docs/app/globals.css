@@ -179,3 +179,24 @@ body {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* References (v25) — bookmarks and cross-references. */
+.ProseMirror .bookmark-marker {
+  display: inline-block;
+  color: var(--doc-muted);
+  font-size: 0.75em;
+  vertical-align: middle;
+  cursor: default;
+}
+.ProseMirror .bookmark-marker::after {
+  content: "\1F516"; /* 🔖 */
+}
+
+.ProseMirror .xref {
+  color: var(--doc-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ProseMirror .xref::after {
+  content: attr(data-label);
+}

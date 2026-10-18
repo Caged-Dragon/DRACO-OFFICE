@@ -60,6 +60,10 @@ import {
 import FootnoteReference, { getFootnoteNumbers } from "./footnote-extension";
 import HeadingWithId, { getHeadings } from "./heading-id-extension";
 import TocPanel from "./toc-panel";
+import Bookmark, { getBookmarks } from "./bookmark-extension";
+import CrossReference, { getRefTargets } from "./crossref-extension";
+import ReferenceControls from "./reference-controls";
+import ReferencesPanel from "./references-panel";
 import FootnoteControls from "./footnote-controls";
 import FootnotesSection from "./footnotes-section";
 import {
@@ -97,7 +101,7 @@ export default function DocumentEditor() {
     initialDraft?.footnotes ?? []
   );
   const [rightPanel, setRightPanel] = useState<
-    "comments" | "changes" | "toc" | null
+    "comments" | "changes" | "toc" | "references" | null
   >(null);
   const [pageSettings, setPageSettings] = useState<PageSettings>(() =>
     loadPageSettings()
@@ -160,6 +164,8 @@ export default function DocumentEditor() {
       CommentMark,
       TrackChanges,
       FootnoteReference,
+      Bookmark,
+      CrossReference,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -177,6 +183,20 @@ export default function DocumentEditor() {
             document
               .getElementById(`footnote-${noteId}`)
               ?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return true;
+          }
+        }
+        const xref = target.closest?.(".xref") as HTMLElement | null;
+        if (xref) {
+          const targetId = xref.getAttribute("data-target-id");
+          if (targetId) {
+            // The target is either a heading (real `id` attribute) or a
+            // bookmark (`data-bookmark-id`, to avoid colliding with — or
+            // being confused with — a heading's own id).
+            const el =
+              document.getElementById(targetId) ??
+              document.querySelector(`[data-bookmark-id="${targetId}"]`);
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
             return true;
           }
         }
@@ -514,6 +534,43 @@ export default function DocumentEditor() {
       ),
     },
     {
+      id: "references",
+      label: "References",
+      icon: "\u00A7", // § section sign
+      content: (
+        <>
+          <ReferenceControls
+            targets={getRefTargets(editor.state.doc)}
+            onInsertBookmark={(name) =>
+              editor.chain().focus().insertBookmark(name).run()
+            }
+            onInsertCrossReference={(targetId) =>
+              editor.chain().focus().insertCrossReference(targetId).run()
+            }
+          />
+          {(() => {
+            const bookmarkCount = getBookmarks(editor.state.doc).length;
+            return (
+              <button
+                type="button"
+                onClick={() =>
+                  setRightPanel((p) => (p === "references" ? null : "references"))
+                }
+                aria-pressed={rightPanel === "references"}
+                className={`mt-2 text-xs px-3 py-1.5 rounded-md transition-colors ${
+                  rightPanel === "references"
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+                }`}
+              >
+                Bookmarks{bookmarkCount > 0 && ` (${bookmarkCount})`}
+              </button>
+            );
+          })()}
+        </>
+      ),
+    },
+    {
       id: "accessibility",
       label: 'Accessibility',
       icon: "♿",
@@ -690,6 +747,12 @@ export default function DocumentEditor() {
         )}
         {rightPanel === "toc" && (
           <TocPanel headings={getHeadings(editor.state.doc)} />
+        )}
+        {rightPanel === "references" && (
+          <ReferencesPanel
+            bookmarks={getBookmarks(editor.state.doc)}
+            onDelete={(id) => editor.commands.removeBookmark(id)}
+          />
         )}
       </div>
 

@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.24.0-blue)
+![Version](https://img.shields.io/badge/version-v0.25.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -45,7 +45,7 @@ WAI-ARIA toolbar pattern as before, just vertical now.
 
 ## Features
 
-Current as of **v0.24.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.25.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -70,7 +70,8 @@ Current as of **v0.24.0**. Checked items are shipped; the rest are on the [Roadm
 - [x] Track changes — insertion/deletion markup, accept/reject (single or all), scoped to inline edits
 - [x] Footnotes — superscript references numbered live by document order, bottom-of-page notes list, click-to-scroll
 - [x] Table of contents — live, read-only panel, click-to-scroll, auto-updates as headings change
-- [ ] References, print, PDF export, and more — see Roadmap
+- [x] References — named bookmarks, and cross-references that show live text from a heading or bookmark and update automatically as that target changes
+- [ ] Print, PDF export, page breaks, and more — see Roadmap
 
 ## Tech Stack
 
@@ -177,7 +178,7 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
 | v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles, accessibility — ✅ done |
-| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v24/v30) |
+| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v25/v30) |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |
 
@@ -194,6 +195,7 @@ Tracked honestly as they're found, not hidden. Full detail in `CHANGELOG.md`; su
 - **Track changes only covers plain inline edits within one block** — normal typing, Backspace/Delete, and typing over a selection. Structural edits (paragraph merges/splits, table edits, block-level paste) are intentionally NOT tracked; they pass through as ordinary untracked edits rather than risking an incorrect rewrite. The on/off toggle is a per-session setting (resets to off on reload) — existing tracked marks in a document still persist and remain actionable.
 - **Footnotes vs. endnotes aren't visually distinct yet** — there's no real multi-page pagination (see the v9/v14 notes above), so "bottom of page" and "end of document" are currently the same place. All notes render as one list at the end of the document; this will split once real pagination lands.
 - **Default page theme is now Light** (was "Match system"). This only changes the *fallback* for people who've never touched the setting — anyone with an existing saved preference keeps it exactly as they left it.
+- **Cross-references resolve by text, not by a stored snapshot.** If a referenced heading or bookmark is renamed, every reference to it updates automatically next render. If the target is deleted, references show "(missing reference)" rather than silently breaking or pointing at stale text.
 
 ## Security & Dependency Policy
 
