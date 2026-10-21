@@ -1,0 +1,602 @@
+[
+ {
+  "v": 1,
+  "title": "Project scaffold, grid render, cell edit, selection, scroll",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 2,
+  "title": "PWA: manifest, icons, service worker, installable",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 3,
+  "title": "Responsive shell: desktop ribbon, tablet compact, mobile bottom bar",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 4,
+  "title": "Undo/redo, clipboard (cut/copy/paste), paste special",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 5,
+  "title": "Row/column insert, delete, hide, resize, autofit",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 6,
+  "title": "Multi-sheet tabs: add, rename, delete, reorder, color, hide",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 7,
+  "title": "Supabase schema + RLS: workbooks, versions",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 8,
+  "title": "Auth (email/password, Google) and per-user workbook list",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 9,
+  "title": "Autosave, manual save, open, rename, delete workbook",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 10,
+  "title": "New / Open / Save As dialogs, recent files, offline draft cache",
+  "phase": "A · Foundation",
+  "status": "done"
+ },
+ {
+  "v": 11,
+  "title": "Font family, size, bold, italic, underline, strikethrough",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 12,
+  "title": "Font color, fill color, color palette, recent colors",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 13,
+  "title": "Alignment (horizontal, vertical), indent",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 14,
+  "title": "Wrap text, merge and center, unmerge, center across selection",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 15,
+  "title": "Borders (all styles, colors, draw border)",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 16,
+  "title": "Number formats: General, Number, Currency, Accounting",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 17,
+  "title": "Number formats: Date, Time, Percentage, Fraction, Scientific, Text",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 18,
+  "title": "Custom number formats editor",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 19,
+  "title": "Format Painter",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 20,
+  "title": "Cell styles and themes",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 21,
+  "title": "Text rotation and orientation",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 22,
+  "title": "Shrink to fit, text overflow rules",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 23,
+  "title": "Conditional formatting: highlight rules",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 24,
+  "title": "Conditional formatting: data bars, color scales, icon sets",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 25,
+  "title": "Conditional formatting: custom formula, manage rules",
+  "phase": "B · Formatting",
+  "status": "planned"
+ },
+ {
+  "v": 26,
+  "title": "Formula bar, name box, formula editing, F2/F4 modes",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 27,
+  "title": "Math and trig functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 28,
+  "title": "Statistical functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 29,
+  "title": "Logical functions (IF, IFS, AND, OR, SWITCH, XOR)",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 30,
+  "title": "Text functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 31,
+  "title": "Date and time functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 32,
+  "title": "Lookup: VLOOKUP, HLOOKUP, INDEX, MATCH",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 33,
+  "title": "Lookup: XLOOKUP, XMATCH, LOOKUP",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 34,
+  "title": "Financial functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 35,
+  "title": "Information and error-handling functions (IFERROR, ISxxx)",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 36,
+  "title": "Engineering and conversion functions",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 37,
+  "title": "Database functions (DSUM, DCOUNT…)",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 38,
+  "title": "Dynamic arrays: FILTER, SORT, SORTBY, UNIQUE, SEQUENCE",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 39,
+  "title": "Dynamic arrays: LET, LAMBDA, MAP, REDUCE, SCAN, BYROW",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 40,
+  "title": "Array formulas, spill ranges, implicit intersection",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 41,
+  "title": "Named ranges and Name Manager",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 42,
+  "title": "Absolute/relative refs, cross-sheet refs, 3D refs",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 43,
+  "title": "Formula auditing: trace precedents/dependents, show formulas",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 44,
+  "title": "Error checking, evaluate formula, watch window",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 45,
+  "title": "Calculation options (auto/manual), iterative calc, circular refs",
+  "phase": "C · Formulas core",
+  "status": "planned"
+ },
+ {
+  "v": 46,
+  "title": "Sort (single, multi-level, custom lists)",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 47,
+  "title": "AutoFilter, text/number/date filters",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 48,
+  "title": "Advanced filter, slicer-style quick filters",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 49,
+  "title": "Find and Replace (formulas, formats, within sheet/workbook)",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 50,
+  "title": "Go To, Go To Special",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 51,
+  "title": "Data validation: lists, numbers, dates, custom",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 52,
+  "title": "Data validation: input messages, error alerts, circle invalid",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 53,
+  "title": "Remove duplicates, text to columns, flash fill",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 54,
+  "title": "Fill handle: series, autofill, custom series",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 55,
+  "title": "Freeze panes, split panes",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 56,
+  "title": "Group/outline rows and columns, subtotals",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 57,
+  "title": "Tables (structured refs, banded rows, total row)",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 58,
+  "title": "Table styles and slicers",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 59,
+  "title": "Consolidate, what-if: Goal Seek",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 60,
+  "title": "What-if: Data Tables, Scenario Manager, Solver-lite",
+  "phase": "D · Data tools",
+  "status": "planned"
+ },
+ {
+  "v": 61,
+  "title": "Charts: column, bar, line",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 62,
+  "title": "Charts: pie, doughnut, area",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 63,
+  "title": "Charts: scatter, bubble",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 64,
+  "title": "Charts: radar, stock, surface",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 65,
+  "title": "Charts: combo, secondary axis",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 66,
+  "title": "Charts: waterfall, funnel, histogram, box, treemap, sunburst",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 67,
+  "title": "Chart elements: titles, legends, axes, labels, trendlines, error bars",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 68,
+  "title": "Chart styles, themes, templates",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 69,
+  "title": "Sparklines (line, column, win/loss)",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 70,
+  "title": "Images, shapes, text boxes, icons",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 71,
+  "title": "SmartArt-style diagrams",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 72,
+  "title": "Camera/linked picture, 3D-ish map charts",
+  "phase": "E · Charts and visuals",
+  "status": "planned"
+ },
+ {
+  "v": 73,
+  "title": "PivotTable: create, row/column/value fields",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 74,
+  "title": "PivotTable: grouping (dates, numbers), calculated fields",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 75,
+  "title": "PivotTable: filters, slicers, timelines",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 76,
+  "title": "PivotTable: show values as, sort, subtotals, layouts",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 77,
+  "title": "PivotCharts",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 78,
+  "title": "Power-query-lite: import, transform, refresh",
+  "phase": "F · PivotTables",
+  "status": "planned"
+ },
+ {
+  "v": 79,
+  "title": "Import/export .xlsx (values, formulas, styles)",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 80,
+  "title": "Import/export .csv, .tsv, .ods, .json",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 81,
+  "title": "Export PDF, print layout, page setup",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 82,
+  "title": "Print preview, headers/footers, print area, page breaks",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 83,
+  "title": ".xlsm-safe handling, legacy .xls import",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 84,
+  "title": "Copy/paste from Excel and Google Sheets with formatting",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 85,
+  "title": "Version history, restore, compare versions",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 86,
+  "title": "Autosave drafts, crash recovery, offline sync queue",
+  "phase": "G · Files and interop",
+  "status": "planned"
+ },
+ {
+  "v": 87,
+  "title": "Comments and threaded replies",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 88,
+  "title": "Notes",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 89,
+  "title": "Real-time co-editing via Supabase Realtime, presence cursors",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 90,
+  "title": "Share links, view/comment/edit roles",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 91,
+  "title": "Track changes / change log",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 92,
+  "title": "Protect sheet/workbook, locked cells, cell permissions",
+  "phase": "H · Collaboration and review",
+  "status": "planned"
+ },
+ {
+  "v": 93,
+  "title": "Macros-lite: record and replay actions",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 94,
+  "title": "Scripting: JS automation (Office Scripts style)",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 95,
+  "title": "Hyperlinks, document links, external data connections",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 96,
+  "title": "Accessibility: keyboard parity, screen reader, high contrast",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 97,
+  "title": "Performance: virtualization for 1M rows, workers",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 98,
+  "title": "Localization, RTL, regional formats",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 99,
+  "title": "Excel keyboard shortcut parity, command search (Alt/Ctrl+/)",
+  "phase": "I · Advanced",
+  "status": "planned"
+ },
+ {
+  "v": 100,
+  "title": "Final parity audit + new features (AI assist, templates gallery, themes)",
+  "phase": "I · Advanced",
+  "status": "planned"
+ }
+]
