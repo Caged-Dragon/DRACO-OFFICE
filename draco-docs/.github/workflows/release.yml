@@ -1,0 +1,78 @@
+name: Release
+
+# Runs whenever a version tag is pushed, using the project's numbering scheme:
+# v0.01.0 -> v0.99.0 = versions 1-99, v1.00.0 = version 100
+# (i.e. version number = major*100 + minor)
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package source zip
+        run: |
+          zip -r "dracodocs-app-${GITHUB_REF_NAME}.zip" . \
+            -x "node_modules/*" \
+            -x ".next/*" \
+            -x ".git/*"
+
+      - name: Package production build zip
+        run: |
+          zip -r "dracodocs-app-${GITHUB_REF_NAME}-build.zip" .next public package.json package-lock.json next.config.ts
+
+      # Pulls the matching "## vN — Theme" section out of CHANGELOG.md to use
+      # as the release notes. If the tag has no matching heading yet, GitHub
+      # falls back to an auto-generated list of commits instead.
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          # Tag scheme: v<major>.<minor>.<patch> where
+          # version number = major*100 + minor
+          # e.g. v0.01.0 -> 1, v0.50.0 -> 50, v0.99.0 -> 99, v1.00.0 -> 100
+          VERSION_NUM=$(python3 -c "
+          import re, sys
+          m = re.match(r'^v(\d+)\.(\d+)\.\d+$', '${GITHUB_REF_NAME}')
+          if not m:
+              sys.exit('Tag \"${GITHUB_REF_NAME}\" does not match v<major>.<minor>.<patch>')
+          major, minor = int(m.group(1)), int(m.group(2))
+          print(major * 100 + minor)
+          ")
+          echo "Resolved version number: ${VERSION_NUM}"
+          awk -v ver="## v${VERSION_NUM} " '
+            $0 ~ "^" ver { found=1; print; next }
+            found && /^## v/ { exit }
+            found { print }
+          ' CHANGELOG.md > release_notes.md
+          echo "Extracted notes:"
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: |
+            dracodocs-app-${{ github.ref_name }}.zip
+            dracodocs-app-${{ github.ref_name }}-build.zip
