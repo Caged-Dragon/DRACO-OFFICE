@@ -1,4 +1,4 @@
-import { isPresentation } from "../../core/document-model/factory";
+import { parsePresentation } from "../../core/serialization/migrate";
 import type { Presentation } from "../../core/document-model/types";
 
 const DB_NAME = "draco-slides";
@@ -34,13 +34,19 @@ export async function savePresentation(p: Presentation): Promise<void> {
 
 export async function getPresentation(id: string): Promise<Presentation | null> {
   const value = await run<unknown>("readonly", (s) => s.get(id));
-  return isPresentation(value) ? value : null;
+  const result = parsePresentation(value);
+  return result.ok ? result.value : null;
 }
 
-/** Recent presentations, newest first. Invalid records are skipped, not deleted. */
+/** Recent presentations, newest first. Older schemas are upgraded on read; invalid records are skipped, never deleted. */
 export async function listPresentations(): Promise<Presentation[]> {
   const all = await run<unknown[]>("readonly", (s) => s.getAll());
-  return all.filter(isPresentation).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return all
+    .flatMap((raw) => {
+      const r = parsePresentation(raw);
+      return r.ok ? [r.value] : [];
+    })
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function deletePresentation(id: string): Promise<void> {

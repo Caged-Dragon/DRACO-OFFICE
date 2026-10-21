@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createPresentation, isPresentation } from "../../src/core/document-model/factory";
+import { createPresentation } from "../../src/core/document-model/factory";
+import { parsePresentation } from "../../src/core/serialization/migrate";
 import { editorReducer, initEditorState } from "../../src/state/editorReducer";
 
 describe("editorReducer", () => {
@@ -44,10 +45,21 @@ describe("editorReducer", () => {
   });
 });
 
-describe("isPresentation", () => {
-  it("accepts a new presentation and rejects junk", () => {
-    expect(isPresentation(createPresentation())).toBe(true);
-    expect(isPresentation({})).toBe(false);
-    expect(isPresentation(null)).toBe(false);
+describe("updateProperties", () => {
+  it("updates title and metadata, trimming and falling back for a blank title", () => {
+    const s0 = initEditorState(createPresentation());
+    const s1 = editorReducer(s0, { type: "updateProperties", title: "  Plan  ", author: " Ana ", description: "Notes" });
+    expect(s1.presentation.title).toBe("Plan");
+    expect(s1.presentation.metadata.author).toBe("Ana");
+    expect(s1.presentation.metadata.description).toBe("Notes");
+    const s2 = editorReducer(s1, { type: "updateProperties", title: " ", author: "", description: "" });
+    expect(s2.presentation.title).toBe("Untitled presentation");
+  });
+
+  it("keeps the document valid after edits", () => {
+    let s = initEditorState(createPresentation());
+    s = editorReducer(s, { type: "addSlide" });
+    s = editorReducer(s, { type: "updateProperties", title: "T", author: "A", description: "D" });
+    expect(parsePresentation(s.presentation).ok).toBe(true);
   });
 });

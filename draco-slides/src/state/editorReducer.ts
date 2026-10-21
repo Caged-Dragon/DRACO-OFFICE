@@ -11,6 +11,7 @@ export type EditorAction =
   | { type: "deleteSlide"; slideId: string }
   | { type: "selectSlide"; slideId: string }
   | { type: "renamePresentation"; title: string }
+  | { type: "updateProperties"; title: string; author: string; description: string }
   | { type: "setObjectText"; slideId: string; objectId: string; text: string };
 
 export function initEditorState(presentation: Presentation): EditorState {
@@ -46,6 +47,19 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         : state;
     case "renamePresentation":
       return { ...state, presentation: touch({ ...presentation, title: action.title.trim() || "Untitled presentation" }) };
+    case "updateProperties":
+      return {
+        ...state,
+        presentation: touch({
+          ...presentation,
+          title: action.title.trim().slice(0, 200) || "Untitled presentation",
+          metadata: {
+            ...presentation.metadata,
+            author: action.author.trim().slice(0, 200),
+            description: action.description.trim().slice(0, 2000),
+          },
+        }),
+      };
     case "setObjectText":
       return {
         ...state,

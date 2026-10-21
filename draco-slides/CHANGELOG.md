@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 (Roadmap Version 5)
+- Document model schema 2: presentation metadata (author, description, language, created-with), object base properties (name, rotation, visible), documented in `docs/architecture/document-model.md`.
+- Slide-size presets (16:9, 4:3, 16:10) selectable when creating a presentation; sizes validated.
+- Strict validation (`validatePresentation`) with unique-ID, number and structure checks.
+- Automatic, non-destructive migration of schema-1 presentations saved by 0.1.0 to 0.4.0; invalid records are skipped, never deleted.
+- File > Properties dialog to edit title, author and description; shows size, slide count, dates and creating version.
+- Canvas honors object visibility and rotation.
+- Limits: slide size cannot be changed after creation yet; hidden/rotated objects have no editing UI yet.
+
 ## 0.4.0 (Roadmap Version 4, plus tag-based installer)
 - Editor layout: File menu (Back to home, Close presentation), ribbon with Home and View tabs, toggleable slide pane, central canvas, status bar (slide position, slide size, save status).
 - Accessible menu and tab components (arrow keys, Escape, focus return, `aria-pressed` toggles). PageUp/PageDown move between slides.

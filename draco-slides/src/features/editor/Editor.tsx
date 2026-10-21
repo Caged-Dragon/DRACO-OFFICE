@@ -5,6 +5,7 @@ import { savePresentation } from "../../services/storage/presentationStore";
 import { useApp } from "../../state/AppContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
 import { Ribbon } from "../ribbon/Ribbon";
+import { PropertiesDialog } from "./PropertiesDialog";
 import { SlideCanvas } from "./SlideCanvas";
 import { SlidePane } from "./SlidePane";
 import { StatusBar, type SaveStatus } from "./StatusBar";
@@ -19,6 +20,7 @@ export function Editor({ initial }: Props) {
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [showSlidePane, setShowSlidePane] = useState(true);
   const [showTextPanel, setShowTextPanel] = useState(true);
+  const [showProperties, setShowProperties] = useState(false);
   const first = useRef(true);
   const dirty = useRef(false);
   const { presentation, currentSlideId } = state;
@@ -79,6 +81,7 @@ export function Editor({ initial }: Props) {
         <MenuButton
           label="File"
           items={[
+            { label: "Properties", onSelect: () => setShowProperties(true) },
             { label: "Back to home", onSelect: () => appDispatch({ type: "navigate", view: "home" }) },
             { label: "Close presentation", onSelect: () => appDispatch({ type: "closePresentation" }) },
           ]}
@@ -133,6 +136,17 @@ export function Editor({ initial }: Props) {
           )}
         </section>
       </div>
+
+      {showProperties && (
+        <PropertiesDialog
+          presentation={presentation}
+          onClose={() => setShowProperties(false)}
+          onSave={(values) => {
+            dispatch({ type: "updateProperties", ...values });
+            setShowProperties(false);
+          }}
+        />
+      )}
 
       <StatusBar
         index={index}

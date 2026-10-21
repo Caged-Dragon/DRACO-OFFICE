@@ -20,11 +20,18 @@ export function SlideCanvas({ presentation, slide, displayWidth }: Props) {
         className="slide__inner"
         style={{ width: presentation.width, height: presentation.height, transform: `scale(${scale})` }}
       >
-        {slide.objects.map((o) => (
+        {slide.objects.filter((o) => o.visible).map((o) => (
           <div
             key={o.id}
             className={`slide__text slide__text--${o.role}`}
-            style={{ left: o.x, top: o.y, width: o.width, height: o.height, fontSize: o.fontSize }}
+            style={{
+              left: o.x,
+              top: o.y,
+              width: o.width,
+              height: o.height,
+              fontSize: o.fontSize,
+              transform: o.rotation ? `rotate(${o.rotation}deg)` : undefined,
+            }}
           >
             {o.text}
           </div>

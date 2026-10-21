@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Presentation } from "../../core/document-model/types";
+import { SLIDE_SIZE_IDS, SLIDE_SIZES, DEFAULT_SLIDE_SIZE, type SlideSizeId } from "../../core/document-model/sizes";
 import { deletePresentation, listPresentations } from "../../services/storage/presentationStore";
 
 interface Props {
-  onNew: (title: string) => void;
+  onNew: (title: string, size: SlideSizeId) => void;
   onOpen: (id: string) => void;
 }
 
@@ -11,6 +12,7 @@ export function Home({ onNew, onOpen }: Props) {
   const [recent, setRecent] = useState<Presentation[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [size, setSize] = useState<SlideSizeId>(DEFAULT_SLIDE_SIZE);
   const [query, setQuery] = useState("");
 
   const refresh = () =>
@@ -29,7 +31,7 @@ export function Home({ onNew, onOpen }: Props) {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    onNew(title.trim());
+    onNew(title.trim(), size);
   };
 
   return (
@@ -40,6 +42,16 @@ export function Home({ onNew, onOpen }: Props) {
         <label className="field">
           <span className="muted">Title (optional)</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Untitled presentation" />
+        </label>
+        <label className="field">
+          <span className="muted">Slide size</span>
+          <select value={size} onChange={(e) => setSize(e.target.value as SlideSizeId)}>
+            {SLIDE_SIZE_IDS.map((id) => (
+              <option key={id} value={id}>
+                {SLIDE_SIZES[id].label} · {SLIDE_SIZES[id].width} × {SLIDE_SIZES[id].height}
+              </option>
+            ))}
+          </select>
         </label>
         <button type="submit" className="btn btn--primary">
           New presentation

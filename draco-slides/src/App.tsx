@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { APP_VERSION } from "./app/version";
 import { AppShell } from "./components/layout/AppShell";
 import { createPresentation } from "./core/document-model/factory";
 import { Editor } from "./features/editor/Editor";
@@ -26,7 +27,12 @@ function Screens() {
     <AppShell>
       {state.view === "home" && (
         <Home
-          onNew={(title) => dispatch({ type: "openPresentation", presentation: createPresentation(title || undefined) })}
+          onNew={(title, size) =>
+            dispatch({
+              type: "openPresentation",
+              presentation: createPresentation(title || undefined, { size, createdWith: APP_VERSION }),
+            })
+          }
           onOpen={openById}
         />
       )}

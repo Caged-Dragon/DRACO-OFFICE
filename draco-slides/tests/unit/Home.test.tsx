@@ -24,6 +24,14 @@ describe("Home", () => {
     render(<Home onNew={onNew} onOpen={() => {}} />);
     fireEvent.change(screen.getByLabelText("Title (optional)"), { target: { value: "Q4 deck" } });
     fireEvent.click(screen.getByRole("button", { name: "New presentation" }));
-    expect(onNew).toHaveBeenCalledWith("Q4 deck");
+    expect(onNew).toHaveBeenCalledWith("Q4 deck", "16:9");
+  });
+
+  it("passes the chosen slide size to onNew", async () => {
+    const onNew = vi.fn();
+    render(<Home onNew={onNew} onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Slide size"), { target: { value: "4:3" } });
+    fireEvent.click(screen.getByRole("button", { name: "New presentation" }));
+    expect(onNew).toHaveBeenCalledWith("", "4:3");
   });
 });

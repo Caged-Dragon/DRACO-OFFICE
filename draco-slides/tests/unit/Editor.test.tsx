@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import App from "../../src/App";
 
@@ -41,5 +41,34 @@ describe("Editor layout", () => {
   it("shows the slide size in the status bar", async () => {
     await openEditor();
     expect(screen.getByText("960 × 540")).toBeInTheDocument();
+  });
+
+  it("File > Properties edits and keeps the author", async () => {
+    await openEditor();
+    const open = () => {
+      fireEvent.click(screen.getByRole("button", { name: "File" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Properties" }));
+      return within(screen.getByRole("dialog", { name: "Presentation properties" }));
+    };
+    let dialog = open();
+    fireEvent.change(dialog.getByLabelText("Author"), { target: { value: "Ana" } });
+    fireEvent.click(dialog.getByRole("button", { name: "Save" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    dialog = open();
+    expect(dialog.getByLabelText("Author")).toHaveValue("Ana");
+    expect(dialog.getByText("960 × 540")).toBeInTheDocument();
+  });
+
+  it("Escape closes the properties dialog without saving", async () => {
+    await openEditor();
+    fireEvent.click(screen.getByRole("button", { name: "File" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Properties" }));
+    const dialog = screen.getByRole("dialog", { name: "Presentation properties" });
+    fireEvent.change(within(dialog).getByLabelText("Author"), { target: { value: "Nobody" } });
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "File" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Properties" }));
+    expect(within(screen.getByRole("dialog")).getByLabelText("Author")).toHaveValue("");
   });
 });
