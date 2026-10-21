@@ -3,7 +3,7 @@
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.25.1-blue)
+![Version](https://img.shields.io/badge/version-v0.26.0-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -45,7 +45,7 @@ WAI-ARIA toolbar pattern as before, just vertical now.
 
 ## Features
 
-Current as of **v0.25.1**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.26.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -71,7 +71,8 @@ Current as of **v0.25.1**. Checked items are shipped; the rest are on the [Roadm
 - [x] Footnotes — superscript references numbered live by document order, bottom-of-page notes list, click-to-scroll
 - [x] Table of contents — live, read-only panel, click-to-scroll, auto-updates as headings change
 - [x] References — named bookmarks, and cross-references that show live text from a heading or bookmark and update automatically as that target changes
-- [ ] Print, PDF export, page breaks, and more — see Roadmap
+- [x] Breaks — page breaks and section breaks, as real document-model nodes (visual markers for now; see Known Limitations)
+- [ ] Print, PDF export, and more — see Roadmap
 
 ## Tech Stack
 
@@ -178,7 +179,7 @@ Pushing the tag triggers `.github/workflows/release.yml`, which builds the app, 
 |-----------|---------------------------------------------------------------------|
 | v1–v10    | Foundation, editor core, formatting, history, layout, local save/load — ✅ done |
 | v11–v20   | Tables, images, links, headers/footers, find & replace, spell check, templates, styles, accessibility — ✅ done |
-| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v25/v30) |
+| v21–v30   | Comments, track changes, footnotes, TOC, references, print, PDF export — 🚧 in progress (v26/v30) |
 | v31–v50   | `.docx`/`.rtf`/`.odt` import-export, drawing, equations, charts, accessibility, performance polish |
 | v51–v100  | Real-time collaboration, cloud sync, and beyond — scoped separately |
 
@@ -196,6 +197,7 @@ Tracked honestly as they're found, not hidden. Full detail in `CHANGELOG.md`; su
 - **Footnotes vs. endnotes aren't visually distinct yet** — there's no real multi-page pagination (see the v9/v14 notes above), so "bottom of page" and "end of document" are currently the same place. All notes render as one list at the end of the document; this will split once real pagination lands.
 - **Default page theme is now Light** (was "Match system"). This only changes the *fallback* for people who've never touched the setting — anyone with an existing saved preference keeps it exactly as they left it.
 - **Cross-references resolve by text, not by a stored snapshot.** If a referenced heading or bookmark is renamed, every reference to it updates automatically next render. If the target is deleted, references show "(missing reference)" rather than silently breaking or pointing at stale text.
+- **Page breaks and section breaks are visual markers only, not yet functional pagination.** They're real nodes in the document model — saved, exported, and ready for real pagination to use — but since there's no multi-page rendering yet (the same limitation noted since v9/v14/v23), inserting one doesn't currently start a new page on screen. Section breaks also don't yet carry per-section page settings (different margins/orientation per section); page settings remain document-wide until that's built.
 
 ## Security & Dependency Policy
 

@@ -3,6 +3,32 @@
 All notable changes to DracoDocs are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v26 — Breaks
+- Page break and section break, each a real block-level node in the
+  document model (not just a visual effect) — so once real pagination
+  exists, it has something concrete to split on
+- Inserting a break **mid-paragraph correctly splits the paragraph** —
+  verified directly, not assumed, since ProseMirror's block-insertion
+  behavior at an inline position is exactly the kind of thing worth
+  confirming rather than guessing at. Confirmed no text is lost on either
+  side of the split, confirmed inserting at the very end of a paragraph
+  doesn't misbehave, and confirmed both node types round-trip correctly
+  through both `getJSON`/`setContent` AND `getHTML`/re-import
+- Rendered as a labeled dashed divider ("Page Break" / "Section Break"),
+  theme-aware via the same `--doc-border`/`--doc-muted`/`--doc-page-bg`
+  tokens already verified for AA contrast in earlier versions — no new
+  contrast check needed since nothing new was introduced
+- 12 checks total in a real headless editor
+- **Known limitation, stated plainly, not discovered later:** these are
+  visual markers only. There's still no real multi-page rendering (the
+  same honest gap noted since v9, v14, and v23), so a page break doesn't
+  currently start a new page on screen. Section breaks also don't yet
+  carry their own page settings — true per-section margins/orientation
+  would need `PageSettings` restructured to be per-section, which is a
+  meaningfully larger change deliberately deferred rather than rushed in
+  alongside this one
+- **New dependencies: none**
+
 ## v25.1 — Renamed to DracoDocs
 App renamed from DocWrite to **DracoDocs**, at the user's request.
 

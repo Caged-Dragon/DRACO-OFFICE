@@ -64,6 +64,8 @@ import Bookmark, { getBookmarks } from "./bookmark-extension";
 import CrossReference, { getRefTargets } from "./crossref-extension";
 import ReferenceControls from "./reference-controls";
 import ReferencesPanel from "./references-panel";
+import { PageBreak, SectionBreak } from "./break-extension";
+import BreakControls from "./break-controls";
 import FootnoteControls from "./footnote-controls";
 import FootnotesSection from "./footnotes-section";
 import {
@@ -166,6 +168,8 @@ export default function DocumentEditor() {
       FootnoteReference,
       Bookmark,
       CrossReference,
+      PageBreak,
+      SectionBreak,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -435,6 +439,16 @@ export default function DocumentEditor() {
             savePageSettings(next);
           }}
         />
+        </>
+      ),
+    },
+    {
+      id: "breaks",
+      label: "Breaks",
+      icon: "\u2702", // ✂ scissors — "split here"
+      content: (
+        <>
+          <BreakControls editor={editor} />
         </>
       ),
     },

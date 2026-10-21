@@ -200,3 +200,35 @@ body {
 .ProseMirror .xref::after {
   content: attr(data-label);
 }
+
+/* Breaks (v26) — visual markers only for now. No real multi-page
+   pagination exists yet (see v9/v14/v23 notes), so these don't yet split
+   the page container; they mark the document model so real pagination can
+   use them once it lands. */
+.ProseMirror .doc-break {
+  position: relative;
+  height: 1px;
+  margin: 1.25rem 0;
+  border-top: 1px dashed var(--doc-border);
+  user-select: none;
+}
+
+.ProseMirror .doc-break::after {
+  position: absolute;
+  top: -0.6em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 0.5em;
+  background: var(--doc-page-bg);
+  font-size: 0.65rem;
+  color: var(--doc-muted);
+  white-space: nowrap;
+}
+
+.ProseMirror .doc-break-page::after {
+  content: "Page Break";
+}
+
+.ProseMirror .doc-break-section::after {
+  content: "Section Break";
+}
