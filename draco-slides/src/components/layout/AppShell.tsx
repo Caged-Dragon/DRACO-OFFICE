@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ReleaseInfo } from "../../features/release/ReleaseInfo";
 import { Toasts } from "../notifications/Toasts";
 import { isCloudConfigured } from "../../services/supabase/client";
 import { useApp } from "../../state/AppContext";
@@ -33,6 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="muted shell__cloud">
           {isCloudConfigured ? "Cloud connection configured" : "Local only"}
         </span>
+        <ReleaseInfo />
       </header>
       <main id="main" className="shell__main" tabIndex={-1}>
         {children}

@@ -26,7 +26,7 @@ function Screens() {
     <AppShell>
       {state.view === "home" && (
         <Home
-          onNew={() => dispatch({ type: "openPresentation", presentation: createPresentation() })}
+          onNew={(title) => dispatch({ type: "openPresentation", presentation: createPresentation(title || undefined) })}
           onOpen={openById}
         />
       )}

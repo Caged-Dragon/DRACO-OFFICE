@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (Roadmap Version 3, plus requested web/app distribution)
+- Home: optional title when creating a presentation, search across recent presentations, clearer empty states.
+- Top-right release badge showing the latest `draco-slides/v*` GitHub tag (configurable via `VITE_GITHUB_REPO`), "Update available" hint, and an Install button.
+- PWA support: web manifest, icons, network-first service worker (production builds only).
+- `vercel.json` for deploying the `draco-slides` folder as a static Vite site.
+- Tests for tag parsing/ordering, release badge, and Home.
+- Known limits: no native desktop installer yet; Install is browser-dependent.
+
 ## 0.2.0 (Roadmap Version 2)
 - Application shell: skip link, top bar with brand, main navigation (Home / Editor) and cloud status, single `<main>` landmark.
 - Application-level state (`AppProvider`, `appReducer`): current view, open presentation, notifications.
