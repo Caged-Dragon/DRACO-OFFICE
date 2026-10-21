@@ -1,33 +1,49 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { AppShell } from "./components/layout/AppShell";
 import { createPresentation } from "./core/document-model/factory";
-import type { Presentation } from "./core/document-model/types";
 import { Editor } from "./features/editor/Editor";
 import { Home } from "./features/home/Home";
 import { getPresentation } from "./services/storage/presentationStore";
+import { AppProvider, useApp } from "./state/AppContext";
+
+function Screens() {
+  const { state, dispatch, notify } = useApp();
+
+  const openById = useCallback(
+    async (id: string) => {
+      try {
+        const p = await getPresentation(id);
+        if (!p) throw new Error("That presentation is missing or unreadable.");
+        dispatch({ type: "openPresentation", presentation: p });
+      } catch (e) {
+        notify("error", e instanceof Error ? e.message : "Could not open the presentation.");
+      }
+    },
+    [dispatch, notify],
+  );
+
+  return (
+    <AppShell>
+      {state.view === "home" && (
+        <Home
+          onNew={() => dispatch({ type: "openPresentation", presentation: createPresentation() })}
+          onOpen={openById}
+        />
+      )}
+      {/* Kept mounted while hidden so edits and autosave survive a trip to Home. */}
+      {state.presentation && (
+        <div className="shell__editor" hidden={state.view !== "editor"}>
+          <Editor key={state.presentation.id} initial={state.presentation} />
+        </div>
+      )}
+    </AppShell>
+  );
+}
 
 export default function App() {
-  const [open, setOpen] = useState<Presentation | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const openById = useCallback(async (id: string) => {
-    try {
-      const p = await getPresentation(id);
-      if (!p) throw new Error("That presentation is missing or unreadable.");
-      setError(null);
-      setOpen(p);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not open the presentation.");
-    }
-  }, []);
-
-  if (open) {
-    return <Editor key={open.id} initial={open} onClose={() => setOpen(null)} />;
-  }
   return (
-    <Home
-      error={error}
-      onNew={() => setOpen(createPresentation())}
-      onOpen={openById}
-    />
+    <AppProvider>
+      <Screens />
+    </AppProvider>
   );
 }

@@ -6,16 +6,18 @@ import { SlideCanvas } from "./SlideCanvas";
 
 interface Props {
   initial: Presentation;
-  onClose: () => void;
 }
 
 type SaveStatus = "saved" | "saving" | "error";
 
-export function Editor({ initial, onClose }: Props) {
+export function Editor({ initial }: Props) {
   const [state, dispatch] = useReducer(editorReducer, initial, initEditorState);
   const [status, setStatus] = useState<SaveStatus>("saved");
   const first = useRef(true);
+  const dirty = useRef(false);
   const { presentation, currentSlideId } = state;
+  const latest = useRef(presentation);
+  latest.current = presentation;
   const slide = presentation.slides.find((s) => s.id === currentSlideId) ?? presentation.slides[0];
   const index = presentation.slides.indexOf(slide);
 
@@ -26,14 +28,26 @@ export function Editor({ initial, onClose }: Props) {
       void savePresentation(presentation).catch(() => setStatus("error"));
       return;
     }
+    dirty.current = true;
     setStatus("saving");
     const t = window.setTimeout(() => {
       savePresentation(presentation)
-        .then(() => setStatus("saved"))
+        .then(() => {
+          if (latest.current === presentation) dirty.current = false;
+          setStatus("saved");
+        })
         .catch(() => setStatus("error"));
     }, 400);
     return () => window.clearTimeout(t);
   }, [presentation]);
+
+  // Flush pending edits if the editor closes before the debounce fires.
+  useEffect(
+    () => () => {
+      if (dirty.current) void savePresentation(latest.current);
+    },
+    [],
+  );
 
   const go = (delta: number) => {
     const next = presentation.slides[index + delta];
@@ -43,7 +57,6 @@ export function Editor({ initial, onClose }: Props) {
   return (
     <div className="editor">
       <header className="editor__bar">
-        <button className="btn" onClick={onClose}>Home</button>
         <input
           className="editor__title"
           aria-label="Presentation title"
@@ -83,7 +96,7 @@ export function Editor({ initial, onClose }: Props) {
           </ol>
         </nav>
 
-        <main className="editor__stage">
+        <section className="editor__stage" aria-label="Slide editor">
           <SlideCanvas presentation={presentation} slide={slide} displayWidth={800} />
           <div className="editor__text">
             {slide.objects.map((o) => (
@@ -99,10 +112,10 @@ export function Editor({ initial, onClose }: Props) {
               </label>
             ))}
           </div>
-        </main>
+        </section>
       </div>
 
-      <footer className="editor__status" role="status">
+      <footer className="editor__status">
         <span>
           Slide {index + 1} of {presentation.slides.length}
         </span>
@@ -110,7 +123,7 @@ export function Editor({ initial, onClose }: Props) {
           <button className="btn btn--small" disabled={index === 0} onClick={() => go(-1)}>Previous</button>{" "}
           <button className="btn btn--small" disabled={index === presentation.slides.length - 1} onClick={() => go(1)}>Next</button>
         </span>
-        <span className={status === "error" ? "error" : "muted"}>
+        <span className={status === "error" ? "error" : "muted"} role="status">
           {status === "saved" && "Saved in this browser"}
           {status === "saving" && "Saving…"}
           {status === "error" && "Could not save. Your changes are still on screen; keep this tab open."}

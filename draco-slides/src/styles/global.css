@@ -35,7 +35,7 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 .recent__open { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: .75rem 1rem; font: inherit; cursor: pointer; text-align: left; }
 .recent__open:hover { border-color: var(--ember); }
 
-.editor { display: flex; flex-direction: column; height: 100vh; }
+.editor { display: flex; flex-direction: column; height: 100%; }
 .editor__bar { display: flex; gap: .75rem; align-items: center; padding: .5rem .75rem; background: var(--panel); border-bottom: 1px solid var(--line); }
 .editor__title { flex: 1; min-width: 0; background: transparent; border: 1px solid transparent; color: var(--text); font: inherit; font-weight: 600; padding: .35rem .5rem; border-radius: 6px; }
 .editor__title:hover, .editor__title:focus { border-color: var(--line); }
@@ -60,3 +60,22 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 @media (max-width: 800px) {
   .editor__nav { width: 120px; }
 }
+
+.shell { display: flex; flex-direction: column; height: 100vh; }
+.shell__bar { display: flex; align-items: center; gap: 1.25rem; padding: 0 .75rem; height: 48px; flex: none; background: var(--ink); border-bottom: 1px solid var(--line); }
+.brand { font-weight: 700; letter-spacing: -.01em; color: var(--ember); }
+.shell__bar nav { display: flex; gap: .25rem; }
+.shell__cloud { margin-left: auto; }
+.navbtn { background: transparent; color: var(--muted); border: 0; border-bottom: 2px solid transparent; padding: .8rem .75rem; font: inherit; cursor: pointer; }
+.navbtn:hover:not(:disabled) { color: var(--text); }
+.navbtn--active { color: var(--text); border-bottom-color: var(--ember); }
+.navbtn:disabled { opacity: .4; cursor: not-allowed; }
+.shell__main { flex: 1; min-height: 0; overflow: auto; }
+.shell__main:focus { outline: none; }
+.shell__editor { height: 100%; }
+.shell__editor[hidden] { display: none; }
+.skip { position: absolute; left: -999px; top: 0; background: var(--ember); color: #1a0d05; padding: .5rem 1rem; z-index: 20; }
+.skip:focus { left: 0; }
+.toasts { position: fixed; right: 1rem; bottom: 3rem; display: grid; gap: .5rem; max-width: 360px; z-index: 10; }
+.toast { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: .6rem .8rem; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+.toast--error { border-color: var(--err); }

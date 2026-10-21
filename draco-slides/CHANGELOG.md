@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 (Roadmap Version 2)
+- Application shell: skip link, top bar with brand, main navigation (Home / Editor) and cloud status, single `<main>` landmark.
+- Application-level state (`AppProvider`, `appReducer`): current view, open presentation, notifications.
+- Notifications: info messages auto-dismiss, errors stay until dismissed. Open failures now use them.
+- The open presentation stays mounted when you go Home and return, so edits are not lost.
+- Fix: edits made less than 400 ms before the editor unmounts are now flushed to storage (v0.1.0 could drop them).
+- Home screen heading is now "Your presentations"; the Home button moved from the editor bar into the shell navigation.
+- Tests added for the app reducer and shell navigation.
+
 ## 0.1.0 (Roadmap Version 1)
 - Vite + React + TypeScript project foundation.
 - Home screen: new presentation, recent presentations (local), delete.
