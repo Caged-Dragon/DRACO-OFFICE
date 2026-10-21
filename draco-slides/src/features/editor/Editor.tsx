@@ -1,18 +1,24 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState, type KeyboardEvent } from "react";
+import { MenuButton } from "../../components/menus/MenuButton";
 import type { Presentation } from "../../core/document-model/types";
 import { savePresentation } from "../../services/storage/presentationStore";
+import { useApp } from "../../state/AppContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
+import { Ribbon } from "../ribbon/Ribbon";
 import { SlideCanvas } from "./SlideCanvas";
+import { SlidePane } from "./SlidePane";
+import { StatusBar, type SaveStatus } from "./StatusBar";
 
 interface Props {
   initial: Presentation;
 }
 
-type SaveStatus = "saved" | "saving" | "error";
-
 export function Editor({ initial }: Props) {
+  const { dispatch: appDispatch } = useApp();
   const [state, dispatch] = useReducer(editorReducer, initial, initEditorState);
   const [status, setStatus] = useState<SaveStatus>("saved");
+  const [showSlidePane, setShowSlidePane] = useState(true);
+  const [showTextPanel, setShowTextPanel] = useState(true);
   const first = useRef(true);
   const dirty = useRef(false);
   const { presentation, currentSlideId } = state;
@@ -54,81 +60,87 @@ export function Editor({ initial }: Props) {
     if (next) dispatch({ type: "selectSlide", slideId: next.id });
   };
 
+  // PageUp / PageDown move between slides unless focus is in a text field or open menu.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("input, textarea, [role=menu]")) return;
+    if (e.key === "PageDown") {
+      e.preventDefault();
+      go(1);
+    } else if (e.key === "PageUp") {
+      e.preventDefault();
+      go(-1);
+    }
+  };
+
   return (
-    <div className="editor">
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div className="editor" onKeyDown={onKeyDown}>
       <header className="editor__bar">
+        <MenuButton
+          label="File"
+          items={[
+            { label: "Back to home", onSelect: () => appDispatch({ type: "navigate", view: "home" }) },
+            { label: "Close presentation", onSelect: () => appDispatch({ type: "closePresentation" }) },
+          ]}
+        />
         <input
           className="editor__title"
           aria-label="Presentation title"
           value={presentation.title}
           onChange={(e) => dispatch({ type: "renamePresentation", title: e.target.value })}
         />
-        <div className="editor__actions" role="toolbar" aria-label="Slide actions">
-          <button className="btn btn--primary" onClick={() => dispatch({ type: "addSlide" })}>
-            New slide
-          </button>
-          <button
-            className="btn"
-            disabled={presentation.slides.length <= 1}
-            onClick={() => dispatch({ type: "deleteSlide", slideId: slide.id })}
-          >
-            Delete slide
-          </button>
-        </div>
       </header>
 
+      <Ribbon
+        index={index}
+        slideCount={presentation.slides.length}
+        onAddSlide={() => dispatch({ type: "addSlide" })}
+        onDeleteSlide={() => dispatch({ type: "deleteSlide", slideId: slide.id })}
+        onPrevious={() => go(-1)}
+        onNext={() => go(1)}
+        showSlidePane={showSlidePane}
+        showTextPanel={showTextPanel}
+        onToggleSlidePane={() => setShowSlidePane((v) => !v)}
+        onToggleTextPanel={() => setShowTextPanel((v) => !v)}
+      />
+
       <div className="editor__body">
-        <nav className="editor__nav" aria-label="Slides">
-          <ol>
-            {presentation.slides.map((s, i) => (
-              <li key={s.id}>
-                <button
-                  className={`thumb${s.id === slide.id ? " thumb--active" : ""}`}
-                  aria-current={s.id === slide.id ? "true" : undefined}
-                  aria-label={`Slide ${i + 1}: ${s.name}`}
-                  onClick={() => dispatch({ type: "selectSlide", slideId: s.id })}
-                >
-                  <span className="thumb__num">{i + 1}</span>
-                  <SlideCanvas presentation={presentation} slide={s} displayWidth={160} />
-                </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
+        {showSlidePane && (
+          <SlidePane
+            presentation={presentation}
+            currentSlideId={slide.id}
+            onSelect={(slideId) => dispatch({ type: "selectSlide", slideId })}
+          />
+        )}
 
         <section className="editor__stage" aria-label="Slide editor">
           <SlideCanvas presentation={presentation} slide={slide} displayWidth={800} />
-          <div className="editor__text">
-            {slide.objects.map((o) => (
-              <label key={o.id}>
-                <span className="muted">{o.role === "title" ? "Title" : "Body text"}</span>
-                <textarea
-                  rows={o.role === "title" ? 1 : 3}
-                  value={o.text}
-                  onChange={(e) =>
-                    dispatch({ type: "setObjectText", slideId: slide.id, objectId: o.id, text: e.target.value })
-                  }
-                />
-              </label>
-            ))}
-          </div>
+          {showTextPanel && (
+            <div className="editor__text">
+              {slide.objects.map((o) => (
+                <label key={o.id}>
+                  <span className="muted">{o.role === "title" ? "Title" : "Body text"}</span>
+                  <textarea
+                    rows={o.role === "title" ? 1 : 3}
+                    value={o.text}
+                    onChange={(e) =>
+                      dispatch({ type: "setObjectText", slideId: slide.id, objectId: o.id, text: e.target.value })
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
-      <footer className="editor__status">
-        <span>
-          Slide {index + 1} of {presentation.slides.length}
-        </span>
-        <span>
-          <button className="btn btn--small" disabled={index === 0} onClick={() => go(-1)}>Previous</button>{" "}
-          <button className="btn btn--small" disabled={index === presentation.slides.length - 1} onClick={() => go(1)}>Next</button>
-        </span>
-        <span className={status === "error" ? "error" : "muted"} role="status">
-          {status === "saved" && "Saved in this browser"}
-          {status === "saving" && "Saving…"}
-          {status === "error" && "Could not save. Your changes are still on screen; keep this tab open."}
-        </span>
-      </footer>
+      <StatusBar
+        index={index}
+        slideCount={presentation.slides.length}
+        width={presentation.width}
+        height={presentation.height}
+        status={status}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { APP_VERSION } from "../../app/version";
+import { detectPlatform, fetchInstallerAsset, isDesktopApp } from "../../services/release/installer";
 import {
   fetchLatestTag,
   isNewer,
@@ -8,6 +9,7 @@ import {
   type LatestTag,
 } from "../../services/release/latestTag";
 import { useApp } from "../../state/AppContext";
+import { startDownload } from "../../utils/download";
 import { useInstallPrompt } from "./useInstallPrompt";
 
 const CACHE_KEY = "draco-slides:latest-tag";
@@ -35,13 +37,19 @@ function writeCache(repo: string, value: LatestTag) {
 interface Props {
   /** "owner/name" of the GitHub repo that holds the draco-slides/v* tags. */
   repo?: string;
+  userAgent?: string;
 }
 
-export function ReleaseInfo({ repo = import.meta.env.VITE_GITHUB_REPO as string | undefined }: Props) {
+export function ReleaseInfo({
+  repo = import.meta.env.VITE_GITHUB_REPO as string | undefined,
+  userAgent = navigator.userAgent,
+}: Props) {
   const { notify } = useApp();
-  const { canPrompt, installed, promptInstall } = useInstallPrompt();
+  const { canPrompt, installed: pwaInstalled, promptInstall } = useInstallPrompt();
   const [latest, setLatest] = useState<LatestTag | null>(null);
+  const [busy, setBusy] = useState(false);
   const validRepo = isValidRepo(repo) ? repo : null;
+  const installed = pwaInstalled || isDesktopApp(userAgent);
 
   useEffect(() => {
     if (!validRepo) return;
@@ -64,17 +72,43 @@ export function ReleaseInfo({ repo = import.meta.env.VITE_GITHUB_REPO as string 
     return () => ctrl.abort();
   }, [validRepo]);
 
+  const updateAvailable = latest !== null && isNewer(latest.tag, APP_VERSION);
+
   const onInstall = async () => {
-    if (canPrompt) {
-      await promptInstall();
-    } else if (validRepo) {
-      window.open(releaseUrl(validRepo, latest?.tag), "_blank", "noopener,noreferrer");
-    } else {
-      notify("info", "Use your browser's Install option (address bar or menu) to install Draco Slides.");
+    setBusy(true);
+    try {
+      // 1. Preferred: download the installer attached to the latest tag's GitHub release.
+      const platform = detectPlatform(userAgent);
+      if (validRepo && latest && platform) {
+        try {
+          const asset = await fetchInstallerAsset(validRepo, latest.tag, platform);
+          if (asset) {
+            startDownload(asset.browser_download_url);
+            notify("info", `Downloading ${asset.name}. Run it to ${installed ? "update to" : "install"} ${latest.label}.`);
+            return;
+          }
+        } catch {
+          /* fall through to the other options */
+        }
+      }
+      // 2. Browser install (PWA), where the browser offers it.
+      if (canPrompt && !isDesktopApp(userAgent)) {
+        await promptInstall();
+        return;
+      }
+      // 3. Release page.
+      if (validRepo) {
+        window.open(releaseUrl(validRepo, latest?.tag), "_blank", "noopener,noreferrer");
+        notify("info", "No installer for your system is attached to this release yet. Opened the release page instead.");
+        return;
+      }
+      notify("info", "Installer download is not configured for this build.");
+    } finally {
+      setBusy(false);
     }
   };
 
-  const updateAvailable = latest !== null && isNewer(latest.tag, APP_VERSION);
+  const buttonLabel = installed ? (updateAvailable ? "Update" : null) : "Install";
 
   return (
     <div className="release">
@@ -93,10 +127,10 @@ export function ReleaseInfo({ repo = import.meta.env.VITE_GITHUB_REPO as string 
           v{APP_VERSION}
         </span>
       )}
-      {updateAvailable && <span className="release__update">Update available</span>}
-      {!installed && (
-        <button className="btn btn--small btn--primary" onClick={onInstall}>
-          Install
+      {updateAvailable && !installed && <span className="release__update">Update available</span>}
+      {buttonLabel && (
+        <button className="btn btn--small btn--primary" onClick={onInstall} disabled={busy}>
+          {buttonLabel}
         </button>
       )}
     </div>

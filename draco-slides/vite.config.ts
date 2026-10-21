@@ -5,7 +5,9 @@ import { readFileSync } from "node:fs";
 
 const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf-8")) as { version: string };
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  // The desktop build loads from file://, so asset URLs must be relative.
+  base: mode === "desktop" ? "./" : "/",
   plugins: [react()],
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   server: { port: 5175 },
@@ -15,4 +17,4 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
   },
-});
+}));

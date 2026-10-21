@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 (Roadmap Version 4, plus tag-based installer)
+- Editor layout: File menu (Back to home, Close presentation), ribbon with Home and View tabs, toggleable slide pane, central canvas, status bar (slide position, slide size, save status).
+- Accessible menu and tab components (arrow keys, Escape, focus return, `aria-pressed` toggles). PageUp/PageDown move between slides.
+- Install now downloads the installer attached to the latest `draco-slides/v*` GitHub release (Windows .exe, macOS .dmg, Linux AppImage), then falls back to the browser install prompt, then the release page. The desktop app shows Update when a newer tag exists.
+- Electron desktop wrapper (`desktop/main.cjs`) and electron-builder config; `npm run dist:win|mac|linux`.
+- Release workflow template in `ci/draco-slides-release.yml` (must be copied into the monorepo root `.github/workflows/`).
+- Fix: `typecheck` script is now `tsc -b`.
+- Only Home and View ribbon tabs exist; other tabs arrive with their features. Windows installer is unsigned.
+
 ## 0.3.0 (Roadmap Version 3, plus requested web/app distribution)
 - Home: optional title when creating a presentation, search across recent presentations, clearer empty states.
 - Top-right release badge showing the latest `draco-slides/v*` GitHub tag (configurable via `VITE_GITHUB_REPO`), "Update available" hint, and an Install button.
