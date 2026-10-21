@@ -32,14 +32,14 @@ jobs:
 
       - name: Package source zip
         run: |
-          zip -r "docwrite-app-${GITHUB_REF_NAME}.zip" . \
+          zip -r "dracodocs-app-${GITHUB_REF_NAME}.zip" . \
             -x "node_modules/*" \
             -x ".next/*" \
             -x ".git/*"
 
       - name: Package production build zip
         run: |
-          zip -r "docwrite-app-${GITHUB_REF_NAME}-build.zip" .next public package.json package-lock.json next.config.ts
+          zip -r "dracodocs-app-${GITHUB_REF_NAME}-build.zip" .next public package.json package-lock.json next.config.ts
 
       # Pulls the matching "## vN — Theme" section out of CHANGELOG.md to use
       # as the release notes. If the tag has no matching heading yet, GitHub
@@ -74,5 +74,5 @@ jobs:
           name: ${{ github.ref_name }}
           body_path: release_notes.md
           files: |
-            docwrite-app-${{ github.ref_name }}.zip
-            docwrite-app-${{ github.ref_name }}-build.zip
+            dracodocs-app-${{ github.ref_name }}.zip
+            dracodocs-app-${{ github.ref_name }}-build.zip

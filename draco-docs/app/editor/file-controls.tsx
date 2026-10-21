@@ -33,7 +33,7 @@ export default function FileControls({
       const file = await openDocumentFromDisk();
       if (file) onOpen(file);
     } catch {
-      setError("Couldn't open that file — it may not be a DocWrite document.");
+      setError("Couldn't open that file — it may not be a DracoDocs document.");
     } finally {
       setBusy(null);
     }

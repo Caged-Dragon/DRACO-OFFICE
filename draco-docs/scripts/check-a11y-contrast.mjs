@@ -35,7 +35,7 @@ export function contrast(a, b) {
 }
 
 // ---------- load real TS modules ----------
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "docwrite-a11y-"));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dracodocs-a11y-"));
 async function loadTs(rel) {
   const src = fs.readFileSync(path.join(root, rel), "utf8");
   const js = ts.transpileModule(src, {

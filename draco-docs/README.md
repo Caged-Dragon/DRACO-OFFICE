@@ -1,9 +1,9 @@
-# DocWrite
+# DracoDocs
 
 **A cross-platform, offline-first document editor** — a from-scratch, incrementally built alternative to Microsoft Word and Google Docs, developed and released in 100 versioned stages.
 
 ![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Version](https://img.shields.io/badge/version-v0.25.0-blue)
+![Version](https://img.shields.io/badge/version-v0.25.1-blue)
 ![License](https://img.shields.io/badge/license-unset-lightgrey)
 
 ---
@@ -26,7 +26,7 @@
 
 ## Overview
 
-DocWrite is a single-codebase document editor that runs as a website, an installable Progressive Web App, and (in later versions) a packaged native app for Android, iOS, Windows, and macOS.
+DracoDocs is a single-codebase document editor that runs as a website, an installable Progressive Web App, and (in later versions) a packaged native app for Android, iOS, Windows, and macOS.
 
 It is built in **100 incremental versions**, each released as a tagged GitHub Release with the full source attached as a downloadable zip. Versions 1–50 deliver a complete, offline-first, single-user editor with `.docx` import/export. Versions 51–100 are scoped separately (collaboration, cloud sync, and beyond).
 
@@ -45,7 +45,7 @@ WAI-ARIA toolbar pattern as before, just vertical now.
 
 ## Features
 
-Current as of **v0.25.0**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
+Current as of **v0.25.1**. Checked items are shipped; the rest are on the [Roadmap](#roadmap).
 
 - [x] Rich-text editing core (TipTap / ProseMirror)
 - [x] Text formatting — bold, italic, underline, strikethrough
@@ -97,7 +97,7 @@ Current as of **v0.25.0**. Checked items are shipped; the rest are on the [Roadm
 
 ```bash
 git clone <your-repo-url>
-cd docwrite-app
+cd dracodocs-app
 npm install
 ```
 
@@ -135,7 +135,7 @@ touching any color or adding any `<input>`/`<select>`/`<textarea>`.
 ## Project Structure
 
 ```
-docwrite-app/
+dracodocs-app/
 ├── app/
 │   ├── page.tsx              # Document dashboard
 │   ├── editor/

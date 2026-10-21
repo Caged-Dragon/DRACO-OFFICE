@@ -42,7 +42,7 @@ export function parseDocument(raw: string): DocWriteFile {
     typeof (parsed as Record<string, unknown>).content !== "object"
   ) {
     throw new InvalidDocumentError(
-      "That file doesn't look like a DocWrite document."
+      "That file doesn't look like a DracoDocs document."
     );
   }
   const p = parsed as Partial<DocWriteFile>;

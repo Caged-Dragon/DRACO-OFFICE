@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col bg-slate-950 text-slate-100">
       <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight">DocWrite</h1>
+        <h1 className="text-lg font-semibold tracking-tight">DracoDocs</h1>
         <Link
           href="/settings"
           className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
@@ -35,7 +35,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-slate-800 px-6 py-3 text-xs text-slate-400">
-        DocWrite v1.0.0 &middot; installable as an app on this device
+        DracoDocs v1.0.0 &middot; installable as an app on this device
       </footer>
     </div>
   );

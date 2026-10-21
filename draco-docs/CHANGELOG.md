@@ -1,7 +1,38 @@
 # Changelog
 
-All notable changes to DocWrite are documented here, one entry per release.
+All notable changes to DracoDocs are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
+
+## v25.1 — Renamed to DracoDocs
+App renamed from DocWrite to **DracoDocs**, at the user's request.
+
+- Renamed everywhere user-visible: PWA manifest name/short name, browser
+  tab title, dashboard heading and footer text, file-picker labels, the
+  "not a valid file" error message, npm package name
+  (`dracodocs-app`), the project directory itself
+  (`docwrite-app/` → `dracodocs-app/`), and every mention throughout
+  this README and CHANGELOG
+- Also renamed two internal-but-harmless identifiers for consistency: the
+  service worker's cache name and the accessibility checker's temp
+  directory prefix — both invisible to users and safe to change (a cache
+  name change just means the browser rebuilds its cache under the new
+  name on next activate; no user data involved)
+- **Deliberately NOT renamed, to avoid silently orphaning existing users'
+  saved data:** the four `localStorage` key prefixes (`docwrite:draft`,
+  `docwrite:customDictionary`, `docwrite:pageSettings`,
+  `docwrite:preferences`) and the `.dwdoc` file format's internal
+  `MIME_TYPE` string (`application/vnd.docwrite+json`). Anyone who already
+  has a draft, custom dictionary, or saved preferences from before this
+  update keeps them exactly as they are — renaming those keys would have
+  made the app start reading from empty storage and look like it had
+  silently wiped their data. The `DocWriteFile` TypeScript type name was
+  also left alone: a pure internal identifier, never shown to a user,
+  where renaming it across many files would add real risk for zero
+  visible benefit
+- Verified after the rename: clean build (now reporting as
+  `dracodocs-app@0.1.0`), clean lint, `check:contrast` still 227/227, and
+  confirmed the actual rendered homepage HTML shows "DracoDocs" — not just
+  that the source files mention it
 
 ## v25 — References
 - **Bookmarks**: named inline point markers, inserted via a popover.

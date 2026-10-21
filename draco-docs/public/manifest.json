@@ -1,6 +1,6 @@
 {
-  "name": "DocWrite",
-  "short_name": "DocWrite",
+  "name": "DracoDocs",
+  "short_name": "DracoDocs",
   "description": "A cross-platform, offline-first document editor.",
   "start_url": "/",
   "display": "standalone",

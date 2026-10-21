@@ -3,13 +3,13 @@ import "./globals.css";
 import RegisterServiceWorker from "./register-sw";
 
 export const metadata: Metadata = {
-  title: "DocWrite",
+  title: "DracoDocs",
   description: "A cross-platform, offline-first document editor.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "DocWrite",
+    title: "DracoDocs",
   },
 };
 

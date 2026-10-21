@@ -16,7 +16,7 @@ export function supportsFileSystemAccess(): boolean {
 
 const PICKER_TYPES = [
   {
-    description: "DocWrite Document",
+    description: "DracoDocs Document",
     accept: { [MIME_TYPE]: [`.${FILE_EXTENSION}`] },
   },
 ];
