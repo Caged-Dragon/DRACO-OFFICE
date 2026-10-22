@@ -114,3 +114,7 @@ a.release__tag:hover { border-color: var(--ember); }
 .props { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; margin: 1rem 0 0; font-size: .9rem; }
 .props dt { color: var(--muted); }
 .props dd { margin: 0; }
+
+.slidepane__item { border-radius: 6px; }
+.slidepane__item--dragging { opacity: .4; }
+.slidepane__item--over .thumb { border-color: var(--ember); border-style: dashed; }

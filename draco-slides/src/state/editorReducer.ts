@@ -1,4 +1,4 @@
-import { createSlide } from "../core/document-model/factory";
+import { createSlide, duplicateSlide, nextSlideName } from "../core/document-model/factory";
 import type { Presentation } from "../core/document-model/types";
 
 export interface EditorState {
@@ -9,6 +9,9 @@ export interface EditorState {
 export type EditorAction =
   | { type: "addSlide" }
   | { type: "deleteSlide"; slideId: string }
+  | { type: "duplicateSlide"; slideId: string }
+  | { type: "renameSlide"; slideId: string; name: string }
+  | { type: "moveSlide"; slideId: string; toIndex: number }
   | { type: "selectSlide"; slideId: string }
   | { type: "renamePresentation"; title: string }
   | { type: "updateProperties"; title: string; author: string; description: string }
@@ -27,7 +30,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
   switch (action.type) {
     case "addSlide": {
       const idx = presentation.slides.findIndex((s) => s.id === state.currentSlideId);
-      const slide = createSlide(`Slide ${presentation.slides.length + 1}`);
+      const slide = createSlide(nextSlideName(presentation.slides));
       const slides = [...presentation.slides];
       slides.splice(idx + 1, 0, slide);
       return { presentation: touch({ ...presentation, slides }), currentSlideId: slide.id };
@@ -40,6 +43,35 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const currentSlideId =
         state.currentSlideId === action.slideId ? slides[Math.min(idx, slides.length - 1)].id : state.currentSlideId;
       return { presentation: touch({ ...presentation, slides }), currentSlideId };
+    }
+    case "duplicateSlide": {
+      const idx = presentation.slides.findIndex((s) => s.id === action.slideId);
+      if (idx === -1) return state;
+      const copy = duplicateSlide(presentation.slides[idx]);
+      const slides = [...presentation.slides];
+      slides.splice(idx + 1, 0, copy);
+      return { presentation: touch({ ...presentation, slides }), currentSlideId: copy.id };
+    }
+    case "renameSlide": {
+      const name = action.name.trim().slice(0, 100);
+      if (!name || !presentation.slides.some((s) => s.id === action.slideId)) return state;
+      return {
+        ...state,
+        presentation: touch({
+          ...presentation,
+          slides: presentation.slides.map((s) => (s.id === action.slideId ? { ...s, name } : s)),
+        }),
+      };
+    }
+    case "moveSlide": {
+      const from = presentation.slides.findIndex((s) => s.id === action.slideId);
+      if (from === -1) return state;
+      const to = Math.max(0, Math.min(presentation.slides.length - 1, action.toIndex));
+      if (from === to) return state;
+      const slides = [...presentation.slides];
+      const [moved] = slides.splice(from, 1);
+      slides.splice(to, 0, moved);
+      return { ...state, presentation: touch({ ...presentation, slides }) }; // selection follows the slide id
     }
     case "selectSlide":
       return presentation.slides.some((s) => s.id === action.slideId)

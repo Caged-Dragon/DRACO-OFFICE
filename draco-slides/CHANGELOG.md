@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 (Roadmap Version 6)
+- Duplicate slide (new ids, inserted after the original, selected).
+- Rename slide via dialog (blank names refused, 100-character cap).
+- Reorder slides: Move up/Move down buttons, drag and drop in the slide pane, Alt+Up/Alt+Down on a focused thumbnail. Selection follows the moved slide.
+- Delete slide now asks for confirmation (no undo yet).
+- New slides get the next unused "Slide N" name, so names no longer repeat after deletions.
+- Dialogs share a `Modal` component and now return focus to the element that opened them (fixes the v0.5.0 limitation).
+- Limits: no multi-select, slide copy/paste, undo/redo or sections yet.
+
 ## 0.5.0 (Roadmap Version 5)
 - Document model schema 2: presentation metadata (author, description, language, created-with), object base properties (name, rotation, visible), documented in `docs/architecture/document-model.md`.
 - Slide-size presets (16:9, 4:3, 16:10) selectable when creating a presentation; sizes validated.

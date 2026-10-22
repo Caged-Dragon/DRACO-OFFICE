@@ -16,6 +16,24 @@ export function createSlide(name = "Untitled slide", title = "Click to add title
   };
 }
 
+/** Smallest "Slide N" (N above the slide count) that no slide already uses. */
+export function nextSlideName(slides: Slide[]): string {
+  const used = new Set(slides.map((s) => s.name));
+  let n = slides.length + 1;
+  while (used.has(`Slide ${n}`)) n++;
+  return `Slide ${n}`;
+}
+
+/** Copy of a slide with fresh ids. Objects are flat today; deepen the clone when nested objects arrive. */
+export function duplicateSlide(slide: Slide): Slide {
+  return {
+    ...slide,
+    id: newId(),
+    name: `${slide.name} (copy)`.slice(0, 100),
+    objects: slide.objects.map((o) => ({ ...o, id: newId() })),
+  };
+}
+
 export interface CreatePresentationOptions {
   size?: SlideSizeId;
   author?: string;

@@ -6,6 +6,7 @@ import { useApp } from "../../state/AppContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
 import { Ribbon } from "../ribbon/Ribbon";
 import { PropertiesDialog } from "./PropertiesDialog";
+import { RenameSlideDialog } from "./RenameSlideDialog";
 import { SlideCanvas } from "./SlideCanvas";
 import { SlidePane } from "./SlidePane";
 import { StatusBar, type SaveStatus } from "./StatusBar";
@@ -21,6 +22,7 @@ export function Editor({ initial }: Props) {
   const [showSlidePane, setShowSlidePane] = useState(true);
   const [showTextPanel, setShowTextPanel] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
+  const [renaming, setRenaming] = useState(false);
   const first = useRef(true);
   const dirty = useRef(false);
   const { presentation, currentSlideId } = state;
@@ -62,6 +64,13 @@ export function Editor({ initial }: Props) {
     if (next) dispatch({ type: "selectSlide", slideId: next.id });
   };
 
+  const deleteCurrent = () => {
+    // No undo until a later release, so ask first.
+    if (window.confirm(`Delete "${slide.name}"? This cannot be undone yet.`)) {
+      dispatch({ type: "deleteSlide", slideId: slide.id });
+    }
+  };
+
   // PageUp / PageDown move between slides unless focus is in a text field or open menu.
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("input, textarea, [role=menu]")) return;
@@ -98,7 +107,11 @@ export function Editor({ initial }: Props) {
         index={index}
         slideCount={presentation.slides.length}
         onAddSlide={() => dispatch({ type: "addSlide" })}
-        onDeleteSlide={() => dispatch({ type: "deleteSlide", slideId: slide.id })}
+        onDuplicateSlide={() => dispatch({ type: "duplicateSlide", slideId: slide.id })}
+        onDeleteSlide={deleteCurrent}
+        onRenameSlide={() => setRenaming(true)}
+        onMoveUp={() => dispatch({ type: "moveSlide", slideId: slide.id, toIndex: index - 1 })}
+        onMoveDown={() => dispatch({ type: "moveSlide", slideId: slide.id, toIndex: index + 1 })}
         onPrevious={() => go(-1)}
         onNext={() => go(1)}
         showSlidePane={showSlidePane}
@@ -113,6 +126,7 @@ export function Editor({ initial }: Props) {
             presentation={presentation}
             currentSlideId={slide.id}
             onSelect={(slideId) => dispatch({ type: "selectSlide", slideId })}
+            onMove={(slideId, toIndex) => dispatch({ type: "moveSlide", slideId, toIndex })}
           />
         )}
 
@@ -144,6 +158,17 @@ export function Editor({ initial }: Props) {
           onSave={(values) => {
             dispatch({ type: "updateProperties", ...values });
             setShowProperties(false);
+          }}
+        />
+      )}
+
+      {renaming && (
+        <RenameSlideDialog
+          currentName={slide.name}
+          onClose={() => setRenaming(false)}
+          onSave={(name) => {
+            dispatch({ type: "renameSlide", slideId: slide.id, name });
+            setRenaming(false);
           }}
         />
       )}

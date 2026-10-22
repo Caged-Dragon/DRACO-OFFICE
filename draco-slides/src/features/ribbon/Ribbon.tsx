@@ -10,7 +10,11 @@ interface Props {
   index: number;
   slideCount: number;
   onAddSlide: () => void;
+  onDuplicateSlide: () => void;
   onDeleteSlide: () => void;
+  onRenameSlide: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onPrevious: () => void;
   onNext: () => void;
   showSlidePane: boolean;
@@ -56,9 +60,18 @@ export function Ribbon(p: Props) {
             <div className="rgroup" role="group" aria-label="Slides">
               <div className="rgroup__buttons">
                 <button className="btn btn--primary" onClick={p.onAddSlide}>New slide</button>
+                <button className="btn" onClick={p.onDuplicateSlide}>Duplicate slide</button>
+                <button className="btn" onClick={p.onRenameSlide}>Rename slide</button>
                 <button className="btn" disabled={p.slideCount <= 1} onClick={p.onDeleteSlide}>Delete slide</button>
               </div>
               <span className="rgroup__label">Slides</span>
+            </div>
+            <div className="rgroup" role="group" aria-label="Arrange">
+              <div className="rgroup__buttons">
+                <button className="btn" disabled={p.index === 0} onClick={p.onMoveUp}>Move up</button>
+                <button className="btn" disabled={p.index === p.slideCount - 1} onClick={p.onMoveDown}>Move down</button>
+              </div>
+              <span className="rgroup__label">Arrange</span>
             </div>
             <div className="rgroup" role="group" aria-label="Navigate">
               <div className="rgroup__buttons">
