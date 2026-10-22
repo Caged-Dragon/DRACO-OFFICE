@@ -3,6 +3,9 @@ export const DOCUMENT_SCHEMA_VERSION = 2;
 
 export const MIN_SLIDE_DIMENSION = 100;
 export const MAX_SLIDE_DIMENSION = 20000;
+/** Sanity limits so a malformed or hostile file cannot make the editor unusable. */
+export const MAX_SLIDES = 2000;
+export const MAX_OBJECTS_PER_SLIDE = 2000;
 
 /** Properties shared by every object that can sit on a slide. Units are slide pixels. */
 export interface BaseObject {

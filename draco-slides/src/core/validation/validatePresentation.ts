@@ -1,5 +1,7 @@
 import {
   DOCUMENT_SCHEMA_VERSION,
+  MAX_OBJECTS_PER_SLIDE,
+  MAX_SLIDES,
   MAX_SLIDE_DIMENSION,
   MIN_SLIDE_DIMENSION,
   type Presentation,
@@ -56,6 +58,8 @@ export function validatePresentation(value: unknown): ValidationResult {
 
   if (!Array.isArray(value.slides) || value.slides.length === 0) {
     fail("A presentation needs at least one slide");
+  } else if (value.slides.length > MAX_SLIDES) {
+    fail(`A presentation can have at most ${MAX_SLIDES} slides`);
   } else {
     value.slides.forEach((slide, i) => {
       const sw = `slides[${i}]`;
@@ -63,6 +67,7 @@ export function validatePresentation(value: unknown): ValidationResult {
       checkId(slide.id, sw);
       if (!isStr(slide.name)) fail(`${sw}: name must be text`);
       if (!Array.isArray(slide.objects)) return fail(`${sw}: objects must be a list`);
+      if (slide.objects.length > MAX_OBJECTS_PER_SLIDE) return fail(`${sw}: at most ${MAX_OBJECTS_PER_SLIDE} objects per slide`);
       slide.objects.forEach((o, j) => {
         const ow = `${sw}.objects[${j}]`;
         if (!isRecord(o)) return fail(`${ow}: not an object`);

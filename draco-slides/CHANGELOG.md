@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0 (Roadmap Version 9)
+- Native file: File > Save a copy to file (`.draco-slides.json`) and Home > Open from file. Strict import validation with size and count limits, unknown-field stripping, newer-version detection, and automatic migration of older schemas. Imports never overwrite an existing presentation.
+- Storage errors are classified (full, blocked, other) and explained in the status bar, with Retry and Download backup.
+- Saves now count only after the IndexedDB transaction commits.
+- Autosave flushes when the page is hidden or closed and when the editor closes; leaving the page with unsaved changes asks for confirmation; a failed save on close is reported.
+- Requests persistent browser storage (best effort).
+- Home reports unreadable stored records (kept, not deleted).
+- Fix: the "Saved" indicator no longer appears while a newer edit is still waiting to save.
+- Limits: two tabs editing the same presentation are not detected (last save wins); no sharing between browsers or the desktop app until cloud sync.
+
 ## 0.8.0 (Roadmap Version 8)
 - Zoomable, pannable canvas viewport replacing the fixed-size preview. Fit to window (follows window resizing), zoom 10% to 400%, Zoom in/out/Fit/Actual size in the View tab, +/-/0 keys, Ctrl/Cmd+wheel zoom at the cursor.
 - Pan with the wheel, arrow keys, Space+drag or middle-button drag; the slide cannot be panned out of view.

@@ -1,9 +1,13 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent } from "react";
+import { APP_VERSION } from "../../app/version";
 import { MenuButton } from "../../components/menus/MenuButton";
 import type { Presentation } from "../../core/document-model/types";
+import { fileNameFor, serializePresentation } from "../../core/serialization/serialize";
 import { savePresentation } from "../../services/storage/presentationStore";
+import { describeStorageError } from "../../services/storage/storageError";
 import { useApp } from "../../state/AppContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
+import { downloadTextFile } from "../../utils/download";
 import { CanvasViewport } from "../canvas/CanvasViewport";
 import { createPointerStore } from "../canvas/pointerStore";
 import { useCanvasView } from "../canvas/useCanvasView";
@@ -18,9 +22,10 @@ interface Props {
 }
 
 export function Editor({ initial }: Props) {
-  const { dispatch: appDispatch } = useApp();
+  const { dispatch: appDispatch, notify } = useApp();
   const [state, dispatch] = useReducer(editorReducer, initial, initEditorState);
   const [status, setStatus] = useState<SaveStatus>("saved");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showSlidePane, setShowSlidePane] = useState(true);
   const [showTextPanel, setShowTextPanel] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
@@ -35,33 +40,74 @@ export function Editor({ initial }: Props) {
   const slide = presentation.slides.find((s) => s.id === currentSlideId) ?? presentation.slides[0];
   const index = presentation.slides.indexOf(slide);
 
-  // Debounced autosave to IndexedDB. A failed save is surfaced, never swallowed.
+  /** Saves a snapshot. Status only changes to "saved" if no newer edit is waiting. */
+  const persist = useCallback(async (p: Presentation) => {
+    try {
+      await savePresentation(p);
+      if (latest.current === p) {
+        dirty.current = false;
+        setStatus("saved");
+        setSaveError(null);
+      }
+    } catch (e) {
+      setStatus("error");
+      setSaveError(describeStorageError(e));
+    }
+  }, []);
+
+  // Debounced autosave. A failed save is surfaced with its reason, never swallowed.
   useEffect(() => {
     if (first.current) {
       first.current = false;
-      void savePresentation(presentation).catch(() => setStatus("error"));
+      void persist(presentation);
       return;
     }
     dirty.current = true;
     setStatus("saving");
-    const t = window.setTimeout(() => {
-      savePresentation(presentation)
-        .then(() => {
-          if (latest.current === presentation) dirty.current = false;
-          setStatus("saved");
-        })
-        .catch(() => setStatus("error"));
-    }, 400);
+    const t = window.setTimeout(() => void persist(presentation), 400);
     return () => window.clearTimeout(t);
-  }, [presentation]);
+  }, [presentation, persist]);
 
-  // Flush pending edits if the editor closes before the debounce fires.
-  useEffect(
-    () => () => {
-      if (dirty.current) void savePresentation(latest.current);
-    },
-    [],
-  );
+  // Save immediately when the page is being hidden or closed, and when the editor closes with edits pending.
+  useEffect(() => {
+    const flush = () => {
+      if (dirty.current) void persist(latest.current);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (dirty.current) {
+        const p = latest.current;
+        savePresentation(p).catch((e) =>
+          notify("error", `Could not save "${p.title}": ${describeStorageError(e)} Your last changes were not stored.`),
+        );
+      }
+    };
+  }, [persist, notify]);
+
+  // Warn before leaving the page while changes are unsaved or a save has failed.
+  useEffect(() => {
+    if (status === "saved") return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [status]);
+
+  const downloadCopy = () =>
+    downloadTextFile(fileNameFor(latest.current.title), serializePresentation(latest.current, APP_VERSION));
+
+  const retrySave = () => {
+    setStatus("saving");
+    void persist(latest.current);
+  };
 
   const go = (delta: number) => {
     const next = presentation.slides[index + delta];
@@ -95,6 +141,7 @@ export function Editor({ initial }: Props) {
           label="File"
           items={[
             { label: "Properties", onSelect: () => setShowProperties(true) },
+            { label: "Save a copy to file", onSelect: downloadCopy },
             { label: "Back to home", onSelect: () => appDispatch({ type: "navigate", view: "home" }) },
             { label: "Close presentation", onSelect: () => appDispatch({ type: "closePresentation" }) },
           ]}
@@ -196,6 +243,9 @@ export function Editor({ initial }: Props) {
         zoomPercent={canvas.percent}
         pointerStore={pointerStore}
         status={status}
+        saveError={saveError}
+        onRetry={retrySave}
+        onDownloadBackup={downloadCopy}
       />
     </div>
   );

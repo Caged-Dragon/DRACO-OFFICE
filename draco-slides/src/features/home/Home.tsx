@@ -1,24 +1,36 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { DEFAULT_SLIDE_SIZE, SLIDE_SIZE_IDS, SLIDE_SIZES, type SlideSizeId } from "../../core/document-model/sizes";
 import type { Presentation } from "../../core/document-model/types";
-import { SLIDE_SIZE_IDS, SLIDE_SIZES, DEFAULT_SLIDE_SIZE, type SlideSizeId } from "../../core/document-model/sizes";
-import { deletePresentation, listPresentations } from "../../services/storage/presentationStore";
+import { FILE_EXTENSION } from "../../core/serialization/serialize";
+import { deletePresentation, listPresentationsDetailed } from "../../services/storage/presentationStore";
+import { describeStorageError } from "../../services/storage/storageError";
 
 interface Props {
   onNew: (title: string, size: SlideSizeId) => void;
   onOpen: (id: string) => void;
+  onImportFile: (file: File) => void;
 }
 
-export function Home({ onNew, onOpen }: Props) {
+export function Home({ onNew, onOpen, onImportFile }: Props) {
   const [recent, setRecent] = useState<Presentation[] | null>(null);
+  const [unreadable, setUnreadable] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [size, setSize] = useState<SlideSizeId>(DEFAULT_SLIDE_SIZE);
   const [query, setQuery] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const refresh = () =>
-    listPresentations()
-      .then(setRecent)
-      .catch(() => setLoadError("Saved presentations could not be read from this browser."));
+    listPresentationsDetailed()
+      .then((r) => {
+        setRecent(r.presentations);
+        setUnreadable(r.unreadable);
+        setLoadError(null);
+      })
+      .catch((e) => {
+        setRecent([]);
+        setLoadError(`Saved presentations could not be read from this browser. ${describeStorageError(e)}`);
+      });
 
   useEffect(() => {
     void refresh();
@@ -56,9 +68,29 @@ export function Home({ onNew, onOpen }: Props) {
         <button type="submit" className="btn btn--primary">
           New presentation
         </button>
+        <button type="button" className="btn" onClick={() => fileInput.current?.click()}>
+          Open from file
+        </button>
+        <input
+          ref={fileInput}
+          type="file"
+          hidden
+          accept={`${FILE_EXTENSION},.json,application/json`}
+          aria-label="Presentation file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = ""; // allow choosing the same file again
+            if (file) onImportFile(file);
+          }}
+        />
       </form>
 
       {loadError && <p role="alert" className="error">{loadError}</p>}
+      {unreadable > 0 && (
+        <p className="muted" role="note">
+          {unreadable} saved item{unreadable === 1 ? "" : "s"} in this browser could not be read. They were kept, not deleted.
+        </p>
+      )}
 
       <section aria-labelledby="recent-h">
         <h2 id="recent-h">Recent presentations</h2>
