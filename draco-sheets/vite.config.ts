@@ -37,9 +37,15 @@ export default defineConfig({
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,ico}'],
+        // Precache the app + engine; the ~80 lazy hyphenation-language chunks are cached on first use instead.
+        globPatterns: ['**/*.{css,html,svg,png,woff2,ico}', 'assets/index-*.js', 'assets/engine-*.js', 'assets/*worker*.js'],
         navigateFallback: '/index.html',
         runtimeCaching: [
+          {
+            urlPattern: ({ url, request }) => url.origin === self.location.origin && request.destination === 'script',
+            handler: 'CacheFirst',
+            options: { cacheName: 'draco-lazy-js', expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
           {
             urlPattern: ({ url }) => url.hostname.endsWith('.supabase.co'),
             handler: 'NetworkOnly',
@@ -48,5 +54,9 @@ export default defineConfig({
       },
     }),
   ],
-  build: { chunkSizeWarningLimit: 6000 },
+  build: {
+    chunkSizeWarningLimit: 8000,
+    rollupOptions: { output: { chunkFileNames: (c) => (c.name === 'engine' || c.facadeModuleId?.endsWith('engine.ts') ? 'assets/engine-[hash].js' : 'assets/[name]-[hash].js') } },
+  },
+  worker: { format: 'es' },
 });

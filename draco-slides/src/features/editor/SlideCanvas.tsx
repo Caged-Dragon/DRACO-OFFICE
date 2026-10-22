@@ -1,7 +1,7 @@
 import type { Presentation, Slide } from "../../core/document-model/types";
 
 interface Props {
-  presentation: Presentation;
+  presentation: Pick<Presentation, "width" | "height">;
   slide: Slide;
   /** Rendered width in CSS px; the slide scales uniformly from its model size. */
   displayWidth: number;

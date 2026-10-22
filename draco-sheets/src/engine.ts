@@ -63,6 +63,7 @@ export function bootEngine(container: HTMLElement, onMutation: () => void): Engi
         container,
         ribbonType: ribbonForWidth(window.innerWidth),
         formulaBar: true,
+        workerURL: new Worker(new URL('./formula.worker.ts', import.meta.url), { type: 'module' }),
       }),
       UniverSheetsConditionalFormattingPreset(),
       UniverSheetsDataValidationPreset(),

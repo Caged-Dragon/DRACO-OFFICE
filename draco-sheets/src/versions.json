@@ -39,19 +39,19 @@
   "v": 7,
   "title": "Supabase schema + RLS: workbooks, versions",
   "phase": "A · Foundation",
-  "status": "done"
+  "status": "partial"
  },
  {
   "v": 8,
   "title": "Auth (email/password, Google) and per-user workbook list",
   "phase": "A · Foundation",
-  "status": "done"
+  "status": "partial"
  },
  {
   "v": 9,
   "title": "Autosave, manual save, open, rename, delete workbook",
   "phase": "A · Foundation",
-  "status": "done"
+  "status": "partial"
  },
  {
   "v": 10,
@@ -63,97 +63,97 @@
   "v": 11,
   "title": "Font family, size, bold, italic, underline, strikethrough",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 12,
   "title": "Font color, fill color, color palette, recent colors",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 13,
   "title": "Alignment (horizontal, vertical), indent",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 14,
   "title": "Wrap text, merge and center, unmerge, center across selection",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 15,
   "title": "Borders (all styles, colors, draw border)",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 16,
   "title": "Number formats: General, Number, Currency, Accounting",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 17,
   "title": "Number formats: Date, Time, Percentage, Fraction, Scientific, Text",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 18,
   "title": "Custom number formats editor",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 19,
   "title": "Format Painter",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 20,
   "title": "Cell styles and themes",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 21,
   "title": "Text rotation and orientation",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 22,
   "title": "Shrink to fit, text overflow rules",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 23,
   "title": "Conditional formatting: highlight rules",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 24,
   "title": "Conditional formatting: data bars, color scales, icon sets",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 25,
   "title": "Conditional formatting: custom formula, manage rules",
   "phase": "B · Formatting",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 26,
   "title": "Formula bar, name box, formula editing, F2/F4 modes",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 27,
@@ -195,7 +195,7 @@
   "v": 33,
   "title": "Lookup: XLOOKUP, XMATCH, LOOKUP",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 34,
@@ -579,7 +579,7 @@
   "v": 97,
   "title": "Performance: virtualization for 1M rows, workers",
   "phase": "I · Advanced",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 98,

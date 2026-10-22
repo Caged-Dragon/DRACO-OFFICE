@@ -118,3 +118,7 @@ a.release__tag:hover { border-color: var(--ember); }
 .slidepane__item { border-radius: 6px; }
 .slidepane__item--dragging { opacity: .4; }
 .slidepane__item--over .thumb { border-color: var(--ember); border-style: dashed; }
+
+.thumb__body { display: grid; gap: .25rem; min-width: 0; }
+.thumb__name { font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: var(--muted); }
+.thumb--active .thumb__name { color: var(--text); }

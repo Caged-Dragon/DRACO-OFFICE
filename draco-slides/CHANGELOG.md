@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 (Roadmap Version 7)
+- Slide pane keyboard navigation: Up/Down/Home/End select slides; only the selected thumbnail is in the Tab order (roving tabindex).
+- Selection stays synchronized everywhere: whichever control changes the selection (ribbon, status bar, PageUp/PageDown, delete, duplicate), the pane scrolls the selected thumbnail into view and, if keyboard focus is in the pane, focus follows.
+- Thumbnails show the slide name, and thumbnails of unchanged slides are not re-rendered while another slide is edited (`SlideThumbnail` is memoized; not benchmarked).
+- Limits: no multi-select, no resizable pane, no virtualization for very long decks (planned for Version 91).
+
 ## 0.6.0 (Roadmap Version 6)
 - Duplicate slide (new ids, inserted after the original, selected).
 - Rename slide via dialog (blank names refused, 100-character cap).

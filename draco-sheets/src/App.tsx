@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { bootEngine, type Engine } from './engine';
+import type { Engine } from './engine';
 import { supabase, cloudEnabled } from './supabase';
 import {
   newId, saveLocal, loadLocal, saveCloud, loadCloud, type WorkbookMeta,
@@ -8,6 +8,8 @@ import {
 import AuthDialog from './AuthDialog';
 import OpenDialog from './OpenDialog';
 import RoadmapDialog from './RoadmapDialog';
+import CellStylesDialog from './CellStylesDialog';
+import { changeIndent } from './indent';
 
 type Status = 'saved' | 'saving' | 'dirty' | 'pending';
 type Snapshot = Record<string, unknown>;
@@ -22,8 +24,9 @@ export default function App() {
   const [cloud, setCloud] = useState(false);
   const [status, setStatus] = useState<Status>('saved');
   const [session, setSession] = useState<Session | null>(null);
-  const [dialog, setDialog] = useState<null | 'open' | 'auth' | 'roadmap'>(null);
+  const [dialog, setDialog] = useState<null | 'open' | 'auth' | 'roadmap' | 'styles'>(null);
   const [menu, setMenu] = useState(false);
+  const [ready, setReady] = useState(false);
   const sessionRef = useRef<Session | null>(null);
   sessionRef.current = session;
 
@@ -60,7 +63,8 @@ export default function App() {
     current.current = { id, title: name, cloud: isCloud };
     setTitleState(name);
     setCloud(isCloud);
-    api.createWorkbook({ ...(data ?? {}), id, name } as never);
+    const loc = data?.locale && data.locale !== 'zhCN' ? data.locale : 'enUS'; // engine default is Chinese; v98 adds a picker
+    api.createWorkbook({ ...(data ?? {}), locale: loc, id, name } as never);
     setStatus('saved');
     localStorage.setItem(LAST_KEY, JSON.stringify({ id, cloud: isCloud }));
   }, []);
@@ -85,8 +89,13 @@ export default function App() {
   // boot engine once
   useEffect(() => {
     if (!host.current) return;
-    engine.current = bootEngine(host.current, scheduleSave);
+    let cancelled = false;
     (async () => {
+      const { bootEngine } = await import('./engine');
+      if (cancelled || !host.current) return;
+      engine.current = bootEngine(host.current, scheduleSave);
+      (window as unknown as { dracoAPI: unknown }).dracoAPI = engine.current.api; // used by tests and, later, macros/scripting
+      setReady(true);
       try {
         const last = JSON.parse(localStorage.getItem(LAST_KEY) ?? 'null') as { id: string; cloud: boolean } | null;
         const rec = last ? await loadLocal(last.id) : null;
@@ -95,6 +104,7 @@ export default function App() {
       mount(newId(), 'Untitled workbook', false);
     })();
     return () => {
+      cancelled = true;
       window.clearTimeout(timer.current);
       engine.current?.dispose();
       engine.current = null;
@@ -167,6 +177,11 @@ export default function App() {
           <button onClick={newWorkbook}>New</button>
           <button onClick={() => setDialog('open')}>Open</button>
           <button onClick={() => void flush()}>Save</button>
+          <button onClick={() => setDialog('styles')}>Styles</button>
+          <span className="pair" role="group" aria-label="Indent">
+            <button title="Decrease indent" aria-label="Decrease indent" onClick={() => engine.current && void changeIndent(engine.current, -1)}>⇤</button>
+            <button title="Increase indent" aria-label="Increase indent" onClick={() => engine.current && void changeIndent(engine.current, 1)}>⇥</button>
+          </span>
           <button onClick={() => setDialog('roadmap')}>Roadmap</button>
           {cloudEnabled && !cloud && <button onClick={moveToCloud}>☁ Sync</button>}
           <button className="primary" onClick={() => setDialog('auth')}>{session ? (session.user.email ?? 'Account').split('@')[0] : 'Sign in'}</button>
@@ -178,15 +193,22 @@ export default function App() {
             <button onClick={() => setDialog('open')}>Open…</button>
             <button onClick={() => void flush()}>Save now</button>
             {cloudEnabled && !cloud && <button onClick={moveToCloud}>Sync to cloud</button>}
+            <button onClick={() => setDialog('styles')}>Cell styles</button>
+            <button onClick={() => engine.current && void changeIndent(engine.current, 1)}>Increase indent</button>
+            <button onClick={() => engine.current && void changeIndent(engine.current, -1)}>Decrease indent</button>
             <button onClick={() => setDialog('roadmap')}>Roadmap</button>
             <button onClick={() => setDialog('auth')}>{session ? 'Account' : 'Sign in'}</button>
           </div>
         )}
       </header>
-      <main ref={host} className="grid" />
+      <div className="stage">
+        <main ref={host} className="grid" />
+        {!ready && <div className="splash" role="status"><div className="spin" /><span>Loading spreadsheet engine…</span></div>}
+      </div>
       {dialog === 'open' && <OpenDialog signedIn={Boolean(session)} onOpen={(m: WorkbookMeta) => void openMeta(m)} onClose={() => setDialog(null)} />}
       {dialog === 'auth' && <AuthDialog session={session} onClose={() => setDialog(null)} />}
       {dialog === 'roadmap' && <RoadmapDialog onClose={() => setDialog(null)} />}
+      {dialog === 'styles' && <CellStylesDialog engine={engine.current} onClose={() => setDialog(null)} />}
     </div>
   );
 }

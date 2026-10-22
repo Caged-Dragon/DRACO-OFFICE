@@ -12,3 +12,9 @@
 Selection follows the slide (by id) when slides are reordered.
 
 Limits: no multi-select, no copy/paste of slides, no undo/redo, no section grouping yet.
+
+## Slide pane (v0.7.0)
+- Click a thumbnail to select it. Up/Down arrows move between slides, Home/End jump to first/last. Alt+Up/Alt+Down reorder.
+- Only the selected thumbnail is a Tab stop; Tab leaves the pane.
+- Selection changes from anywhere scroll the selected thumbnail into view; focus follows only if it was already inside the pane.
+- Thumbnails of unchanged slides are not re-rendered while another slide is being edited.

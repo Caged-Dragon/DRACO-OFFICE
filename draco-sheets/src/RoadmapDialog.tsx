@@ -1,7 +1,7 @@
 import Dialog from './Dialog';
 import versions from './versions.json';
 
-type V = { v: number; title: string; phase: string; status: 'done' | 'planned' };
+type V = { v: number; title: string; phase: string; status: 'done' | 'partial' | 'planned' };
 
 export default function RoadmapDialog({ onClose }: { onClose: () => void }) {
   const list = versions as V[];
@@ -16,7 +16,7 @@ export default function RoadmapDialog({ onClose }: { onClose: () => void }) {
           <ul className="roadmap">
             {list.filter((x) => x.phase === p).map((x) => (
               <li key={x.v} className={x.status}>
-                <span className="tick">{x.status === 'done' ? '✔' : '○'}</span>
+                <span className="tick">{x.status === 'done' ? '✔' : x.status === 'partial' ? '◐' : '○'}</span>
                 <b>v{x.v}</b> {x.title}
               </li>
             ))}
