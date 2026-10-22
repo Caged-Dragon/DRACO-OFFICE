@@ -46,8 +46,8 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 .thumb { display: flex; gap: .4rem; align-items: flex-start; width: 100%; background: transparent; border: 2px solid transparent; border-radius: 6px; padding: 2px; color: var(--muted); font: inherit; cursor: pointer; }
 .thumb--active { border-color: var(--ember); }
 .thumb__num { font-size: .75rem; width: 1rem; text-align: right; }
-.editor__stage { flex: 1; overflow: auto; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; background: #0d1a20; }
-.editor__text { width: 800px; max-width: 100%; display: grid; gap: .75rem; }
+.editor__stage { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0d1a20; overflow: hidden; }
+.editor__text { flex: none; max-height: 240px; overflow: auto; display: grid; gap: .75rem; padding: .75rem 1rem; border-top: 1px solid var(--line); background: var(--ink); }
 .editor__text label { display: grid; gap: .25rem; }
 .editor__text textarea { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: .5rem; font: inherit; resize: vertical; }
 .editor__status { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .35rem .75rem; background: var(--panel); border-top: 1px solid var(--line); font-size: .85rem; }
@@ -122,3 +122,12 @@ a.release__tag:hover { border-color: var(--ember); }
 .thumb__body { display: grid; gap: .25rem; min-width: 0; }
 .thumb__name { font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: var(--muted); }
 .thumb--active .thumb__name { color: var(--text); }
+
+.viewport { position: relative; flex: 1; min-height: 160px; overflow: hidden; }
+.viewport:focus-visible { outline-offset: -3px; }
+.viewport--pan { cursor: grab; }
+.viewport--panning { cursor: grabbing; }
+.viewport__slide { position: absolute; }
+.slide--overflow { overflow: visible; }
+.rgroup__value { align-self: center; min-width: 3.5rem; text-align: center; font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

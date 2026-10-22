@@ -1,3 +1,6 @@
+import { useSyncExternalStore } from "react";
+import type { PointerStore } from "../canvas/pointerStore";
+
 export type SaveStatus = "saved" | "saving" | "error";
 
 interface Props {
@@ -5,10 +8,17 @@ interface Props {
   slideCount: number;
   width: number;
   height: number;
+  zoomPercent: number;
+  pointerStore: PointerStore;
   status: SaveStatus;
 }
 
-export function StatusBar({ index, slideCount, width, height, status }: Props) {
+function PointerReadout({ store }: { store: PointerStore }) {
+  const p = useSyncExternalStore(store.subscribe, store.get);
+  return <span className="muted">Pointer {p ? `${p.x}, ${p.y}` : "—"}</span>;
+}
+
+export function StatusBar({ index, slideCount, width, height, zoomPercent, pointerStore, status }: Props) {
   return (
     <footer className="editor__status">
       <span>
@@ -17,6 +27,8 @@ export function StatusBar({ index, slideCount, width, height, status }: Props) {
       <span className="muted">
         {width} × {height}
       </span>
+      <PointerReadout store={pointerStore} />
+      <span className="muted">Zoom {zoomPercent}%</span>
       <span className={status === "error" ? "error" : "muted"} role="status">
         {status === "saved" && "Saved in this browser"}
         {status === "saving" && "Saving…"}

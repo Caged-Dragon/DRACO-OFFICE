@@ -5,13 +5,15 @@ interface Props {
   slide: Slide;
   /** Rendered width in CSS px; the slide scales uniformly from its model size. */
   displayWidth: number;
+  /** Clip objects that extend past the slide edge (thumbnails, presenting). The editing canvas shows them. */
+  clip?: boolean;
 }
 
-export function SlideCanvas({ presentation, slide, displayWidth }: Props) {
+export function SlideCanvas({ presentation, slide, displayWidth, clip = true }: Props) {
   const scale = displayWidth / presentation.width;
   return (
     <div
-      className="slide"
+      className={`slide${clip ? "" : " slide--overflow"}`}
       style={{ width: displayWidth, height: presentation.height * scale }}
       role="img"
       aria-label={`${slide.name} preview`}

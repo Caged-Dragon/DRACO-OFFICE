@@ -1,13 +1,15 @@
-import { useEffect, useReducer, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent } from "react";
 import { MenuButton } from "../../components/menus/MenuButton";
 import type { Presentation } from "../../core/document-model/types";
 import { savePresentation } from "../../services/storage/presentationStore";
 import { useApp } from "../../state/AppContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
+import { CanvasViewport } from "../canvas/CanvasViewport";
+import { createPointerStore } from "../canvas/pointerStore";
+import { useCanvasView } from "../canvas/useCanvasView";
 import { Ribbon } from "../ribbon/Ribbon";
 import { PropertiesDialog } from "./PropertiesDialog";
 import { RenameSlideDialog } from "./RenameSlideDialog";
-import { SlideCanvas } from "./SlideCanvas";
 import { SlidePane } from "./SlidePane";
 import { StatusBar, type SaveStatus } from "./StatusBar";
 
@@ -23,6 +25,8 @@ export function Editor({ initial }: Props) {
   const [showTextPanel, setShowTextPanel] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const canvas = useCanvasView(initial.width, initial.height);
+  const pointerStore = useMemo(createPointerStore, []);
   const first = useRef(true);
   const dirty = useRef(false);
   const { presentation, currentSlideId } = state;
@@ -118,6 +122,11 @@ export function Editor({ initial }: Props) {
         showTextPanel={showTextPanel}
         onToggleSlidePane={() => setShowSlidePane((v) => !v)}
         onToggleTextPanel={() => setShowTextPanel((v) => !v)}
+        zoomPercent={canvas.percent}
+        onZoomIn={canvas.zoomIn}
+        onZoomOut={canvas.zoomOut}
+        onFitZoom={canvas.zoomFit}
+        onActualSize={canvas.zoomActual}
       />
 
       <div className="editor__body">
@@ -131,7 +140,13 @@ export function Editor({ initial }: Props) {
         )}
 
         <section className="editor__stage" aria-label="Slide editor">
-          <SlideCanvas presentation={presentation} slide={slide} displayWidth={800} />
+          <CanvasViewport
+            canvas={canvas}
+            slide={slide}
+            width={presentation.width}
+            height={presentation.height}
+            onPointer={pointerStore.set}
+          />
           {showTextPanel && (
             <div className="editor__text">
               {slide.objects.map((o) => (
@@ -178,6 +193,8 @@ export function Editor({ initial }: Props) {
         slideCount={presentation.slides.length}
         width={presentation.width}
         height={presentation.height}
+        zoomPercent={canvas.percent}
+        pointerStore={pointerStore}
         status={status}
       />
     </div>

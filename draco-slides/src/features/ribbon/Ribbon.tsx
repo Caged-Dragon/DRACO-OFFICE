@@ -21,6 +21,11 @@ interface Props {
   showTextPanel: boolean;
   onToggleSlidePane: () => void;
   onToggleTextPanel: () => void;
+  zoomPercent: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onFitZoom: () => void;
+  onActualSize: () => void;
 }
 
 export function Ribbon(p: Props) {
@@ -82,13 +87,25 @@ export function Ribbon(p: Props) {
             </div>
           </>
         ) : (
-          <div className="rgroup" role="group" aria-label="Show">
-            <div className="rgroup__buttons">
-              <button className="btn" aria-pressed={p.showSlidePane} onClick={p.onToggleSlidePane}>Slide pane</button>
-              <button className="btn" aria-pressed={p.showTextPanel} onClick={p.onToggleTextPanel}>Text panel</button>
+          <>
+            <div className="rgroup" role="group" aria-label="Show">
+              <div className="rgroup__buttons">
+                <button className="btn" aria-pressed={p.showSlidePane} onClick={p.onToggleSlidePane}>Slide pane</button>
+                <button className="btn" aria-pressed={p.showTextPanel} onClick={p.onToggleTextPanel}>Text panel</button>
+              </div>
+              <span className="rgroup__label">Show</span>
             </div>
-            <span className="rgroup__label">Show</span>
-          </div>
+            <div className="rgroup" role="group" aria-label="Zoom">
+              <div className="rgroup__buttons">
+                <button className="btn" onClick={p.onZoomOut}>Zoom out</button>
+                <span className="rgroup__value" aria-live="polite">{p.zoomPercent}%</span>
+                <button className="btn" onClick={p.onZoomIn}>Zoom in</button>
+                <button className="btn" onClick={p.onFitZoom}>Fit to window</button>
+                <button className="btn" onClick={p.onActualSize}>Actual size</button>
+              </div>
+              <span className="rgroup__label">Zoom</span>
+            </div>
+          </>
         )}
       </div>
     </div>

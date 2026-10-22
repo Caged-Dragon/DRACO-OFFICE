@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 (Roadmap Version 8)
+- Zoomable, pannable canvas viewport replacing the fixed-size preview. Fit to window (follows window resizing), zoom 10% to 400%, Zoom in/out/Fit/Actual size in the View tab, +/-/0 keys, Ctrl/Cmd+wheel zoom at the cursor.
+- Pan with the wheel, arrow keys, Space+drag or middle-button drag; the slide cannot be panned out of view.
+- Documented coordinate system (slide pixels vs screen pixels) with a pure, unit-tested geometry module (`core/geometry/viewport.ts`).
+- Status bar shows the pointer position in slide coordinates and the zoom level.
+- The editing canvas shows objects that extend past the slide edge; thumbnails still clip them.
+- Layout: the text panel now sits below the canvas instead of scrolling with it.
+- Limits: no touch gestures; zoom/pan not persisted; no rulers or grid yet (Version 18).
+
 ## 0.7.0 (Roadmap Version 7)
 - Slide pane keyboard navigation: Up/Down/Home/End select slides; only the selected thumbnail is in the Tab order (roving tabindex).
 - Selection stays synchronized everywhere: whichever control changes the selection (ribbon, status bar, PageUp/PageDown, delete, duplicate), the pane scrolls the selected thumbnail into view and, if keyboard focus is in the pane, focus follows.
