@@ -12,7 +12,7 @@ describe("SlideCanvas", () => {
     slide.objects[1].visible = false;
     slide.objects[0].rotation = 15;
     render(<SlideCanvas presentation={p} slide={slide} displayWidth={480} />);
-    const title = screen.getByText("Visible title");
+    const title = screen.getByText("Visible title").closest(".slide__text") as HTMLElement;
     expect(title).toHaveStyle({ transform: "rotate(15deg)" });
     expect(screen.queryByText("Secret body")).not.toBeInTheDocument();
   });
@@ -21,5 +21,23 @@ describe("SlideCanvas", () => {
     const p = createPresentation("4:3", { size: "4:3" });
     render(<SlideCanvas presentation={p} slide={p.slides[0]} displayWidth={480} />);
     expect(screen.getByRole("img")).toHaveStyle({ width: "480px", height: "360px" });
+  });
+
+  it("renders each line as its own block, keeping empty lines", () => {
+    const p = createPresentation("Lines");
+    p.slides[0].objects[0].text = "a\n\nb";
+    const { container } = render(<SlideCanvas presentation={p} slide={p.slides[0]} displayWidth={480} />);
+    const lines = [...container.querySelectorAll(".slide__text--title .rt-line")];
+    expect(lines.map((l) => l.textContent)).toEqual(["a", "", "b"]);
+    expect(lines[1].querySelector("br")).not.toBeNull();
+  });
+
+  it("hides the object that is being edited in place", () => {
+    const p = createPresentation("Edit");
+    const slide = p.slides[0];
+    slide.objects[0].text = "Being edited";
+    render(<SlideCanvas presentation={p} slide={slide} displayWidth={480} hideObjectId={slide.objects[0].id} />);
+    const el = screen.getByText("Being edited").closest(".slide__text") as HTMLElement;
+    expect(el.style.visibility).toBe("hidden");
   });
 });

@@ -9,6 +9,8 @@ interface Props {
   width: number;
   height: number;
   zoomPercent: number;
+  /** Description of the selected object, if any. */
+  selectionLabel: string | null;
   pointerStore: PointerStore;
   status: SaveStatus;
   /** Why the last save failed, shown with Retry and Download backup. */
@@ -28,6 +30,7 @@ export function StatusBar({
   width,
   height,
   zoomPercent,
+  selectionLabel,
   pointerStore,
   status,
   saveError,
@@ -42,6 +45,7 @@ export function StatusBar({
       <span className="muted">
         {width} × {height}
       </span>
+      {selectionLabel && <span>Selected: {selectionLabel}</span>}
       <PointerReadout store={pointerStore} />
       <span className="muted">Zoom {zoomPercent}%</span>
       <span className="editor__save">

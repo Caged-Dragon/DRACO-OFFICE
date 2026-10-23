@@ -1,18 +1,50 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { APP_VERSION } from "./app/version";
+import { AppCrash } from "./components/common/AppCrash";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { AppShell } from "./components/layout/AppShell";
 import { createPresentation } from "./core/document-model/factory";
-import { MAX_FILE_BYTES, deserializePresentation } from "./core/serialization/serialize";
+import { MAX_FILE_BYTES, deserializePresentation, fileNameFor, serializePresentation } from "./core/serialization/serialize";
 import { Editor } from "./features/editor/Editor";
+import { EditorCrash } from "./features/editor/EditorCrash";
 import { Home } from "./features/home/Home";
 import { prepareImport } from "./services/import/importPresentation";
 import { getPresentation, recordExists, savePresentation } from "./services/storage/presentationStore";
 import { describeStorageError } from "./services/storage/storageError";
+import { useGlobalErrorHandlers } from "./hooks/useGlobalErrorHandlers";
 import { AppProvider, useApp } from "./state/AppContext";
+import { SettingsProvider, useSettings } from "./state/SettingsContext";
+import { downloadTextFile } from "./utils/download";
 import { readFileAsText } from "./utils/readFile";
 
 function Screens() {
   const { state, dispatch, notify } = useApp();
+  const { settings } = useSettings();
+  const [editorAttempt, setEditorAttempt] = useState(0);
+  const openId = state.presentation?.id ?? null;
+  useGlobalErrorHandlers(notify);
+
+  /** After an editor crash: reload what autosave stored. */
+  const reloadSaved = useCallback(async () => {
+    try {
+      const p = openId ? await getPresentation(openId) : null;
+      if (!p) throw new Error("The saved version could not be read.");
+      dispatch({ type: "openPresentation", presentation: p });
+      setEditorAttempt((n) => n + 1);
+    } catch (e) {
+      notify("error", e instanceof Error ? e.message : "Could not restore the presentation.");
+    }
+  }, [openId, dispatch, notify]);
+
+  const saveStoredCopy = useCallback(async () => {
+    try {
+      const p = openId ? await getPresentation(openId) : null;
+      if (!p) throw new Error("The saved version could not be read.");
+      downloadTextFile(fileNameFor(p.title), serializePresentation(p, APP_VERSION));
+    } catch (e) {
+      notify("error", e instanceof Error ? e.message : "Could not save a copy.");
+    }
+  }, [openId, notify]);
 
   const openById = useCallback(
     async (id: string) => {
@@ -55,7 +87,11 @@ function Screens() {
           onNew={(title, size) =>
             dispatch({
               type: "openPresentation",
-              presentation: createPresentation(title || undefined, { size, createdWith: APP_VERSION }),
+              presentation: createPresentation(title || undefined, {
+                size,
+                createdWith: APP_VERSION,
+                author: settings.defaultAuthor,
+              }),
             })
           }
           onOpen={openById}
@@ -65,7 +101,18 @@ function Screens() {
       {/* Kept mounted while hidden so edits and autosave survive a trip to Home. */}
       {state.presentation && (
         <div className="shell__editor" hidden={state.view !== "editor"}>
-          <Editor key={state.presentation.id} initial={state.presentation} />
+          <ErrorBoundary
+            key={editorAttempt}
+            fallback={() => (
+              <EditorCrash
+                onReload={reloadSaved}
+                onSaveCopy={saveStoredCopy}
+                onClose={() => dispatch({ type: "closePresentation" })}
+              />
+            )}
+          >
+            <Editor key={state.presentation.id} initial={state.presentation} />
+          </ErrorBoundary>
         </div>
       )}
     </AppShell>
@@ -74,8 +121,12 @@ function Screens() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <Screens />
-    </AppProvider>
+    <ErrorBoundary fallback={() => <AppCrash />}>
+      <AppProvider>
+        <SettingsProvider>
+          <Screens />
+        </SettingsProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type Key
 import { APP_VERSION } from "../../app/version";
 import { MenuButton } from "../../components/menus/MenuButton";
 import type { Presentation } from "../../core/document-model/types";
+import type { Point } from "../../core/geometry/viewport";
 import { fileNameFor, serializePresentation } from "../../core/serialization/serialize";
 import { savePresentation } from "../../services/storage/presentationStore";
 import { describeStorageError } from "../../services/storage/storageError";
 import { useApp } from "../../state/AppContext";
+import { useSettings } from "../../state/SettingsContext";
 import { editorReducer, initEditorState } from "../../state/editorReducer";
 import { downloadTextFile } from "../../utils/download";
 import { CanvasViewport } from "../canvas/CanvasViewport";
@@ -23,22 +25,60 @@ interface Props {
 
 export function Editor({ initial }: Props) {
   const { dispatch: appDispatch, notify } = useApp();
+  const { settings } = useSettings();
   const [state, dispatch] = useReducer(editorReducer, initial, initEditorState);
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [showSlidePane, setShowSlidePane] = useState(true);
-  const [showTextPanel, setShowTextPanel] = useState(true);
+  const [showSlidePane, setShowSlidePane] = useState(settings.showSlidePane);
+  const [showTextPanel, setShowTextPanel] = useState(settings.showTextPanel);
   const [showProperties, setShowProperties] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+  const announcedSlide = useRef(initial.slides[0].id);
   const canvas = useCanvasView(initial.width, initial.height);
   const pointerStore = useMemo(createPointerStore, []);
   const first = useRef(true);
   const dirty = useRef(false);
-  const { presentation, currentSlideId } = state;
+  const { presentation, currentSlideId, selectedObjectId, editingObjectId } = state;
+  const [editCaret, setEditCaret] = useState<Point | null>(null);
   const latest = useRef(presentation);
   latest.current = presentation;
   const slide = presentation.slides.find((s) => s.id === currentSlideId) ?? presentation.slides[0];
   const index = presentation.slides.indexOf(slide);
+  const selectedObject = slide.objects.find((o) => o.id === selectedObjectId) ?? null;
+  const editingObject = slide.objects.find((o) => o.id === editingObjectId) ?? null;
+  const selectionLabel = selectedObject
+    ? `${selectedObject.name} (${Math.round(selectedObject.x)}, ${Math.round(selectedObject.y)}, ${Math.round(selectedObject.width)} × ${Math.round(selectedObject.height)})${
+        editingObject ? " – editing text" : ""
+      }`
+    : null;
+
+  const startEditing = (objectId: string, caret: Point | null) => {
+    setEditCaret(caret);
+    dispatch({ type: "startEditing", objectId });
+  };
+  const stopEditing = (reason: "escape" | "blur" | "click") => {
+    dispatch({ type: "stopEditing" });
+    if (reason === "escape") canvas.containerRef.current?.focus(); // keep keyboard users on the canvas
+  };
+
+  // Tell screen-reader users which slide is now selected (not on reordering, and not on first load).
+  useEffect(() => {
+    if (announcedSlide.current === slide.id) return;
+    announcedSlide.current = slide.id;
+    setAnnouncement(`Slide ${index + 1} of ${presentation.slides.length}: ${slide.name}`);
+  }, [slide.id, slide.name, index, presentation.slides.length]);
+
+  useEffect(() => {
+    if (editingObject) setAnnouncement(`Editing ${editingObject.name}. Press Escape to finish.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingObject?.id]);
+
+  // Announce a newly selected object (clearing the selection is not announced).
+  useEffect(() => {
+    if (selectedObject) setAnnouncement(`Selected ${selectedObject.name}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedObject?.id]);
 
   /** Saves a snapshot. Status only changes to "saved" if no newer edit is waiting. */
   const persist = useCallback(async (p: Presentation) => {
@@ -123,7 +163,7 @@ export function Editor({ initial }: Props) {
 
   // PageUp / PageDown move between slides unless focus is in a text field or open menu.
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest("input, textarea, [role=menu]")) return;
+    if ((e.target as HTMLElement).closest("input, textarea, [role=menu], [contenteditable=true]")) return;
     if (e.key === "PageDown") {
       e.preventDefault();
       go(1);
@@ -165,6 +205,11 @@ export function Editor({ initial }: Props) {
         onMoveDown={() => dispatch({ type: "moveSlide", slideId: slide.id, toIndex: index + 1 })}
         onPrevious={() => go(-1)}
         onNext={() => go(1)}
+        hasSelection={selectedObject !== null}
+        canEditText={selectedObject?.type === "text"}
+        onEditText={() => selectedObject && startEditing(selectedObject.id, null)}
+        onAddTextBox={() => dispatch({ type: "addTextBox" })}
+        onDeleteObject={() => selectedObject && dispatch({ type: "deleteObject", objectId: selectedObject.id })}
         showSlidePane={showSlidePane}
         showTextPanel={showTextPanel}
         onToggleSlidePane={() => setShowSlidePane((v) => !v)}
@@ -192,16 +237,28 @@ export function Editor({ initial }: Props) {
             slide={slide}
             width={presentation.width}
             height={presentation.height}
+            selectedObjectId={selectedObject?.id ?? null}
+            editingObjectId={editingObject?.id ?? null}
+            editCaret={editCaret}
+            onStartEditing={startEditing}
+            onTextChange={(objectId, text) =>
+              dispatch({ type: "setObjectText", slideId: slide.id, objectId, text })
+            }
+            onStopEditing={stopEditing}
             onPointer={pointerStore.set}
+            onSelectObject={(objectId) => dispatch({ type: "selectObject", objectId })}
+            onChangeRect={(objectId, rect) => dispatch({ type: "setObjectRect", objectId, rect })}
+            onDeleteSelected={() => selectedObject && dispatch({ type: "deleteObject", objectId: selectedObject.id })}
           />
           {showTextPanel && (
             <div className="editor__text">
               {slide.objects.map((o) => (
-                <label key={o.id}>
-                  <span className="muted">{o.role === "title" ? "Title" : "Body text"}</span>
+                <label key={o.id} className={o.id === selectedObject?.id ? "editor__field--selected" : undefined}>
+                  <span className="muted">{o.role === "title" ? "Title" : o.role === "body" ? "Body text" : o.name}</span>
                   <textarea
-                    rows={o.role === "title" ? 1 : 3}
+                    rows={o.role === "body" ? 3 : 1}
                     value={o.text}
+                    onFocus={() => dispatch({ type: "selectObject", objectId: o.id })}
                     onChange={(e) =>
                       dispatch({ type: "setObjectText", slideId: slide.id, objectId: o.id, text: e.target.value })
                     }
@@ -235,12 +292,17 @@ export function Editor({ initial }: Props) {
         />
       )}
 
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+
       <StatusBar
         index={index}
         slideCount={presentation.slides.length}
         width={presentation.width}
         height={presentation.height}
         zoomPercent={canvas.percent}
+        selectionLabel={selectionLabel}
         pointerStore={pointerStore}
         status={status}
         saveError={saveError}

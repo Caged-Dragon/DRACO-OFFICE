@@ -153,121 +153,121 @@
   "v": 26,
   "title": "Formula bar, name box, formula editing, F2/F4 modes",
   "phase": "C · Formulas core",
-  "status": "partial"
+  "status": "done"
  },
  {
   "v": 27,
   "title": "Math and trig functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 28,
   "title": "Statistical functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 29,
   "title": "Logical functions (IF, IFS, AND, OR, SWITCH, XOR)",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 30,
   "title": "Text functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 31,
   "title": "Date and time functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 32,
   "title": "Lookup: VLOOKUP, HLOOKUP, INDEX, MATCH",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 33,
   "title": "Lookup: XLOOKUP, XMATCH, LOOKUP",
   "phase": "C · Formulas core",
-  "status": "partial"
+  "status": "done"
  },
  {
   "v": 34,
   "title": "Financial functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 35,
   "title": "Information and error-handling functions (IFERROR, ISxxx)",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 36,
   "title": "Engineering and conversion functions",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 37,
   "title": "Database functions (DSUM, DCOUNT…)",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 38,
   "title": "Dynamic arrays: FILTER, SORT, SORTBY, UNIQUE, SEQUENCE",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 39,
   "title": "Dynamic arrays: LET, LAMBDA, MAP, REDUCE, SCAN, BYROW",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 40,
   "title": "Array formulas, spill ranges, implicit intersection",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 41,
   "title": "Named ranges and Name Manager",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 42,
   "title": "Absolute/relative refs, cross-sheet refs, 3D refs",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "done"
  },
  {
   "v": 43,
   "title": "Formula auditing: trace precedents/dependents, show formulas",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 44,
   "title": "Error checking, evaluate formula, watch window",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 45,
   "title": "Calculation options (auto/manual), iterative calc, circular refs",
   "phase": "C · Formulas core",
-  "status": "planned"
+  "status": "partial"
  },
  {
   "v": 46,

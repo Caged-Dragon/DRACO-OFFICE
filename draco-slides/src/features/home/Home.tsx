@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { DEFAULT_SLIDE_SIZE, SLIDE_SIZE_IDS, SLIDE_SIZES, type SlideSizeId } from "../../core/document-model/sizes";
+import { SLIDE_SIZE_IDS, SLIDE_SIZES, type SlideSizeId } from "../../core/document-model/sizes";
 import type { Presentation } from "../../core/document-model/types";
 import { FILE_EXTENSION } from "../../core/serialization/serialize";
 import { deletePresentation, listPresentationsDetailed } from "../../services/storage/presentationStore";
+import { useSettings } from "../../state/SettingsContext";
 import { describeStorageError } from "../../services/storage/storageError";
 
 interface Props {
@@ -16,7 +17,8 @@ export function Home({ onNew, onOpen, onImportFile }: Props) {
   const [unreadable, setUnreadable] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
-  const [size, setSize] = useState<SlideSizeId>(DEFAULT_SLIDE_SIZE);
+  const { settings } = useSettings();
+  const [size, setSize] = useState<SlideSizeId>(settings.defaultSlideSize);
   const [query, setQuery] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -35,6 +37,11 @@ export function Home({ onNew, onOpen, onImportFile }: Props) {
   useEffect(() => {
     void refresh();
   }, []);
+
+  // A changed default in Settings applies to the next new presentation.
+  useEffect(() => {
+    setSize(settings.defaultSlideSize);
+  }, [settings.defaultSlideSize]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();

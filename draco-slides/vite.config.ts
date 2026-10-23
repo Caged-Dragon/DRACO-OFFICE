@@ -10,11 +10,17 @@ export default defineConfig(({ mode }) => ({
   base: mode === "desktop" ? "./" : "/",
   plugins: [react()],
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
-  server: { port: 5175 },
+  server: { port: 5175, strictPort: true },
   test: {
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/main.tsx", "src/**/*.d.ts", "src/test/**"],
+    },
   },
 }));

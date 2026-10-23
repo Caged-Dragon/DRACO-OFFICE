@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.12.0 (Roadmap Version 12, text editing surface)
+- In-place text editing on the canvas: double-click, Enter, F2 or Home > Edit text; Escape or clicking elsewhere finishes. Works for titles, bodies and text boxes.
+- The browser owns the editing surface while you type (built once, never re-rendered), so caret, selection, IME and native undo behave normally. Text is read back on every input (`domToText`) and flows into the document, thumbnails, Text panel and autosave.
+- Plain-text paste; browser formatting commands and drops are blocked until formatting exists.
+- Text is rendered as one block per line everywhere so text does not shift when editing starts.
+- Keys typed in the editor no longer trigger canvas shortcuts or slide navigation.
+- **Scope note:** formatting ("rich text": bold, italic, fonts, colours) is not in this version. It needs a document-model change and arrives with Version 13.
+- Limits: behaviour in real browsers is untested; no global undo until Version 20.
+
+## 0.11.0 (Roadmap Version 11)
+- Text boxes: Insert > Text box; select, move, resize (8 handles) and delete objects directly on the canvas. Selection shown on the canvas, in the status bar and announced to screen readers; the Text panel and canvas selection stay in sync.
+- New ribbon tab Insert; Home > Delete object; Delete/Backspace/Escape with the canvas focused.
+- Interactions are measured in slide units (zoom-independent), start only after a 3 px movement, keep at least 20 px of an object on the slide, and never fight Space/middle-button panning.
+- Document schema 3 (adds the `textbox` role) with automatic migration from schema 2; older apps will not open schema-3 files.
+- Geometry module `core/geometry/rect.ts` (move, resize, constrain) with unit tests.
+- Limits: mouse only (keyboard nudging in Version 17), no multi-select, snapping, rotation or in-place text editing yet; no undo until Version 20.
+
+## 0.10.0 (Roadmap Version 10: end of Phase 1)
+- Settings dialog: theme (match system, dark, light), default slide size, default author, default pane visibility. Persisted in localStorage with per-field repair and a visible warning if storage is blocked.
+- Light theme; all colours now come from CSS variables. Both themes are checked against WCAG AA contrast by a test (`tests/unit/contrast.test.ts`, `utils/contrast.ts`).
+- Error handling: error boundaries (editor recovery screen with reload / save-a-copy / close; app-level reload screen), global handlers for uncaught errors and unhandled rejections, central logger.
+- Accessibility foundations: modal focus trap, polite announcements of slide changes, ribbon tab panels always present (valid `aria-controls`), axe-core tests on the main screens.
+- Testing baseline: coverage script, Playwright config and e2e smoke tests, `npm run verify`, developer and testing docs.
+- Limits: no coverage threshold yet; e2e covers Chromium only; manual screen-reader testing still to do (Version 95).
+
 ## 0.9.0 (Roadmap Version 9)
 - Native file: File > Save a copy to file (`.draco-slides.json`) and Home > Open from file. Strict import validation with size and count limits, unknown-field stripping, newer-version detection, and automatic migration of older schemas. Imports never overwrite an existing presentation.
 - Storage errors are classified (full, blocked, other) and explained in the status bar, with Retry and Download backup.

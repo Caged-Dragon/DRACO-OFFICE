@@ -57,6 +57,14 @@ describe("validatePresentation", () => {
     expect(errorsOf(q).join()).toContain("metadata");
   });
 
+  it("accepts the textbox role and rejects other roles", () => {
+    const p = clone(createPresentation());
+    p.slides[0].objects[0].role = "textbox";
+    expect(validatePresentation(p).ok).toBe(true);
+    (p.slides[0].objects[0] as { role: string }).role = "banner";
+    expect(errorsOf(p).join()).toContain("role must be title, body or textbox");
+  });
+
   it("does not modify its input", () => {
     const p = createPresentation();
     const before = JSON.stringify(p);

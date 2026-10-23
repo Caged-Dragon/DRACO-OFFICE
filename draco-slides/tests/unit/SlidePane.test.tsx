@@ -23,6 +23,7 @@ describe("Slide management UI", () => {
   it("renames a slide through the dialog and returns focus to the button", async () => {
     await openEditor();
     const trigger = screen.getByRole("button", { name: "Rename slide" });
+    trigger.focus(); // a real click focuses the button; fireEvent.click does not
     fireEvent.click(trigger);
     const dialog = within(screen.getByRole("dialog", { name: "Rename slide" }));
     fireEvent.change(dialog.getByLabelText("Slide name"), { target: { value: "Intro" } });

@@ -1,11 +1,15 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ReleaseInfo } from "../../features/release/ReleaseInfo";
-import { Toasts } from "../notifications/Toasts";
+import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { isCloudConfigured } from "../../services/supabase/client";
 import { useApp } from "../../state/AppContext";
+import { useSettings } from "../../state/SettingsContext";
+import { Toasts } from "../notifications/Toasts";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useApp();
+  const { settings, update } = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { view, presentation } = state;
 
   return (
@@ -34,12 +38,25 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="muted shell__cloud">
           {isCloudConfigured ? "Cloud connection configured" : "Local only"}
         </span>
+        <button className="btn btn--small" onClick={() => setSettingsOpen(true)}>
+          Settings
+        </button>
         <ReleaseInfo />
       </header>
       <main id="main" className="shell__main" tabIndex={-1}>
         {children}
       </main>
       <Toasts />
+      {settingsOpen && (
+        <SettingsDialog
+          settings={settings}
+          onClose={() => setSettingsOpen(false)}
+          onSave={(next) => {
+            update(next);
+            setSettingsOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

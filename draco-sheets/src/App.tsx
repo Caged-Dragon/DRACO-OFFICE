@@ -10,6 +10,7 @@ import OpenDialog from './OpenDialog';
 import RoadmapDialog from './RoadmapDialog';
 import CellStylesDialog from './CellStylesDialog';
 import { changeIndent } from './indent';
+import FormulasDialog from './FormulasDialog';
 
 type Status = 'saved' | 'saving' | 'dirty' | 'pending';
 type Snapshot = Record<string, unknown>;
@@ -24,7 +25,7 @@ export default function App() {
   const [cloud, setCloud] = useState(false);
   const [status, setStatus] = useState<Status>('saved');
   const [session, setSession] = useState<Session | null>(null);
-  const [dialog, setDialog] = useState<null | 'open' | 'auth' | 'roadmap' | 'styles'>(null);
+  const [dialog, setDialog] = useState<null | 'open' | 'auth' | 'roadmap' | 'styles' | 'formulas'>(null);
   const [menu, setMenu] = useState(false);
   const [ready, setReady] = useState(false);
   const sessionRef = useRef<Session | null>(null);
@@ -178,6 +179,7 @@ export default function App() {
           <button onClick={() => setDialog('open')}>Open</button>
           <button onClick={() => void flush()}>Save</button>
           <button onClick={() => setDialog('styles')}>Styles</button>
+          <button onClick={() => setDialog('formulas')}>Formulas</button>
           <span className="pair" role="group" aria-label="Indent">
             <button title="Decrease indent" aria-label="Decrease indent" onClick={() => engine.current && void changeIndent(engine.current, -1)}>⇤</button>
             <button title="Increase indent" aria-label="Increase indent" onClick={() => engine.current && void changeIndent(engine.current, 1)}>⇥</button>
@@ -194,6 +196,7 @@ export default function App() {
             <button onClick={() => void flush()}>Save now</button>
             {cloudEnabled && !cloud && <button onClick={moveToCloud}>Sync to cloud</button>}
             <button onClick={() => setDialog('styles')}>Cell styles</button>
+            <button onClick={() => setDialog('formulas')}>Formulas</button>
             <button onClick={() => engine.current && void changeIndent(engine.current, 1)}>Increase indent</button>
             <button onClick={() => engine.current && void changeIndent(engine.current, -1)}>Decrease indent</button>
             <button onClick={() => setDialog('roadmap')}>Roadmap</button>
@@ -208,6 +211,7 @@ export default function App() {
       {dialog === 'open' && <OpenDialog signedIn={Boolean(session)} onOpen={(m: WorkbookMeta) => void openMeta(m)} onClose={() => setDialog(null)} />}
       {dialog === 'auth' && <AuthDialog session={session} onClose={() => setDialog(null)} />}
       {dialog === 'roadmap' && <RoadmapDialog onClose={() => setDialog(null)} />}
+      {dialog === 'formulas' && engine.current && <FormulasDialog engine={engine.current} onClose={() => setDialog(null)} />}
       {dialog === 'styles' && <CellStylesDialog engine={engine.current} onClose={() => setDialog(null)} />}
     </div>
   );

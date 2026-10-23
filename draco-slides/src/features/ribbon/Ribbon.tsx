@@ -1,8 +1,9 @@
 import { useState, type KeyboardEvent } from "react";
 
-type TabId = "home" | "view";
+type TabId = "home" | "insert" | "view";
 const TABS: { id: TabId; label: string }[] = [
   { id: "home", label: "Home" },
+  { id: "insert", label: "Insert" },
   { id: "view", label: "View" },
 ];
 
@@ -17,6 +18,11 @@ interface Props {
   onMoveDown: () => void;
   onPrevious: () => void;
   onNext: () => void;
+  hasSelection: boolean;
+  canEditText: boolean;
+  onEditText: () => void;
+  onAddTextBox: () => void;
+  onDeleteObject: () => void;
   showSlidePane: boolean;
   showTextPanel: boolean;
   onToggleSlidePane: () => void;
@@ -59,54 +65,85 @@ export function Ribbon(p: Props) {
         ))}
       </div>
 
-      <div className="ribbon__panel" role="tabpanel" id={`ribbon-panel-${tab}`} aria-labelledby={`ribbon-tab-${tab}`}>
-        {tab === "home" ? (
-          <>
-            <div className="rgroup" role="group" aria-label="Slides">
-              <div className="rgroup__buttons">
-                <button className="btn btn--primary" onClick={p.onAddSlide}>New slide</button>
-                <button className="btn" onClick={p.onDuplicateSlide}>Duplicate slide</button>
-                <button className="btn" onClick={p.onRenameSlide}>Rename slide</button>
-                <button className="btn" disabled={p.slideCount <= 1} onClick={p.onDeleteSlide}>Delete slide</button>
-              </div>
-              <span className="rgroup__label">Slides</span>
-            </div>
-            <div className="rgroup" role="group" aria-label="Arrange">
-              <div className="rgroup__buttons">
-                <button className="btn" disabled={p.index === 0} onClick={p.onMoveUp}>Move up</button>
-                <button className="btn" disabled={p.index === p.slideCount - 1} onClick={p.onMoveDown}>Move down</button>
-              </div>
-              <span className="rgroup__label">Arrange</span>
-            </div>
-            <div className="rgroup" role="group" aria-label="Navigate">
-              <div className="rgroup__buttons">
-                <button className="btn" disabled={p.index === 0} onClick={p.onPrevious}>Previous</button>
-                <button className="btn" disabled={p.index === p.slideCount - 1} onClick={p.onNext}>Next</button>
-              </div>
-              <span className="rgroup__label">Navigate</span>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="rgroup" role="group" aria-label="Show">
-              <div className="rgroup__buttons">
-                <button className="btn" aria-pressed={p.showSlidePane} onClick={p.onToggleSlidePane}>Slide pane</button>
-                <button className="btn" aria-pressed={p.showTextPanel} onClick={p.onToggleTextPanel}>Text panel</button>
-              </div>
-              <span className="rgroup__label">Show</span>
-            </div>
-            <div className="rgroup" role="group" aria-label="Zoom">
-              <div className="rgroup__buttons">
-                <button className="btn" onClick={p.onZoomOut}>Zoom out</button>
-                <span className="rgroup__value" aria-live="polite">{p.zoomPercent}%</span>
-                <button className="btn" onClick={p.onZoomIn}>Zoom in</button>
-                <button className="btn" onClick={p.onFitZoom}>Fit to window</button>
-                <button className="btn" onClick={p.onActualSize}>Actual size</button>
-              </div>
-              <span className="rgroup__label">Zoom</span>
-            </div>
-          </>
-        )}
+      {/* Both panels always exist so every tab's aria-controls points at a real element. */}
+      <div
+        className="ribbon__panel"
+        role="tabpanel"
+        id="ribbon-panel-home"
+        aria-labelledby="ribbon-tab-home"
+        hidden={tab !== "home"}
+      >
+        <div className="rgroup" role="group" aria-label="Slides">
+          <div className="rgroup__buttons">
+            <button className="btn btn--primary" onClick={p.onAddSlide}>New slide</button>
+            <button className="btn" onClick={p.onDuplicateSlide}>Duplicate slide</button>
+            <button className="btn" onClick={p.onRenameSlide}>Rename slide</button>
+            <button className="btn" disabled={p.slideCount <= 1} onClick={p.onDeleteSlide}>Delete slide</button>
+          </div>
+          <span className="rgroup__label">Slides</span>
+        </div>
+        <div className="rgroup" role="group" aria-label="Arrange">
+          <div className="rgroup__buttons">
+            <button className="btn" disabled={p.index === 0} onClick={p.onMoveUp}>Move up</button>
+            <button className="btn" disabled={p.index === p.slideCount - 1} onClick={p.onMoveDown}>Move down</button>
+          </div>
+          <span className="rgroup__label">Arrange</span>
+        </div>
+        <div className="rgroup" role="group" aria-label="Navigate">
+          <div className="rgroup__buttons">
+            <button className="btn" disabled={p.index === 0} onClick={p.onPrevious}>Previous</button>
+            <button className="btn" disabled={p.index === p.slideCount - 1} onClick={p.onNext}>Next</button>
+          </div>
+          <span className="rgroup__label">Navigate</span>
+        </div>
+        <div className="rgroup" role="group" aria-label="Object">
+          <div className="rgroup__buttons">
+            <button className="btn" disabled={!p.canEditText} onClick={p.onEditText}>Edit text</button>
+            <button className="btn" disabled={!p.hasSelection} onClick={p.onDeleteObject}>Delete object</button>
+          </div>
+          <span className="rgroup__label">Object</span>
+        </div>
+      </div>
+
+      <div
+        className="ribbon__panel"
+        role="tabpanel"
+        id="ribbon-panel-insert"
+        aria-labelledby="ribbon-tab-insert"
+        hidden={tab !== "insert"}
+      >
+        <div className="rgroup" role="group" aria-label="Text">
+          <div className="rgroup__buttons">
+            <button className="btn btn--primary" onClick={p.onAddTextBox}>Text box</button>
+          </div>
+          <span className="rgroup__label">Text</span>
+        </div>
+      </div>
+
+      <div
+        className="ribbon__panel"
+        role="tabpanel"
+        id="ribbon-panel-view"
+        aria-labelledby="ribbon-tab-view"
+        hidden={tab !== "view"}
+      >
+        <div className="rgroup" role="group" aria-label="Show">
+          <div className="rgroup__buttons">
+            <button className="btn" aria-pressed={p.showSlidePane} onClick={p.onToggleSlidePane}>Slide pane</button>
+            <button className="btn" aria-pressed={p.showTextPanel} onClick={p.onToggleTextPanel}>Text panel</button>
+          </div>
+          <span className="rgroup__label">Show</span>
+        </div>
+        <div className="rgroup" role="group" aria-label="Zoom">
+          <div className="rgroup__buttons">
+            <button className="btn" onClick={p.onZoomOut}>Zoom out</button>
+            <span className="rgroup__value" aria-live="polite">{p.zoomPercent}%</span>
+            <button className="btn" onClick={p.onZoomIn}>Zoom in</button>
+            <button className="btn" onClick={p.onFitZoom}>Fit to window</button>
+            <button className="btn" onClick={p.onActualSize}>Actual size</button>
+          </div>
+          <span className="rgroup__label">Zoom</span>
+        </div>
       </div>
     </div>
   );

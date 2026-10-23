@@ -83,7 +83,9 @@ export function validatePresentation(value: unknown): ValidationResult {
         if (o.type !== "text") {
           fail(`${ow}: unknown object type ${String(o.type)}`);
         } else {
-          if (o.role !== "title" && o.role !== "body") fail(`${ow}: role must be title or body`);
+          if (o.role !== "title" && o.role !== "body" && o.role !== "textbox") {
+            fail(`${ow}: role must be title, body or textbox`);
+          }
           if (!isStr(o.text)) fail(`${ow}: text must be text`);
           if (!isNum(o.fontSize) || o.fontSize <= 0) fail(`${ow}: fontSize must be above zero`);
         }

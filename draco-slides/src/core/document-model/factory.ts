@@ -1,5 +1,5 @@
 import { DEFAULT_SLIDE_SIZE, SLIDE_SIZES, type SlideSizeId } from "./sizes";
-import { DOCUMENT_SCHEMA_VERSION, type Presentation, type Slide } from "./types";
+import { DOCUMENT_SCHEMA_VERSION, type Presentation, type Slide, type SlideObject, type TextObject } from "./types";
 
 export function newId(): string {
   return crypto.randomUUID();
@@ -14,6 +14,18 @@ export function createSlide(name = "Untitled slide", title = "Click to add title
       { id: newId(), type: "text", role: "body", name: "Body", x: 80, y: 200, width: 800, height: 260, rotation: 0, visible: true, text: "Click to add text", fontSize: 24 },
     ],
   };
+}
+
+/** Smallest "<base> N" not already used by an object, for new objects such as text boxes. */
+export function nextObjectName(objects: SlideObject[], base: string): string {
+  const used = new Set(objects.map((o) => o.name));
+  let n = 1;
+  while (used.has(`${base} ${n}`)) n++;
+  return `${base} ${n}`;
+}
+
+export function createTextBox(name: string, rect: { x: number; y: number; width: number; height: number }): TextObject {
+  return { id: newId(), type: "text", role: "textbox", name, ...rect, rotation: 0, visible: true, text: "Text box", fontSize: 24 };
 }
 
 /** Smallest "Slide N" (N above the slide count) that no slide already uses. */

@@ -53,7 +53,7 @@ describe("serialize / deserialize", () => {
       slides: [{ id: "s", name: "S", objects: [{ id: "o", type: "text", role: "title", x: 0, y: 0, width: 5, height: 5, text: "T", fontSize: 30 }] }],
     };
     const r = deserializePresentation(wrap(v1));
-    expect(r.ok && r.presentation.schemaVersion).toBe(2);
+    expect(r.ok && r.presentation.schemaVersion).toBe(3);
   });
 
   it("reports damaged content with the first problems", () => {

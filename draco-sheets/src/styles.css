@@ -84,3 +84,11 @@ input { font: 14px inherit; font-family: inherit; padding: 9px 10px; border: 1px
 .swatch { border-radius: 4px; border: 1px solid var(--line); text-align: left; min-height: 34px; padding: 6px 8px; }
 
 .pair { display: inline-flex; } .pair button { padding: 7px 9px; } .pair button:first-child { border-radius: 8px 0 0 8px; } .pair button:last-child { border-radius: 0 8px 8px 0; border-left: 0; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.tabs button { border-radius: 8px; } .tabs button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+.inline { display: inline-flex; grid-auto-flow: column; align-items: center; gap: 6px; }
+.watch { width: 100%; border-collapse: collapse; font-size: 13px; } .watch th, .watch td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+code { background: var(--bar); padding: 1px 5px; border-radius: 4px; }

@@ -38,7 +38,7 @@ describe("presentationStore (IndexedDB)", () => {
     await savePresentation(v1 as unknown as Presentation);
     await savePresentation({ id: "broken-1", schemaVersion: 2 } as unknown as Presentation);
     const loaded = await getPresentation("legacy-1");
-    expect(loaded?.schemaVersion).toBe(2);
+    expect(loaded?.schemaVersion).toBe(3);
     expect(loaded?.metadata.language).toBe("en");
     expect(loaded?.slides[0].objects[0]).toMatchObject({ name: "Title", rotation: 0, visible: true });
     expect(await getPresentation("broken-1")).toBeNull();

@@ -1,7 +1,7 @@
 {
   "name": "draco-slides",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.12.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,10 @@
     "desktop:start": "npm run build:desktop && electron .",
     "dist:win": "npm run build:desktop && electron-builder --win --publish never",
     "dist:mac": "npm run build:desktop && electron-builder --mac --publish never",
-    "dist:linux": "npm run build:desktop && electron-builder --linux --publish never"
+    "dist:linux": "npm run build:desktop && electron-builder --linux --publish never",
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "verify": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
@@ -22,12 +25,15 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "@vitest/coverage-v8": "^2.1.4",
+    "axe-core": "^4.10.0",
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8",
     "fake-indexeddb": "^6.0.0",
@@ -77,5 +83,8 @@
       "category": "Office",
       "artifactName": "Draco-Slides-${version}.${ext}"
     }
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

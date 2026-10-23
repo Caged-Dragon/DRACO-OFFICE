@@ -32,8 +32,15 @@ function migrateV1(raw: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
+/** v2 -> v3: text objects may now have the "textbox" role. Existing data is unchanged. */
+function migrateV2(raw: Record<string, unknown>): Record<string, unknown> {
+  return { ...raw, schemaVersion: 3 };
+}
+
 /** Upgrades older stored documents to the current schema, then validates. Unknown versions are rejected, not guessed at. */
 export function parsePresentation(raw: unknown): ValidationResult {
-  const upgraded = isRecord(raw) && raw.schemaVersion === 1 ? migrateV1(raw) : raw;
-  return validatePresentation(upgraded);
+  let doc: unknown = raw;
+  if (isRecord(doc) && doc.schemaVersion === 1) doc = migrateV1(doc);
+  if (isRecord(doc) && doc.schemaVersion === 2) doc = migrateV2(doc);
+  return validatePresentation(doc);
 }

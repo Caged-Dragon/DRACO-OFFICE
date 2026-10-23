@@ -1,6 +1,6 @@
 # Draco Slides
 
-Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.9.0**.
+Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.12.0**.
 
 ## Run (Windows CMD)
 ```cmd
@@ -23,3 +23,6 @@ See `CHANGELOG.md` for what exists and what does not. No PowerPoint compatibilit
 - **Fallbacks:** if the release has no installer for the user's system, Install uses the browser's PWA install prompt (Chrome/Edge) or opens the release page.
 - **Build the installer locally (Windows):** `npm run dist:win` writes it to `release/`. Try the desktop shell without packaging: `npm run desktop:start`.
 - The Windows installer is **unsigned**, so Windows SmartScreen may warn on first run. Code signing is not set up.
+
+## Developing and testing
+See `docs/development/getting-started.md` and `docs/development/testing.md`. Before a release run `npm run verify` (and `npm run e2e` when a browser is available).

@@ -1,5 +1,5 @@
 /** Bump when the stored shape changes, and add a migration in core/serialization/migrate.ts. */
-export const DOCUMENT_SCHEMA_VERSION = 2;
+export const DOCUMENT_SCHEMA_VERSION = 3;
 
 export const MIN_SLIDE_DIMENSION = 100;
 export const MAX_SLIDE_DIMENSION = 20000;
@@ -24,7 +24,8 @@ export interface BaseObject {
 
 export interface TextObject extends BaseObject {
   type: "text";
-  role: "title" | "body";
+  /** "title" and "body" are slide placeholders; "textbox" is a free text box the user inserted. */
+  role: "title" | "body" | "textbox";
   text: string;
   fontSize: number;
 }
