@@ -80,7 +80,6 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 .slide { position: relative; background: var(--paper); color: #1d1d1d; overflow: hidden; flex: none; box-shadow: 0 4px 18px rgba(0,0,0,.35); outline: 1px solid var(--line); }
 .slide__inner { position: absolute; top: 0; left: 0; transform-origin: top left; }
 .slide__text { position: absolute; overflow: hidden; white-space: pre-wrap; line-height: 1.2; }
-.slide__text--title { font-weight: 700; }
 
 @media (max-width: 800px) {
   .editor__nav { width: 120px; }
@@ -174,8 +173,99 @@ a.release__tag:hover { border-color: var(--ember); }
 .handle--e, .handle--w { cursor: ew-resize; }
 .viewport--dragging { user-select: none; }
 .editor__field--selected { border-left: 3px solid var(--ember); padding-left: .5rem; }
-.slide__text--textbox { font-weight: 400; }
 
 .textedit { position: absolute; pointer-events: auto; }
-.textedit__inner { position: absolute; left: 0; top: 0; transform-origin: top left; overflow: visible; color: #1d1d1d; outline: 2px solid var(--ember); outline-offset: 0; cursor: text; user-select: text; -webkit-user-select: text; caret-color: #1d1d1d; background: transparent; }
+.textedit__inner { position: absolute; left: 0; top: 0; transform-origin: top left; overflow: visible; outline: 2px solid var(--ember); outline-offset: 0; cursor: text; user-select: text; -webkit-user-select: text; caret-color: currentColor; background: transparent; }
 .rt-line { min-height: 1em; }
+
+.ribbon__panel { flex-wrap: wrap; }
+.btn--glyph { min-width: 2.2rem; }
+.fontsize { width: 4.5rem; }
+.rgroup__buttons select, .rgroup__buttons .fontsize { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: .45rem .5rem; font: inherit; }
+.colorpick { width: 2.6rem; height: 2.4rem; padding: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.colorpick:disabled, .rgroup__buttons select:disabled, .rgroup__buttons .fontsize:disabled { opacity: .45; cursor: not-allowed; }
+
+.slide__text, .textedit__inner { box-sizing: border-box; }
+
+/* ---- paragraph levels and lists (levels are data-level on each line; see core/document-model/lists.ts) ---- */
+.slide__text > div, .textedit__inner > div { --lvl: 0; position: relative; padding-inline-start: calc(var(--lvl) * 1.5em); }
+.slide__text > div[data-level="0"], .textedit__inner > div[data-level="0"] { --lvl: 0; }
+.slide__text > div[data-level="1"], .textedit__inner > div[data-level="1"] { --lvl: 1; }
+.slide__text > div[data-level="2"], .textedit__inner > div[data-level="2"] { --lvl: 2; }
+.slide__text > div[data-level="3"], .textedit__inner > div[data-level="3"] { --lvl: 3; }
+.slide__text > div[data-level="4"], .textedit__inner > div[data-level="4"] { --lvl: 4; }
+.slide__text > div[data-level="5"], .textedit__inner > div[data-level="5"] { --lvl: 5; }
+.slide__text > div[data-level="6"], .textedit__inner > div[data-level="6"] { --lvl: 6; }
+.slide__text > div[data-level="7"], .textedit__inner > div[data-level="7"] { --lvl: 7; }
+.slide__text > div[data-level="8"], .textedit__inner > div[data-level="8"] { --lvl: 8; }
+.rt-list > div { padding-inline-start: calc(var(--lvl) * 1.5em + 2em); }
+.rt-list > div::before { position: absolute; inset-inline-start: calc(var(--lvl) * 1.5em); width: 2em; box-sizing: border-box; padding-inline-end: .5em; text-align: end; user-select: none; -webkit-user-select: none; }
+.rt-list--bullet > div::before { content: "•"; }
+.rt-list--bullet > div[data-level="0"]::before { content: "•"; }
+.rt-list--bullet > div[data-level="1"]::before { content: "–"; }
+.rt-list--bullet > div[data-level="2"]::before { content: "▪"; }
+.rt-list--bullet > div[data-level="3"]::before { content: "•"; }
+.rt-list--bullet > div[data-level="4"]::before { content: "–"; }
+.rt-list--bullet > div[data-level="5"]::before { content: "▪"; }
+.rt-list--bullet > div[data-level="6"]::before { content: "•"; }
+.rt-list--bullet > div[data-level="7"]::before { content: "–"; }
+.rt-list--bullet > div[data-level="8"]::before { content: "▪"; }
+.rt-list--number { counter-reset: n0 n1 n2 n3 n4 n5 n6 n7 n8; }
+.rt-list--number > div { counter-increment: n0; counter-reset: n1 n2 n3 n4 n5 n6 n7 n8; }
+.rt-list--number > div::before { content: counter(n0, decimal) "."; }
+.rt-list--number > div[data-level="1"] { counter-increment: n1; counter-reset: n2 n3 n4 n5 n6 n7 n8; }
+.rt-list--number > div[data-level="1"]::before { content: counter(n1, lower-alpha) "."; }
+.rt-list--number > div[data-level="2"] { counter-increment: n2; counter-reset: n3 n4 n5 n6 n7 n8; }
+.rt-list--number > div[data-level="2"]::before { content: counter(n2, lower-roman) "."; }
+.rt-list--number > div[data-level="3"] { counter-increment: n3; counter-reset: n4 n5 n6 n7 n8; }
+.rt-list--number > div[data-level="3"]::before { content: counter(n3, decimal) "."; }
+.rt-list--number > div[data-level="4"] { counter-increment: n4; counter-reset: n5 n6 n7 n8; }
+.rt-list--number > div[data-level="4"]::before { content: counter(n4, lower-alpha) "."; }
+.rt-list--number > div[data-level="5"] { counter-increment: n5; counter-reset: n6 n7 n8; }
+.rt-list--number > div[data-level="5"]::before { content: counter(n5, lower-roman) "."; }
+.rt-list--number > div[data-level="6"] { counter-increment: n6; counter-reset: n7 n8; }
+.rt-list--number > div[data-level="6"]::before { content: counter(n6, decimal) "."; }
+.rt-list--number > div[data-level="7"] { counter-increment: n7; counter-reset: n8; }
+.rt-list--number > div[data-level="7"]::before { content: counter(n7, lower-alpha) "."; }
+.rt-list--number > div[data-level="8"] { counter-increment: n8; counter-reset: none; }
+.rt-list--number > div[data-level="8"]::before { content: counter(n8, lower-roman) "."; }
+
+/* ---- text box layout: vertical alignment, overflow, margins ---- */
+.slide__text, .textedit__inner { display: flex; flex-direction: column; }
+.rt-line { flex: none; }
+.rt-v--middle { justify-content: center; justify-content: safe center; }
+.rt-v--bottom { justify-content: flex-end; justify-content: safe flex-end; }
+.rt-overflow--visible { overflow: visible; }
+.hit--overflow { outline: 1px dashed var(--err); }
+.hit--selected.hit--overflow, .hit--selected.hit--overflow:hover { outline: 2px solid var(--err); }
+.numfield { display: inline-flex; align-items: center; gap: .2rem; }
+.numfield__short { font-size: .75rem; color: var(--muted); }
+.numfield__input { width: 3.6rem; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: .45rem .3rem; font: inherit; }
+.numfield__input:disabled { opacity: .45; cursor: not-allowed; }
+
+/* a larger invisible hit area around each resize handle makes it easier to grab */
+.handle::after { content: ""; position: absolute; inset: -7px; }
+
+/* ---- rulers, gridlines and guides ---- */
+.canvas-area { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.canvas-area--rulers { display: grid; grid-template-columns: 20px minmax(0, 1fr); grid-template-rows: 20px minmax(0, 1fr); }
+.canvas-area--rulers .viewport { min-width: 0; min-height: 0; }
+.canvas-area__corner { background: var(--panel); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ruler { display: block; background: var(--panel); }
+.ruler--horizontal { border-bottom: 1px solid var(--line); }
+.ruler--vertical { border-right: 1px solid var(--line); }
+.ruler__slide { fill: var(--ribbon); }
+.ruler__selection { fill: var(--ember); opacity: .35; }
+.ruler__tick { stroke: var(--muted); stroke-width: 1; }
+.ruler__tick--major { stroke: var(--text); }
+.ruler__label { fill: var(--muted); font-size: 10px; font-family: inherit; }
+.grid { position: absolute; top: 0; left: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(128, 128, 128, .35) 1px, transparent 1px), linear-gradient(to bottom, rgba(128, 128, 128, .35) 1px, transparent 1px); }
+.guide { position: absolute; pointer-events: none; background: #d6249f; }
+.guide--v { width: 1px; }
+.guide--h { height: 1px; }
+
+/* ---- multi-selection, groups, locking ---- */
+.hit--locked { cursor: not-allowed; }
+.hit--locked.hit--selected { outline-style: dashed; }
+.selbox { position: absolute; pointer-events: none; outline: 1px dashed var(--ember); outline-offset: 2px; }
+.marquee { position: absolute; pointer-events: none; border: 1px solid var(--ember); background: rgba(232, 116, 59, .12); }

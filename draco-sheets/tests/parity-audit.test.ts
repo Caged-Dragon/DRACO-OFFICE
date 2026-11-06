@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import * as P from '../src/gallery/parity';
+import * as T from '../src/gallery/themes';
+import versions from '../src/versions.json';
+let n = 0; const eq = (a: unknown, b: unknown, m?: string) => { assert.deepEqual(a, b, m); n++; }; const ok = (c: unknown, m?: string) => { assert.ok(c, m); n++; };
+const v = versions as P.Ver[]; eq(v.length, 100); const t = P.totals(v); eq(t.done + t.partial + t.planned, 100); ok(t.pct > 80); const ph = P.byPhase(v); ok(ph.length >= 9); eq(ph.reduce((a, r) => a + r.total, 0), 100); ok(ph.every((r) => r.pct >= 0 && r.pct <= 100));
+eq(P.byPhase([{ v: 1, title: 'a', phase: 'X', status: 'done' }, { v: 2, title: 'b', phase: 'X', status: 'partial' }, { v: 3, title: 'c', phase: 'X', status: 'planned' }, { v: 4, title: 'd', phase: 'X', status: 'done' }])[0].pct, 63);
+for (const x of v.filter((x) => x.status === 'partial')) ok(P.PARTIAL_NOTES[x.v] || [40, 43, 44, 45, 47, 52, 55, 56, 57, 58, 60].includes(x.v), 'note for v' + x.v);
+ok(P.SELF_CHECKS.length >= 50); eq(new Set(P.SELF_CHECKS.map((c) => c.name)).size, P.SELF_CHECKS.length); ok(P.SELF_CHECKS.every((c) => c.formula.startsWith('=')));
+ok(P.compare(6, 6)); ok(P.compare(2.5700000001, 2.57)); ok(!P.compare(2.6, 2.57)); ok(P.compare('yes', 'yes')); ok(!P.compare('Yes', 'yes')); ok(P.compare(true, true)); ok(P.compare('TRUE', true)); ok(!P.compare('', 0)); ok(!P.compare(null, 0)); ok(P.compare('5', 5));
+ok(T.THEMES.length >= 6); eq(T.themeById('nope').id, 'system'); ok(T.THEMES.filter((x) => x.dark).length >= 2); ok(T.THEMES.filter((x) => x.id !== 'system').every((x) => x.vars['--bg'] && x.vars['--fg'] && x.vars['--brand']));
+ok(T.PALETTES.every((p) => p.colors.length === 10 && p.colors.every((c) => /^#[0-9a-f]{6}$/i.test(c)))); eq(T.textOn('#ffffff'), '#111827'); eq(T.textOn('#000000'), '#ffffff'); eq(T.textOn('#ffd400'), '#111827');
+console.log(`parity-audit.test.ts: ${n} assertions OK`);

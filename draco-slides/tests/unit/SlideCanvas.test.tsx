@@ -40,4 +40,20 @@ describe("SlideCanvas", () => {
     const el = screen.getByText("Being edited").closest(".slide__text") as HTMLElement;
     expect(el.style.visibility).toBe("hidden");
   });
+
+  it("renders list levels and list classes", () => {
+    const p = createPresentation("Lists");
+    const body = p.slides[0].objects[1];
+    body.text = "one\n\ttwo\n\t\tthree";
+    body.list = "number";
+    const { container } = render(<SlideCanvas presentation={p} slide={p.slides[0]} displayWidth={480} />);
+    const el = container.querySelector(".slide__text--body") as HTMLElement;
+    expect(el.classList.contains("rt-list")).toBe(true);
+    expect(el.classList.contains("rt-list--number")).toBe(true);
+    const lines = [...el.querySelectorAll(".rt-line")];
+    expect(lines.map((l) => l.textContent)).toEqual(["one", "two", "three"]);
+    expect(lines.map((l) => l.getAttribute("data-level"))).toEqual([null, "1", "2"]);
+    expect(container.querySelector(".slide__text--title")!.classList.contains("rt-list")).toBe(false);
+  });
 });
+

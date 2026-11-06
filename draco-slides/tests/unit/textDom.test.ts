@@ -31,6 +31,44 @@ describe("domToText", () => {
   }
 });
 
+describe("list levels in the DOM", () => {
+  it("domToText reads data-level as leading tabs", () => {
+    expect(domToText(html('<div>a</div><div data-level="1">b</div><div data-level="2">c</div>'))).toBe("a\n\tb\n\t\tc");
+  });
+
+  it("empty leveled lines and <br> inside a leveled line keep the level", () => {
+    expect(domToText(html('<div data-level="2"><br></div>'))).toBe("\t\t");
+    expect(domToText(html('<div data-level="1">a<br>b</div><div>c</div>'))).toBe("\ta\n\tb\nc");
+  });
+
+  it("a level only applies inside its own block", () => {
+    expect(domToText(html('x<div data-level="1">y</div>z'))).toBe("x\n\ty\nz");
+    expect(domToText(html('<div data-level="1"><div>nested</div></div>'))).toBe("\tnested");
+  });
+
+  it("clamps and ignores bad levels", () => {
+    expect(domToText(html('<div data-level="99">a</div>'))).toBe("\t".repeat(8) + "a");
+    expect(domToText(html('<div data-level="abc">a</div>'))).toBe("a");
+    expect(domToText(html('<div data-level="-2">a</div>'))).toBe("a");
+  });
+
+  it("textToDom sets data-level only above zero", () => {
+    const el = document.createElement("div");
+    el.appendChild(textToDom("a\n\tb\n\t\t", document));
+    expect([...el.children].map((c) => c.getAttribute("data-level"))).toEqual([null, "1", "2"]);
+    expect([...el.children].map((c) => c.textContent)).toEqual(["a", "b", ""]);
+    expect(el.children[2].querySelector("br")).not.toBeNull();
+  });
+
+  it("round-trips outline text", () => {
+    for (const t of ["a\n\tb\n\t\tc", "\t\tx", "a\n\t\n\tb", "\t".repeat(9) + "deep", "a\n\n\tb\n"]) {
+      const el = document.createElement("div");
+      el.appendChild(textToDom(t, document));
+      expect(domToText(el), JSON.stringify(t)).toBe(t);
+    }
+  });
+});
+
 describe("textToDom", () => {
   it("builds one div per line with <br> for empty lines", () => {
     const el = document.createElement("div");

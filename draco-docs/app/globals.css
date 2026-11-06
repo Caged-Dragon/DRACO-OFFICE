@@ -232,3 +232,33 @@ body {
 .ProseMirror .doc-break-section::after {
   content: "Section Break";
 }
+
+/* Columns (v27) — real CSS multi-column layout, functional not a marker. */
+.ProseMirror .doc-columns {
+  column-gap: 2rem;
+  column-rule: 1px solid var(--doc-border);
+}
+
+/* Backgrounds (v28) — page background color (set inline via pageSettings,
+   not here) and a diagonal watermark layer. The watermark uses a fixed
+   semi-transparent gray rather than a theme token, since it must stay
+   legible against an arbitrary user-picked page color, not just our own
+   light/dark theme backgrounds. */
+.doc-watermark {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.12);
+  transform: rotate(-45deg);
+  white-space: nowrap;
+}

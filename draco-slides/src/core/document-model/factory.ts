@@ -1,3 +1,6 @@
+import { defaultTextFormat } from "./fonts";
+import { defaultBoxFormat } from "./box";
+import { defaultParagraphFormat } from "./paragraph";
 import { DEFAULT_SLIDE_SIZE, SLIDE_SIZES, type SlideSizeId } from "./sizes";
 import { DOCUMENT_SCHEMA_VERSION, type Presentation, type Slide, type SlideObject, type TextObject } from "./types";
 
@@ -10,8 +13,8 @@ export function createSlide(name = "Untitled slide", title = "Click to add title
     id: newId(),
     name,
     objects: [
-      { id: newId(), type: "text", role: "title", name: "Title", x: 80, y: 60, width: 800, height: 100, rotation: 0, visible: true, text: title, fontSize: 44 },
-      { id: newId(), type: "text", role: "body", name: "Body", x: 80, y: 200, width: 800, height: 260, rotation: 0, visible: true, text: "Click to add text", fontSize: 24 },
+      { id: newId(), type: "text", role: "title", name: "Title", x: 80, y: 60, width: 800, height: 100, rotation: 0, visible: true, groupId: null, locked: false, text: title, ...defaultTextFormat("title"), ...defaultParagraphFormat(), ...defaultBoxFormat() },
+      { id: newId(), type: "text", role: "body", name: "Body", x: 80, y: 200, width: 800, height: 260, rotation: 0, visible: true, groupId: null, locked: false, text: "Click to add text", ...defaultTextFormat("body"), ...defaultParagraphFormat(), ...defaultBoxFormat() },
     ],
   };
 }
@@ -25,7 +28,7 @@ export function nextObjectName(objects: SlideObject[], base: string): string {
 }
 
 export function createTextBox(name: string, rect: { x: number; y: number; width: number; height: number }): TextObject {
-  return { id: newId(), type: "text", role: "textbox", name, ...rect, rotation: 0, visible: true, text: "Text box", fontSize: 24 };
+  return { id: newId(), type: "text", role: "textbox", name, ...rect, rotation: 0, visible: true, groupId: null, locked: false, text: "Text box", ...defaultTextFormat("textbox"), ...defaultParagraphFormat(), ...defaultBoxFormat() };
 }
 
 /** Smallest "Slide N" (N above the slide count) that no slide already uses. */
@@ -38,11 +41,19 @@ export function nextSlideName(slides: Slide[]): string {
 
 /** Copy of a slide with fresh ids. Objects are flat today; deepen the clone when nested objects arrive. */
 export function duplicateSlide(slide: Slide): Slide {
+  const groupIds = new Map<string, string>(); // each group in the copy gets its own id
   return {
     ...slide,
     id: newId(),
     name: `${slide.name} (copy)`.slice(0, 100),
-    objects: slide.objects.map((o) => ({ ...o, id: newId() })),
+    objects: slide.objects.map((o) => {
+      let groupId = o.groupId;
+      if (groupId !== null) {
+        if (!groupIds.has(groupId)) groupIds.set(groupId, newId());
+        groupId = groupIds.get(groupId) ?? null;
+      }
+      return { ...o, id: newId(), groupId };
+    }),
   };
 }
 

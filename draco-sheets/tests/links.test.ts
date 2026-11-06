@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import * as L from '../src/links/links';
+let n = 0; const eq = (a: unknown, b: unknown, m?: string) => { assert.deepEqual(a, b, m); n++; }; const ok = (c: unknown, m?: string) => { assert.ok(c, m); n++; };
+eq(L.normalizeUrl('www.example.com/a?b=1'), { ok: true, url: 'https://www.example.com/a?b=1' }); eq(L.normalizeUrl('http://x.io'), { ok: true, url: 'http://x.io' }); eq(L.normalizeUrl('me@site.org'), { ok: true, url: 'mailto:me@site.org' }); eq(L.normalizeUrl('+91 98765 43210'), { ok: true, url: 'tel:+919876543210' }); eq(L.normalizeUrl('#gid=abc&range=A1'), { ok: true, url: '#gid=abc&range=A1' });
+for (const bad of ['javascript:alert(1)', 'JaVaScRiPt:x', 'data:text/html,hi', 'file:///etc/passwd', 'ftp://x.y', '', 'just words', 'https://user:pw@host.com/']) ok(!(L.normalizeUrl(bad) as { ok: boolean }).ok, bad);
+eq(L.classify('https://a.b/c').kind, 'web'); eq(L.classify('mailto:a@b.co').kind, 'mail'); eq(L.classify('tel:123').kind, 'tel'); eq(L.classify('javascript:x').kind, 'unsafe'); eq(L.classify('#gid=s1').kind, 'sheet'); eq(L.classify('#gid=s1&range=B2:C3'), { kind: 'range', url: '#gid=s1&range=B2:C3', sheetId: 's1', range: 'B2:C3', rangeId: undefined }); eq(L.classify('#gid=s1&range=Sales').kind, 'name'); eq(L.classify('zzz').kind, 'unknown');
+eq(L.sheetLink('s1', '$B$2'), '#gid=s1&range=B2'); eq(L.sheetLink('s1'), '#gid=s1'); eq(L.hostOf('https://a.b:8080/x'), 'a.b:8080'); eq(L.kindLabel('range'), 'Cell / range');
+eq(L.brokenInternal([{ url: '#gid=gone&range=A1' }, { url: '#gid=here' }, { url: 'https://x.y' }], new Set(['here'])).length, 1);
+eq(L.sniffFormat('[{"a":1}]'), 'json'); eq(L.sniffFormat('{"a":1}'), 'json'); eq(L.sniffFormat('<html><table>'), 'html'); eq(L.sniffFormat('a,b\n1,2'), 'csv'); eq(L.sniffFormat('a\tb\n1\t2'), 'tsv'); eq(L.sniffFormat('x', 'application/json'), 'json');
+const html = '<p>x</p><table class=t><tr><th>Name</th><th>Qty</th></tr><tr><td>Fish &amp; Chips</td><td>1,200</td></tr><tr><td><b>Tea</b></td><td>&nbsp;3 </td></tr></table><table><tr><td>second</td></table>';
+eq(L.htmlTable(html), [['Name', 'Qty'], ['Fish & Chips', '1,200'], ['Tea', '3']]); eq(L.htmlTable(html, 1), [['second']]); eq(L.htmlTable(html, 5), null); eq(L.htmlTable('no tables'), null); eq(L.tableCount(html), 2);
+eq(L.typed('1,200'), 1200); eq(L.typed('-3.5'), -3.5); eq(L.typed('007'), '007'); eq(L.typed(' '), null); eq(L.typed('TRUE'), true); eq(L.typed('abc'), 'abc'); eq(L.typed('12ab'), '12ab');
+ok(L.isPrivateHost('http://localhost:3000/x')); ok(L.isPrivateHost('http://192.168.1.4/')); ok(L.isPrivateHost('http://10.0.0.2')); ok(L.isPrivateHost('http://172.20.1.1')); ok(!L.isPrivateHost('https://example.com')); ok(!L.isPrivateHost('http://172.32.0.1'));
+eq(L.checkWebUrl('mailto:a@b.co'), { ok: false, reason: 'Data connections need an http or https address' }); eq(L.checkWebUrl('example.com/data.csv'), { ok: true, url: 'https://example.com/data.csv' });
+console.log(`links.test.ts: ${n} assertions OK`);

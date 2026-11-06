@@ -1,3 +1,4 @@
+import * as traceGlue from './trace/traceGlue';
 import { useEffect, useMemo, useState } from 'react';
 import Dialog from './Dialog';
 import type { Engine } from './engine';
@@ -78,7 +79,7 @@ function Audit({ engine, jump }: { engine: Engine; jump: (s: string, r: number, 
   const [deep, setDeep] = useState(false);
   const all = useMemo(() => collectFormulas(engine), [engine]);
   const names = useMemo(() => nameMap(engine), [engine]);
-  const [mode, setMode] = useState<'pre' | 'dep' | 'list'>('pre');
+  const [mode, setMode] = useState<'pre' | 'dep' | 'list'>('pre'); const [arrowMsg, setArrowMsg] = useState('');
   if (!cell) return <p>Select a cell first.</p>;
   const label = `${cell.sheet}!${a1(cell.row, cell.col)}`;
   const pre = mode === 'pre' ? precedents(cell, all, names, deep) : [];
@@ -90,8 +91,11 @@ function Audit({ engine, jump }: { engine: Engine; jump: (s: string, r: number, 
         <button className={mode === 'pre' ? 'primary' : ''} onClick={() => setMode('pre')}>Trace precedents</button>
         <button className={mode === 'dep' ? 'primary' : ''} onClick={() => setMode('dep')}>Trace dependents</button>
         <button className={mode === 'list' ? 'primary' : ''} onClick={() => setMode('list')}>All formulas</button>
+        {mode !== 'list' && <button aria-label="Draw arrows on sheet" onClick={() => setArrowMsg(traceGlue.trace(engine, mode === 'pre' ? 'precedents' : 'dependents', deep).message)}>Draw arrows on sheet</button>}
+        <button aria-label="Remove arrows" onClick={() => { traceGlue.clear(engine); setArrowMsg('Arrows removed.'); }}>Remove arrows</button>
         {mode !== 'list' && <label className="inline"><input type="checkbox" checked={deep} onChange={(e) => setDeep(e.target.checked)} /> All levels</label>}
       </div>
+      {arrowMsg && <p className="hint" role="status">{arrowMsg}</p>}
       <ul className="filelist">
         {mode === 'pre' && (pre.length === 0 ? <li className="hint">This cell has no precedents.</li> : pre.map((r, i) => (
           <li key={i}><button className="row" onClick={() => jump(r.sheet ?? cell.sheet, r.r1, r.c1)}><span className="name">{rectLabel(r, cell.sheet)}</span><span className="meta">{r.sheet}</span></button></li>
@@ -110,11 +114,15 @@ function Audit({ engine, jump }: { engine: Engine; jump: (s: string, r: number, 
 function Errors({ engine, jump }: { engine: Engine; jump: (s: string, r: number, c: number) => void }) {
   const [errs, setErrs] = useState<ErrorCell[] | null>(null);
   const [circ, setCirc] = useState<{ cells: { sheet: string; row: number; col: number; formula: string }[]; skipped: boolean }>({ cells: [], skipped: false });
+  const [dvMsg, setDvMsg] = useState('');
   const scan = () => { setErrs(collectErrors(engine)); setCirc(circularCells(engine)); };
   useEffect(scan, [engine]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
-      <div className="row-btns"><button className="primary" onClick={scan}>Scan workbook</button></div>
+      <div className="row-btns"><button className="primary" onClick={scan}>Scan workbook</button>
+        <button aria-label="Circle invalid data" onClick={async () => setDvMsg((await traceGlue.circleInvalid(engine)).message)}>Circle invalid data</button>
+        <button aria-label="Clear validation circles" onClick={() => { traceGlue.clearCircles(engine); setDvMsg('Circles cleared.'); }}>Clear circles</button></div>
+      {dvMsg && <p className="hint" role="status">{dvMsg}</p>}
       {circ.cells.length > 0 && (<>
         <h3 role="alert">⚠ Circular references ({circ.cells.length}) — these cells evaluate to 0</h3>
         <ul className="filelist">{circ.cells.map((x, i) => (

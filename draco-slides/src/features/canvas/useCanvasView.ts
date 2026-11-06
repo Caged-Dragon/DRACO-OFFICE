@@ -126,6 +126,8 @@ export function useCanvasView(slideWidth: number, slideHeight: number) {
   return {
     containerRef,
     view,
+    /** Size of the canvas viewport in screen pixels (a default until it has been measured). */
+    size: viewport,
     panning,
     percent: Math.round(view.zoom * 100),
     zoomIn,

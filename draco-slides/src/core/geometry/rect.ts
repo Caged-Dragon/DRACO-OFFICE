@@ -20,23 +20,49 @@ export function moveRect(r: Rect, dx: number, dy: number): Rect {
   return { ...r, x: r.x + dx, y: r.y + dy };
 }
 
+export interface ResizeOptions {
+  /** Minimum width and height. */
+  min?: number;
+  /** Override the minimum for one axis (used when resizing several objects at once). */
+  minWidth?: number;
+  minHeight?: number;
+  /** Corner handles only: keep the original width-to-height ratio. */
+  keepAspect?: boolean;
+  /** Resize around the center: the opposite edge moves the other way by the same amount. */
+  fromCenter?: boolean;
+}
+
 /**
- * Resizes from `origin` by dragging `handle` by (dx, dy) in slide units. The edge opposite the handle
+ * Resizes from `origin` by dragging `handle` by (dx, dy) in slide units. By default the edge opposite the handle
  * stays fixed, including when the minimum size is reached.
  */
-export function resizeRect(origin: Rect, handle: HandleId, dx: number, dy: number, min = MIN_OBJECT_SIZE): Rect {
-  let { x, y, width, height } = origin;
-  if (handle.includes("e")) width = Math.max(min, origin.width + dx);
-  if (handle.includes("w")) {
-    width = Math.max(min, origin.width - dx);
-    x = origin.x + origin.width - width;
+export function resizeRect(origin: Rect, handle: HandleId, dx: number, dy: number, opts: ResizeOptions = {}): Rect {
+  const min = opts.min ?? MIN_OBJECT_SIZE;
+  const minW = opts.minWidth ?? min;
+  const minH = opts.minHeight ?? min;
+  const sx = handle.includes("e") ? 1 : handle.includes("w") ? -1 : 0;
+  const sy = handle.includes("s") ? 1 : handle.includes("n") ? -1 : 0;
+  const k = opts.fromCenter ? 2 : 1;
+  let width = sx === 0 ? origin.width : Math.max(minW, origin.width + sx * dx * k);
+  let height = sy === 0 ? origin.height : Math.max(minH, origin.height + sy * dy * k);
+  if (opts.keepAspect && sx !== 0 && sy !== 0) {
+    const scale = Math.max(width / origin.width, height / origin.height, minW / origin.width, minH / origin.height);
+    width = origin.width * scale;
+    height = origin.height * scale;
   }
-  if (handle.includes("s")) height = Math.max(min, origin.height + dy);
-  if (handle.includes("n")) {
-    height = Math.max(min, origin.height - dy);
-    y = origin.y + origin.height - height;
-  }
-  return { x, y, width, height };
+  const cx = origin.x + origin.width / 2;
+  const cy = origin.y + origin.height / 2;
+  return {
+    x: opts.fromCenter ? cx - width / 2 : sx === -1 ? origin.x + origin.width - width : origin.x,
+    y: opts.fromCenter ? cy - height / 2 : sy === -1 ? origin.y + origin.height - height : origin.y,
+    width,
+    height,
+  };
+}
+
+/** For Shift-dragging: keep only the larger of the two movements, so an object slides along one axis. */
+export function lockAxis(dx: number, dy: number): [number, number] {
+  return Math.abs(dx) >= Math.abs(dy) ? [dx, 0] : [0, dy];
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));

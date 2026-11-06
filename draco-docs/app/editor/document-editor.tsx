@@ -66,6 +66,9 @@ import ReferenceControls from "./reference-controls";
 import ReferencesPanel from "./references-panel";
 import { PageBreak, SectionBreak } from "./break-extension";
 import BreakControls from "./break-controls";
+import ColumnsBlock from "./columns-extension";
+import ColumnsControls from "./columns-controls";
+import BackgroundControls from "./background-controls";
 import FootnoteControls from "./footnote-controls";
 import FootnotesSection from "./footnotes-section";
 import {
@@ -170,6 +173,7 @@ export default function DocumentEditor() {
       CrossReference,
       PageBreak,
       SectionBreak,
+      ColumnsBlock,
       Placeholder.configure({
         placeholder: "Start writing…",
       }),
@@ -443,12 +447,40 @@ export default function DocumentEditor() {
       ),
     },
     {
+      id: "backgrounds",
+      label: "Backgrounds",
+      icon: "\u2600", // ☀ sun — stand-in for "page appearance"
+      content: (
+        <>
+          <BackgroundControls
+            backgroundColor={pageSettings.backgroundColor}
+            watermarkText={pageSettings.watermarkText}
+            onChange={(next) => {
+              const updated = { ...pageSettings, ...next };
+              setPageSettings(updated);
+              savePageSettings(updated);
+            }}
+          />
+        </>
+      ),
+    },
+    {
       id: "breaks",
       label: "Breaks",
       icon: "\u2702", // ✂ scissors — "split here"
       content: (
         <>
           <BreakControls editor={editor} />
+        </>
+      ),
+    },
+    {
+      id: "columns",
+      label: "Columns",
+      icon: "\u2016", // ‖ double vertical line — column layout
+      content: (
+        <>
+          <ColumnsControls editor={editor} />
         </>
       ),
     },
@@ -645,16 +677,22 @@ export default function DocumentEditor() {
         <div
           id="editor-page"
           tabIndex={-1}
-          className="mx-auto shadow-xl flex flex-col focus:outline-none"
+          className="mx-auto shadow-xl flex flex-col focus:outline-none relative"
           style={
             {
               ...styleSetToCssVars(pageSettings.styleSet, resolvedTheme),
-              backgroundColor: "var(--doc-page-bg)",
+              backgroundColor: pageSettings.backgroundColor ?? "var(--doc-page-bg)",
               width: `${getPageDimensionsIn(pageSettings).width}in`,
               minHeight: `${getPageDimensionsIn(pageSettings).height}in`,
             } as React.CSSProperties
           }
         >
+          {pageSettings.watermarkText && (
+            <div aria-hidden="true" className="doc-watermark">
+              {pageSettings.watermarkText}
+            </div>
+          )}
+          <div className="relative z-[1] flex flex-col flex-1">
           {header && (
             <div
               className="text-xs pb-2"
@@ -729,6 +767,7 @@ export default function DocumentEditor() {
               )}
             </div>
           )}
+          </div>
         </div>
         </div>
         {rightPanel === "comments" && (

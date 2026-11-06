@@ -3,6 +3,115 @@
 All notable changes to DracoDocs are documented here, one entry per release.
 Format: `## vX — Theme` followed by what shipped.
 
+## v28 — Backgrounds
+- Custom page background color (native color picker) and a diagonal
+  watermark, both page-level settings extending `PageSettings` with full
+  validation — same hardening pattern as v19's `sanitizePageSettings`:
+  invalid/hostile `backgroundColor` values (including a CSS-injection-shaped
+  string crafted to look like it might escape the hex context) fall back
+  to the default, oversized watermark text is truncated rather than
+  rejected outright, wrong types never crash the parser
+- **A live WCAG contrast warning, not a blocking restriction.** Page
+  background is arbitrary user-picked color, which `check:contrast`
+  (built for the app's own *fixed* design tokens) structurally cannot
+  exhaustively verify — there's no way to pre-check every hex value a
+  person might type into a color picker. So this version adds a small,
+  independently-tested contrast-math module (`color-contrast.ts`) that
+  computes the real ratio live in the UI and shows a warning below
+  4.5:1 — matching the same tradeoff Word and Google Docs make with their
+  own page-color pickers: informed, not prevented
+- The new contrast module was cross-checked against a value already
+  independently verified back in v20 (slate-400 on white = 2.56), not
+  just tested in isolation against itself
+- The warning text's own color (fixed, on our own dark panel chrome, not
+  user-driven) IS something `check:contrast` can verify exhaustively —
+  added as a new static check rather than left to only the live
+  calculation, so a future styling change to that one color can't
+  silently break it
+- Watermark renders behind the document content via a dedicated stacking
+  layer (`aria-hidden`, `pointer-events: none`, non-selectable) — content
+  and the comments/changes/TOC/references side panels now live inside an
+  explicit `z-index` wrapper so they always paint above it regardless of
+  DOM/CSS stacking-order ambiguity
+- Verified end-to-end against the real `file-format.ts`: a pre-v28 file
+  with `pageSettings` missing these two fields entirely still loads with
+  safe defaults, and a v28-era file round-trips both values correctly
+- **New dependencies: none**
+
+## v27 — Columns
+- Multi-column text layout — functional, not a visual marker like v26's
+  breaks: real CSS multi-column (`column-count`) applied to a wrapper node
+  around actual document content, so text genuinely reflows between 2 or
+  3 columns
+- Wrapping a multi-paragraph selection puts ALL of it inside ONE wrapper,
+  not one wrapper per paragraph — verified directly by selecting three
+  separate paragraphs and confirming they land in a single node, in order,
+  with their text intact
+- Changing the column count while already inside a columns block updates
+  it in place rather than nesting a second wrapper around the first
+- **A real bug, caught by testing and then properly root-caused, not
+  patched around:** the first version of "remove columns" used the
+  standard `lift()` command, which only lifts content around wherever the
+  cursor happens to be — with the cursor in just the first of two
+  paragraphs, the second paragraph was left stranded inside the wrapper.
+  The fix wasn't to work around it with a wider selection (which worked
+  but logged a spurious "TextSelection endpoint not pointing into a node
+  with inline content" console warning) — it was to switch to
+  ProseMirror's own `blockRange` + `liftTarget` primitives, the idiomatic
+  way to lift an entire wrapped range in one step, which fixed both the
+  stranded-content bug AND eliminated the warning entirely
+- A second false alarm during testing, this time in the TEST not the
+  extension: an early test assumed wrapping a paragraph would leave
+  exactly one top-level node, and failed. The actual cause was StarterKit's
+  own `trailingNode` extension correctly appending an empty paragraph
+  after a non-default-textblock node so the cursor can always reach the
+  true end of the document — expected behavior, not a defect. Diagnosed
+  directly by inspecting the resulting JSON rather than assumed either way
+- 15 checks total: single and multi-paragraph wrapping, in-place count
+  changes, full-content unwrapping, and both `getJSON`/`setContent` and
+  `getHTML`/re-import round-trips
+- **New dependencies: none**
+
+## v26.1 — Dependency Security Update
+**Environment note first:** this session's sandbox reset again before v27
+was packaged. The person re-uploaded the v0.26.0 zip; `npm install`
+against its lockfile surfaced new advisories (published after the v22.1
+security update) before any new feature work resumed on top of it.
+
+- **Fixed: two critical, unauthenticated RCEs in Next.js** — one via the
+  Image Optimization API when SVG files are used, one via `use cache`
+  functions returning typed arrays — plus a high-severity Denial of
+  Service in Server Actions. All three had `vulnerable_versions: >=16.0.0
+  <=16.4.0` (i.e. even the 16.4.0 this project upgraded to in v22.1 was
+  newly affected). Resolved by `npm audit fix` bumping the already-ranged
+  `^16.4.0` dependency to `16.4.3` — no `package.json` edit needed, the
+  existing semver range already permitted it
+- **Fixed: high-severity memory-exhaustion issue in `zod`** (a transitive
+  dependency), bumped to `4.6.7`, also via plain `npm audit fix`
+- **Verified directly against the advisory database, not just npm's
+  report going quiet**: queried `next@16.4.3` and `zod@4.6.7` explicitly
+  and confirmed zero matching advisories for either — the point being
+  that "the tool stopped complaining" and "this is actually fixed" are
+  different claims, and only the second one was treated as the real bar
+- Before concluding "no stable fix exists" (which was the honest
+  situation when first checked, reportedly bounded at exactly `<=16.4.0`
+  with only `16.5.0-canary.*` prereleases above it), a patch release had
+  in fact landed in between — caught by re-querying with the
+  newly-installed version rather than trusting the earlier snapshot
+- Checked whether this app's own code uses any of the affected surfaces
+  (`next/image`, Server Actions, `use cache`) before relying on that as a
+  mitigating factor — it doesn't use any of them, though that alone
+  doesn't fully eliminate exposure since Next's built-in routes exist
+  regardless of whether application code calls them. Noted for
+  completeness; moot now that a real fix landed
+- Same as v22.1: `postcss-selector-parser`'s moderate advisory remains
+  deliberately unaddressed — its only "fix" is still a downgrade to an
+  unrelated older `@tailwindcss/typography` major version, build/lint-time
+  only, never shipped to users
+- Verified after the upgrade: clean build (now reporting
+  `Next.js 16.4.3`), clean lint, `check:contrast` still 230/230, both
+  routes smoke-tested
+
 ## v26 — Breaks
 - Page break and section break, each a real block-level node in the
   document model (not just a visual effect) — so once real pagination

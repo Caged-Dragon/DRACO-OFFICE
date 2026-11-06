@@ -2,12 +2,22 @@ import { DEFAULT_SLIDE_SIZE, SLIDE_SIZE_IDS, type SlideSizeId } from "../../core
 
 export type ThemeSetting = "system" | "dark" | "light";
 
+/** Grid spacings offered in slide pixels. */
+export const GRID_SIZES = [5, 10, 20, 25, 40, 50, 100] as const;
+
 export interface Settings {
   theme: ThemeSetting;
   defaultSlideSize: SlideSizeId;
   defaultAuthor: string;
   showSlidePane: boolean;
   showTextPanel: boolean;
+  /** Editing aids. */
+  showRulers: boolean;
+  showGrid: boolean;
+  gridSize: number;
+  snapToGrid: boolean;
+  /** Snap to the slide edges and center and to other objects while dragging. */
+  snapToObjects: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -16,6 +26,11 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultAuthor: "",
   showSlidePane: true,
   showTextPanel: true,
+  showRulers: false,
+  showGrid: false,
+  gridSize: 20,
+  snapToGrid: false,
+  snapToObjects: true,
 };
 
 export const SETTINGS_KEY = "draco-slides:settings";
@@ -35,6 +50,11 @@ export function parseSettings(raw: unknown): Settings {
     defaultAuthor: typeof r.defaultAuthor === "string" ? r.defaultAuthor.trim().slice(0, 200) : d.defaultAuthor,
     showSlidePane: typeof r.showSlidePane === "boolean" ? r.showSlidePane : d.showSlidePane,
     showTextPanel: typeof r.showTextPanel === "boolean" ? r.showTextPanel : d.showTextPanel,
+    showRulers: typeof r.showRulers === "boolean" ? r.showRulers : d.showRulers,
+    showGrid: typeof r.showGrid === "boolean" ? r.showGrid : d.showGrid,
+    gridSize: (GRID_SIZES as readonly unknown[]).includes(r.gridSize) ? (r.gridSize as number) : d.gridSize,
+    snapToGrid: typeof r.snapToGrid === "boolean" ? r.snapToGrid : d.snapToGrid,
+    snapToObjects: typeof r.snapToObjects === "boolean" ? r.snapToObjects : d.snapToObjects,
   };
 }
 

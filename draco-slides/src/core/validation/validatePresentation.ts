@@ -1,3 +1,6 @@
+import { OVERFLOW_MODES, VERTICAL_ALIGNS, isValidMargins } from "../document-model/box";
+import { FONT_FAMILY_NAMES, normalizeColor } from "../document-model/fonts";
+import { ALIGNMENTS, DIRECTIONS, LIST_STYLES, MAX_INDENT_LEVEL, MAX_LINE_SPACING, MIN_LINE_SPACING } from "../document-model/paragraph";
 import {
   DOCUMENT_SCHEMA_VERSION,
   MAX_OBJECTS_PER_SLIDE,
@@ -80,6 +83,8 @@ export function validatePresentation(value: unknown): ValidationResult {
           if (!isNum(o[key]) || o[key] < 0) fail(`${ow}: ${key} must be a number, zero or more`);
         }
         if (typeof o.visible !== "boolean") fail(`${ow}: visible must be true or false`);
+        if (typeof o.locked !== "boolean") fail(`${ow}: locked must be true or false`);
+        if (o.groupId !== null && (!isStr(o.groupId) || o.groupId === "")) fail(`${ow}: groupId must be null or an id`);
         if (o.type !== "text") {
           fail(`${ow}: unknown object type ${String(o.type)}`);
         } else {
@@ -87,7 +92,26 @@ export function validatePresentation(value: unknown): ValidationResult {
             fail(`${ow}: role must be title, body or textbox`);
           }
           if (!isStr(o.text)) fail(`${ow}: text must be text`);
-          if (!isNum(o.fontSize) || o.fontSize <= 0) fail(`${ow}: fontSize must be above zero`);
+          if (!isNum(o.fontSize) || o.fontSize <= 0 || o.fontSize > 1000) {
+            fail(`${ow}: fontSize must be above zero and at most 1000`);
+          }
+          if (!isStr(o.fontFamily) || !FONT_FAMILY_NAMES.includes(o.fontFamily)) fail(`${ow}: unknown font family`);
+          for (const key of ["bold", "italic", "underline", "strike"] as const) {
+            if (typeof o[key] !== "boolean") fail(`${ow}: ${key} must be true or false`);
+          }
+          if (normalizeColor(o.color) === null) fail(`${ow}: color must be a hex colour such as #1d1d1d`);
+          if (!ALIGNMENTS.includes(o.align as never)) fail(`${ow}: align must be left, center, right or justify`);
+          if (!DIRECTIONS.includes(o.direction as never)) fail(`${ow}: direction must be ltr or rtl`);
+          if (!isValidMargins(o.margins)) fail(`${ow}: margins must be four numbers from 0 to 200`);
+          if (!VERTICAL_ALIGNS.includes(o.verticalAlign as never)) fail(`${ow}: verticalAlign must be top, middle or bottom`);
+          if (!OVERFLOW_MODES.includes(o.overflow as never)) fail(`${ow}: overflow must be hidden or visible`);
+          if (!LIST_STYLES.includes(o.list as never)) fail(`${ow}: list must be none, bullet or number`);
+          if (!isNum(o.indent) || !Number.isInteger(o.indent) || o.indent < 0 || o.indent > MAX_INDENT_LEVEL) {
+            fail(`${ow}: indent must be a whole number from 0 to ${MAX_INDENT_LEVEL}`);
+          }
+          if (!isNum(o.lineSpacing) || o.lineSpacing < MIN_LINE_SPACING || o.lineSpacing > MAX_LINE_SPACING) {
+            fail(`${ow}: lineSpacing must be between ${MIN_LINE_SPACING} and ${MAX_LINE_SPACING}`);
+          }
         }
       });
     });

@@ -1,11 +1,11 @@
 # Draco Sheets — 100-Version Roadmap
 
 Goal: replicate the complete MS Excel feature set, then add new ideas.
-Each version is a shippable slice. Engine: Univer (grid/formulas) + React shell + Supabase + PWA.
+Each version is a shippable slice. Engine: Univer (grid/formulas) + React shell + Supabase (plain website; the PWA layer was removed in v1.2.0).
 
 ## Phase A — Foundation (v1–v10)
 - v1 Project scaffold, grid render, cell edit, selection, scroll
-- v2 PWA: manifest, icons, service worker, installable
+- v2 Responsive app shell, icons (PWA install/offline layer removed in v1.2.0)
 - v3 Responsive shell: desktop ribbon, tablet compact, mobile bottom bar
 - v4 Undo/redo, clipboard (cut/copy/paste), paste special
 - v5 Row/column insert, delete, hide, resize, autofit

@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { columnStats, runBulk } from '../src/perf/bulkCore';
+import { bulk, stats } from '../src/perf/bulk';
+let n = 0; const eq = (a: unknown, b: unknown, m?: string) => { assert.deepEqual(a, b, m); n++; };
+const s = columnStats([1, 2, 3, 4, '5', '1,000', 'x', '', null, 2]);
+eq(s.numbers, 7); eq(s.blanks, 2); eq(s.sum, 1017); eq(s.min, 1); eq(s.max, 1000); eq(s.median, 3); eq(s.distinct, 7); eq(s.count, 8);
+eq(columnStats([]).mean, null); eq(columnStats(['a', 'b']).numbers, 0); eq(columnStats([4, 6]).median, 5);
+const rows = [['h'], ['a'], ['A'], ['b'], ['a']];
+eq(runBulk({ op: 'dedupe', rows, cols: [0], hasHeader: true, caseSensitive: false }), { op: 'dedupe', removedRows: [2, 4], removed: 2 });
+eq((runBulk({ op: 'dedupe', rows, cols: [0], hasHeader: true, caseSensitive: true }) as { removed: number }).removed, 1);
+const big = Array.from({ length: 400_000 }, (_, i) => [i % 1000]); eq((runBulk({ op: 'dedupe', rows: big, cols: [0], hasHeader: false, caseSensitive: true }) as { removed: number }).removed, 399_000);
+const huge = Array.from({ length: 600_000 }, (_, i) => i); eq(columnStats(huge).max, 599_999);
+(async () => { const r = await bulk<{ op: 'stats'; stats: Array<{ sum: number }> }>({ op: 'stats', cols: [[1, 2, 3]] }); eq(r.stats[0].sum, 6); eq(stats.viaWorker, 0, 'no Worker in Node -> in-thread fallback'); console.log(`bulk.test.ts: ${n} assertions OK`); })();

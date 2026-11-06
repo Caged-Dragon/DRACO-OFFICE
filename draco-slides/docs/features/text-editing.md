@@ -4,7 +4,7 @@
 - **Double-click** a text object (title, body or text box), or select it and press **Enter** or **F2**, or use **Home > Edit text**. The caret goes where you double-clicked, or to the end of the text.
 - Type, select, copy, cut and paste as in any text field. **Escape** finishes editing (the object stays selected and the canvas gets focus). Clicking anywhere else on the canvas, another object, a ribbon button, or another slide also finishes it.
 - Enter starts a new line; the status bar shows "– editing text" and screen readers hear "Editing <name>. Press Escape to finish."
-- Pasting always inserts **plain text**. Browser formatting shortcuts (Ctrl+B and similar) and dropping content are blocked until formatting is supported.
+- Pasting always inserts **plain text**. Ctrl+B, I and U toggle the object's formatting (see `text-formatting.md`); other browser formatting commands and dropping content are blocked.
 
 ## How it works (and why the caret stays put)
 - Text objects still store plain text; a line break (`\n`) separates lines. Rendering uses one block per line, the same structure on the canvas, in thumbnails and in the editor, so text does not shift when editing starts.
@@ -14,7 +14,7 @@
 - Keys typed in the editor (Space, Delete, +, -, PageUp/PageDown, arrows) are not treated as canvas or slide shortcuts.
 
 ## Not in this version
-- **Rich formatting** (bold, italic, underline, strikethrough, font family and size, colour) is Version 13. It needs runs with formatting marks in the document model (a schema change) and a way to apply them to a selection, so it is deliberately not faked here.
+- Formatting is per text object (Version 13); formatting individual words or characters is not supported yet.
 - Alignment, lists, margins and text fitting are Versions 14 to 16.
 - No global undo until Version 20; inside one editing session the browser's own Ctrl+Z works, but it is cleared when editing ends.
 - Rotated objects are edited unrotated-looking only in the sense that the editor follows the object's rotation transform; nothing can be rotated yet.

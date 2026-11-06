@@ -6,6 +6,7 @@ import {
   constrainRect,
   handleFraction,
   isFiniteRect,
+  lockAxis,
   moveRect,
   rectsEqual,
   resizeRect,
@@ -93,3 +94,57 @@ describe("helpers", () => {
     expect(handleFraction("e")).toEqual({ fx: 1, fy: 0.5 });
   });
 });
+
+describe("resizeRect options", () => {
+  const box = { x: 100, y: 100, width: 300, height: 80 };
+
+  it("keepAspect scales both sides by the larger change on corner handles, anchored at the opposite corner", () => {
+    const grown = resizeRect(box, "se", 30, 0, { keepAspect: true });
+    expect(grown.x).toBe(100);
+    expect(grown.y).toBe(100);
+    expect(grown.width).toBeCloseTo(330, 9);
+    expect(grown.height).toBeCloseTo(88, 9);
+    const nw = resizeRect(box, "nw", -30, 0, { keepAspect: true }); // dragging left grows from the top-left
+    expect(nw.width).toBeCloseTo(330, 9);
+    expect(nw.height).toBeCloseTo(88, 9);
+    expect(nw.x + nw.width).toBeCloseTo(400, 9); // right edge fixed
+    expect(nw.y + nw.height).toBeCloseTo(180, 9); // bottom edge fixed
+  });
+
+  it("keepAspect keeps the ratio and the minimum size when shrinking a lot", () => {
+    const r = resizeRect(box, "se", -5000, -5000, { keepAspect: true });
+    expect(r.width).toBeGreaterThanOrEqual(MIN_OBJECT_SIZE);
+    expect(r.height).toBeGreaterThanOrEqual(MIN_OBJECT_SIZE);
+    expect(r.width / r.height).toBeCloseTo(300 / 80, 6);
+  });
+
+  it("keepAspect does nothing for edge handles", () => {
+    expect(resizeRect(box, "e", 30, 40, { keepAspect: true })).toEqual({ x: 100, y: 100, width: 330, height: 80 });
+  });
+
+  it("fromCenter moves the opposite edge the other way by the same amount", () => {
+    expect(resizeRect(box, "e", 30, 0, { fromCenter: true })).toEqual({ x: 70, y: 100, width: 360, height: 80 });
+    expect(resizeRect(box, "w", 30, 0, { fromCenter: true })).toEqual({ x: 130, y: 100, width: 240, height: 80 });
+    expect(resizeRect(box, "se", 10, 5, { fromCenter: true })).toEqual({ x: 90, y: 95, width: 320, height: 90 });
+  });
+
+  it("fromCenter keeps the center when the minimum size is reached", () => {
+    const r = resizeRect(box, "e", -5000, 0, { fromCenter: true });
+    expect(r.width).toBe(MIN_OBJECT_SIZE);
+    expect(r.x + r.width / 2).toBe(250);
+  });
+
+  it("a custom minimum is honoured", () => {
+    expect(resizeRect(box, "e", -5000, 0, { min: 50 }).width).toBe(50);
+  });
+});
+
+describe("lockAxis", () => {
+  it("keeps the larger movement", () => {
+    expect(lockAxis(10, 3)).toEqual([10, 0]);
+    expect(lockAxis(-2, 9)).toEqual([0, 9]);
+    expect(lockAxis(5, 5)).toEqual([5, 0]);
+    expect(lockAxis(0, 0)).toEqual([0, 0]);
+  });
+});
+

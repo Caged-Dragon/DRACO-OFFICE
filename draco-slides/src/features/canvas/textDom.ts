@@ -1,3 +1,4 @@
+import { clampLevel, splitLines } from "../../core/document-model/lists";
 import type { Point } from "../../core/geometry/viewport";
 
 /**
@@ -17,8 +18,9 @@ const SKIP = new Set(["SCRIPT", "STYLE"]);
 export function domToText(root: Node): string {
   const lines: string[] = [];
   let cur: string | null = null;
+  let level = 0; // list level of the line block being read (data-level), stored as leading tabs
   const flush = () => {
-    lines.push(cur ?? "");
+    lines.push("\t".repeat(level) + (cur ?? ""));
     cur = null;
   };
   const addText = (raw: string) => {
@@ -43,8 +45,11 @@ export function domToText(root: Node): string {
     }
     const block = BLOCK.has(tag);
     if (block && cur !== null) flush();
+    const outer = level;
+    if (block && el.hasAttribute("data-level")) level = clampLevel(Number(el.getAttribute("data-level")));
     el.childNodes.forEach(walk);
     if (block && cur !== null) flush();
+    level = outer;
   };
   root.childNodes.forEach(walk);
   if (cur !== null) flush();
@@ -54,11 +59,12 @@ export function domToText(root: Node): string {
 /** One div per line; an empty line holds a <br> so it keeps its height. Same structure as the canvas renders. */
 export function textToDom(text: string, doc: Document): DocumentFragment {
   const frag = doc.createDocumentFragment();
-  for (const line of text.replace(/\r\n?/g, "\n").split("\n")) {
+  for (const { level, content } of splitLines(text)) {
     const div = doc.createElement("div");
     div.className = "rt-line";
-    if (line === "") div.appendChild(doc.createElement("br"));
-    else div.textContent = line;
+    if (level > 0) div.setAttribute("data-level", String(level));
+    if (content === "") div.appendChild(doc.createElement("br"));
+    else div.textContent = content;
     frag.appendChild(div);
   }
   return frag;

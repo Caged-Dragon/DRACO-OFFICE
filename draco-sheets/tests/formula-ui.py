@@ -24,7 +24,8 @@ with sync_playwright() as p:
     pg.get_by_label("Name", exact=True).fill("salesdata"); pg.get_by_role("button", name="Add name").click()
     rec(41, "rejects duplicate (case-insensitive)", "already exists" in pg.locator(".msg").inner_text())
     pg.get_by_label("Name", exact=True).fill("Doubled"); pg.get_by_label("Refers to").fill("=SalesData*2"); pg.get_by_role("button", name="Add name").click(); pg.wait_for_timeout(300)
-    pg.keyboard.press("Escape"); pg.locator(".dialog header .icon").click(); pg.wait_for_timeout(200)
+    pg.keyboard.press("Escape"); pg.wait_for_timeout(200)
+    if pg.locator(".dialog").count(): pg.locator(".dialog header .icon").click(); pg.wait_for_timeout(200)
     r = ev("sh.getRange('H1').setFormula('=SUM(SalesData)'); sh.getRange('H2').setFormula('=SUM(Doubled)'); await new Promise(x=>setTimeout(x,1200)); return [sh.getRange('H1').getValue(), sh.getRange('H2').getValue()];")
     rec(41, "names usable in formulas (range name + formula name)", r == [60, 120], str(r))
     # edit + delete
@@ -78,6 +79,7 @@ with sync_playwright() as p:
     pg.locator(".dialog header .icon").click()
 
     # v26 F4 toggles absolute/relative in the formula editor; F2 enters edit mode
+    pg.mouse.click(700,500); pg.wait_for_timeout(200)
     ev("sh.getRange('J1').activate()"); pg.wait_for_timeout(200)
     pg.keyboard.press("F2"); pg.keyboard.type("=A1"); pg.keyboard.press("F4"); pg.keyboard.press("Enter"); pg.wait_for_timeout(500)
     f = ev("return sh.getRange('J1').getFormula()")
@@ -92,7 +94,7 @@ with sync_playwright() as p:
     f = ev("return [sh.getRange('M2').getFormula(), sh.getRange('M3').getFormula()]")
     if f == ["", ""]:
         pg.context.grant_permissions(["clipboard-read", "clipboard-write"])
-        ev("sh.getRange('M1:N1').activate()"); pg.wait_for_timeout(200); pg.keyboard.press("Control+c"); pg.wait_for_timeout(400)
+        pg.mouse.click(700,500); ev("sh.getRange('M1:N1').activate()"); pg.wait_for_timeout(200); pg.keyboard.press("Control+c"); pg.wait_for_timeout(400)
         ev("sh.getRange('M2:N3').activate()"); pg.wait_for_timeout(200); pg.keyboard.press("Control+v"); pg.wait_for_timeout(900)
         f = ev("return [sh.getRange('M2').getFormula(), sh.getRange('M3').getFormula(), sh.getRange('N3').getFormula()]")
     rec(42, "copy/paste adjusts relative refs, keeps absolute", f[:2] == ["=L2*2", "=L3*2"] and (len(f) < 3 or f[2] == "=$L$1+L3"), str(f))

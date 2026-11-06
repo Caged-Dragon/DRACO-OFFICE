@@ -104,6 +104,7 @@ expect("chrome placeholder color on slate-900", "#94a3b8", slate[900]);
 expect("white on blue-600 (active buttons)", "#ffffff", "#2563eb");
 expect("track-changes insertion chip on slate-900 panel", "#86efac", slate[900]);
 expect("track-changes deletion chip on slate-900 panel", "#fca5a5", slate[900]);
+expect("background-color low-contrast warning on slate-900 panel", "#fbbf24", slate[900]);
 
 // ---------- 3. source scans ----------
 function walk(dir, out = []) {

@@ -1,0 +1,18 @@
+import { splitText, currentRegion, parseDisplayNumber, parseNumberList, type Grid } from '../src/dataTools';
+let fails = 0, passes = 0;
+const eq = (name: string, got: unknown, want: unknown) => { const ok = JSON.stringify(got) === JSON.stringify(want); ok ? passes++ : fails++; if (!ok) console.log('FAIL', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); };
+eq('split: comma', splitText('a,b,c', { delim: ',' }), ['a', 'b', 'c']);
+eq('split: keeps empty fields', splitText('a,,c', { delim: ',' }), ['a', '', 'c']);
+eq('split: merge consecutive', splitText('a  b   c', { delim: ' ', merge: true }), ['a', 'b', 'c']);
+eq('split: quoted delimiter', splitText('"x,y",z', { delim: ',' }), ['x,y', 'z']);
+eq('split: escaped quote', splitText('"say ""hi""",b', { delim: ',' }), ['say "hi"', 'b']);
+eq('split: multi-char delimiter', splitText('a::b::c', { delim: '::' }), ['a', 'b', 'c']);
+eq('split: no delimiter present', splitText('abc', { delim: ',' }), ['abc']);
+eq('split: trailing delimiter gives empty last field', splitText('a,b,', { delim: ',' }), ['a', 'b', '']);
+const grid: Grid = [['a', 'b', null, null, null], ['c', null, null, null, null], ['d', null, null, 'x', 'y'], [null, null, null, 'z', null]];
+eq('current region around A1', currentRegion(grid, 0, 0), { r1: 0, c1: 0, r2: 2, c2: 1 });
+eq('current region around D3 (diagonals+neighbors)', currentRegion(grid, 2, 3), { r1: 2, c1: 3, r2: 3, c2: 4 });
+eq('current region on blank cell = null', currentRegion(grid, 1, 2), null);
+eq('parseDisplayNumber', ['$1,800.00 ', '(5)', '25%', '1e3', ' 7 ', 'abc', '', '-$3.5'].map(parseDisplayNumber).map((n) => (Number.isNaN(n) ? 'NaN' : n)), [1800, -5, 0.25, 1000, 7, 'NaN', 'NaN', -3.5]);
+eq('parseNumberList', parseNumberList('1, 2;3\n4.5 x'), [1, 2, 3, 4.5]);
+console.log(fails ? `${fails} FAILED, ${passes} passed` : `all ${passes} split/parse tests passed`); process.exit(fails ? 1 : 0);

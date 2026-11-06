@@ -1,3 +1,4 @@
+import { DEFAULT_TEXT_COLOR, normalizeColor } from "../document-model/fonts";
 import type { Presentation } from "../document-model/types";
 
 /**
@@ -32,9 +33,25 @@ export function sanitizePresentation(p: Presentation): Presentation {
         height: o.height,
         rotation: o.rotation,
         visible: o.visible,
+        groupId: o.groupId,
+        locked: o.locked,
         role: o.role,
         text: o.text,
+        fontFamily: o.fontFamily,
         fontSize: o.fontSize,
+        bold: o.bold,
+        italic: o.italic,
+        underline: o.underline,
+        strike: o.strike,
+        color: normalizeColor(o.color) ?? DEFAULT_TEXT_COLOR,
+        align: o.align,
+        indent: o.indent,
+        lineSpacing: o.lineSpacing,
+        direction: o.direction,
+        list: o.list,
+        margins: { top: o.margins.top, right: o.margins.right, bottom: o.margins.bottom, left: o.margins.left },
+        verticalAlign: o.verticalAlign,
+        overflow: o.overflow,
       })),
     })),
   };

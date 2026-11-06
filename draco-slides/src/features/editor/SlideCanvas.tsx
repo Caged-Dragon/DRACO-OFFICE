@@ -1,4 +1,6 @@
 import type { Presentation, Slide } from "../../core/document-model/types";
+import { splitLines } from "../../core/document-model/lists";
+import { textClassNames, textStyle } from "./textStyle";
 
 interface Props {
   presentation: Pick<Presentation, "width" | "height">;
@@ -29,21 +31,23 @@ export function SlideCanvas({ presentation, slide, displayWidth, clip = true, hi
           .map((o) => (
             <div
               key={o.id}
-              className={`slide__text slide__text--${o.role}`}
+              className={`slide__text slide__text--${o.role}${textClassNames(o)}`}
+              data-text-id={o.id}
+              dir={o.direction}
               style={{
                 left: o.x,
                 top: o.y,
                 width: o.width,
                 height: o.height,
-                fontSize: o.fontSize,
+                ...textStyle(o),
                 transform: o.rotation ? `rotate(${o.rotation}deg)` : undefined,
                 visibility: o.id === hideObjectId ? "hidden" : undefined,
               }}
             >
               {/* One block per line, the same structure the in-place editor uses, so text does not shift when editing starts. */}
-              {o.text.split("\n").map((line, i) => (
-                <div key={i} className="rt-line">
-                  {line === "" ? <br /> : line}
+              {splitLines(o.text).map((line, i) => (
+                <div key={i} className="rt-line" data-level={line.level > 0 ? line.level : undefined}>
+                  {line.content === "" ? <br /> : line.content}
                 </div>
               ))}
             </div>

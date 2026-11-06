@@ -1,5 +1,5 @@
 /** Bump when the stored shape changes, and add a migration in core/serialization/migrate.ts. */
-export const DOCUMENT_SCHEMA_VERSION = 3;
+export const DOCUMENT_SCHEMA_VERSION = 8;
 
 export const MIN_SLIDE_DIMENSION = 100;
 export const MAX_SLIDE_DIMENSION = 20000;
@@ -20,14 +20,71 @@ export interface BaseObject {
   rotation: number;
   /** Hidden objects stay in the document but are not rendered. */
   visible: boolean;
+  /** Objects on a slide that share a groupId form a group (one level; groups cannot be nested). */
+  groupId: string | null;
+  /** A locked object cannot be moved, resized or deleted. Its text and formatting can still be edited. */
+  locked: boolean;
 }
 
-export interface TextObject extends BaseObject {
+/** Formatting of a whole text object (character-level formatting inside one object is not supported yet). */
+export interface TextFormat {
+  /** One of FONT_FAMILIES (core/document-model/fonts.ts). */
+  fontFamily: string;
+  /** Slide pixels. */
+  fontSize: number;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  strike: boolean;
+  /** Lowercase "#rrggbb". */
+  color: string;
+}
+
+export type Alignment = "left" | "center" | "right" | "justify";
+export type Direction = "ltr" | "rtl";
+export type ListStyle = "none" | "bullet" | "number";
+
+/** Paragraph settings of a whole text object (they apply to every paragraph in it). */
+export interface ParagraphFormat {
+  /** Physical alignment of the text. */
+  align: Alignment;
+  /** Indent level, 0 to 8, in steps of INDENT_STEP slide pixels from the starting edge. */
+  indent: number;
+  /** Line height as a multiple of the font size. */
+  lineSpacing: number;
+  /** Base text direction; "rtl" makes right-to-left scripts (Arabic, Hebrew) lay out correctly. */
+  direction: Direction;
+  /**
+   * List markers for every paragraph of the object. A paragraph's list level (0 to 8) is stored as leading tab
+   * characters in `text`, so text stays the single source of truth.
+   */
+  list: ListStyle;
+}
+
+export type VerticalAlign = "top" | "middle" | "bottom";
+/** What happens to text that does not fit the box: "hidden" clips it, "visible" lets it spill outside. */
+export type OverflowMode = "hidden" | "visible";
+
+/** Internal margins: the space between the box edge and its text, in slide pixels. */
+export interface Margins {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+/** How the text sits inside its box. */
+export interface BoxFormat {
+  margins: Margins;
+  verticalAlign: VerticalAlign;
+  overflow: OverflowMode;
+}
+
+export interface TextObject extends BaseObject, TextFormat, ParagraphFormat, BoxFormat {
   type: "text";
   /** "title" and "body" are slide placeholders; "textbox" is a free text box the user inserted. */
   role: "title" | "body" | "textbox";
   text: string;
-  fontSize: number;
 }
 
 /** Union grows as shapes, images, tables, charts and media are added. */

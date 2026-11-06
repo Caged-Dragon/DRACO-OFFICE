@@ -1,18 +1,25 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent } from "react";
 import { APP_VERSION } from "../../app/version";
 import { MenuButton } from "../../components/menus/MenuButton";
-import type { Presentation } from "../../core/document-model/types";
+import type { BoxPatch } from "../../core/document-model/box";
+import { boundsOf, isWholeGroup, rectOf } from "../../core/document-model/groups";
+import { paragraphPatch } from "../../core/document-model/paragraph";
+import type { Alignment, ParagraphFormat, Presentation, TextFormat } from "../../core/document-model/types";
+import { formatPatch } from "../../core/document-model/fonts";
 import type { Point } from "../../core/geometry/viewport";
 import { fileNameFor, serializePresentation } from "../../core/serialization/serialize";
 import { savePresentation } from "../../services/storage/presentationStore";
 import { describeStorageError } from "../../services/storage/storageError";
 import { useApp } from "../../state/AppContext";
 import { useSettings } from "../../state/SettingsContext";
-import { editorReducer, initEditorState } from "../../state/editorReducer";
+import { historyReducer, initHistoryState } from "../../state/history";
 import { downloadTextFile } from "../../utils/download";
+import { Ruler } from "../canvas/Ruler";
 import { CanvasViewport } from "../canvas/CanvasViewport";
 import { createPointerStore } from "../canvas/pointerStore";
 import { useCanvasView } from "../canvas/useCanvasView";
+import { fitBoxHeight, fitFontSize } from "../canvas/fitText";
+import type { TextEditorApi } from "../canvas/TextEditor";
 import { Ribbon } from "../ribbon/Ribbon";
 import { PropertiesDialog } from "./PropertiesDialog";
 import { RenameSlideDialog } from "./RenameSlideDialog";
@@ -25,8 +32,10 @@ interface Props {
 
 export function Editor({ initial }: Props) {
   const { dispatch: appDispatch, notify } = useApp();
-  const { settings } = useSettings();
-  const [state, dispatch] = useReducer(editorReducer, initial, initEditorState);
+  const { settings, update: updateSettings } = useSettings();
+  const [history, dispatch] = useReducer(historyReducer, initial, initHistoryState);
+  const state = history.present;
+  const [historyNote, setHistoryNote] = useState("");
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showSlidePane, setShowSlidePane] = useState(settings.showSlidePane);
@@ -39,19 +48,90 @@ export function Editor({ initial }: Props) {
   const pointerStore = useMemo(createPointerStore, []);
   const first = useRef(true);
   const dirty = useRef(false);
-  const { presentation, currentSlideId, selectedObjectId, editingObjectId } = state;
+  const { presentation, currentSlideId, selectedObjectId, selectedObjectIds, editingObjectId } = state;
   const [editCaret, setEditCaret] = useState<Point | null>(null);
+  const editorApi = useRef<TextEditorApi | null>(null);
+  const [overflowIds, setOverflowIds] = useState<ReadonlySet<string>>(new Set());
   const latest = useRef(presentation);
   latest.current = presentation;
   const slide = presentation.slides.find((s) => s.id === currentSlideId) ?? presentation.slides[0];
   const index = presentation.slides.indexOf(slide);
+  /** The one selected object (null when none or several are selected): text editing, formatting and the position fields use it. */
   const selectedObject = slide.objects.find((o) => o.id === selectedObjectId) ?? null;
+  const selectedObjects = slide.objects.filter((o) => selectedObjectIds.includes(o.id));
+  const selectionBounds = boundsOf(selectedObjects.map(rectOf));
+  const wholeGroup = isWholeGroup(slide.objects, selectedObjectIds);
+  const anyLocked = selectedObjects.some((o) => o.locked);
+  const allLocked = selectedObjects.length > 0 && selectedObjects.every((o) => o.locked);
   const editingObject = slide.objects.find((o) => o.id === editingObjectId) ?? null;
+  const dims = (r: { x: number; y: number; width: number; height: number }) =>
+    `(${Math.round(r.x)}, ${Math.round(r.y)}, ${Math.round(r.width)} × ${Math.round(r.height)})`;
   const selectionLabel = selectedObject
-    ? `${selectedObject.name} (${Math.round(selectedObject.x)}, ${Math.round(selectedObject.y)}, ${Math.round(selectedObject.width)} × ${Math.round(selectedObject.height)})${
-        editingObject ? " – editing text" : ""
-      }`
-    : null;
+    ? `${selectedObject.name} ${dims(selectedObject)}${editingObject ? " – editing text" : ""}${
+        overflowIds.has(selectedObject.id) ? " – text overflows the box" : ""
+      }${selectedObject.groupId ? " – in a group" : ""}${selectedObject.locked ? " – locked" : ""}`
+    : selectionBounds
+      ? `${wholeGroup ? `group of ${selectedObjects.length} objects` : `${selectedObjects.length} objects`} ${dims(selectionBounds)}${anyLocked ? " – locked" : ""}`
+      : null;
+
+  const notifyLocked = () => notify("info", "Locked objects can't be moved, resized or deleted. Unlock them first.");
+  const deleteSelected = () => {
+    if (selectedObjects.length === 0) return;
+    if (anyLocked) notifyLocked();
+    else dispatch({ type: "deleteSelection" });
+  };
+
+  const textObject = selectedObject?.type === "text" ? selectedObject : null;
+  const formatSelected = (patch: Partial<Record<keyof TextFormat, unknown>>) => {
+    if (textObject) dispatch({ type: "setTextFormat", objectId: textObject.id, patch });
+  };
+  const paragraphSelected = (patch: Partial<Record<keyof ParagraphFormat, unknown>>) => {
+    if (textObject) dispatch({ type: "setParagraphFormat", objectId: textObject.id, patch });
+  };
+  const boxSelected = (patch: BoxPatch) => {
+    if (textObject) dispatch({ type: "setBoxFormat", objectId: textObject.id, patch });
+  };
+
+  /** One-shot fitting, measured on the text as it is drawn on the canvas. Not a live autofit mode. */
+  const fitSelected = (mode: "shrink" | "resize") => {
+    if (!textObject) return;
+    const el = canvas.containerRef.current?.querySelector<HTMLElement>(`[data-text-id="${textObject.id}"]`) ?? null;
+    const unavailable = () => notify("info", "Fitting needs the slide to be shown on screen, so nothing was changed.");
+    if (!el) return unavailable();
+    if (mode === "shrink") {
+      const result = fitFontSize(el, textObject.fontSize);
+      if (!result) return unavailable();
+      if (result.size === textObject.fontSize) {
+        notify("info", result.fits ? "The text already fits." : "The text does not fit even at the smallest size. Make the box larger.");
+        return;
+      }
+      formatSelected({ fontSize: result.size });
+      if (!result.fits) notify("info", "The text still does not fit at the smallest size. Make the box larger.");
+    } else {
+      const height = fitBoxHeight(el);
+      if (height === null) return unavailable();
+      if (Math.abs(height - textObject.height) < 1) {
+        notify("info", "The box already fits its text.");
+        return;
+      }
+      dispatch({
+        type: "setObjectRect",
+        objectId: textObject.id,
+        rect: { x: textObject.x, y: textObject.y, width: textObject.width, height },
+      });
+    }
+  };
+
+  const alignSelected = (align: Alignment) => paragraphSelected(paragraphPatch("align", align));
+  /** While editing, the editing surface changes the levels of the paragraphs in the selection; otherwise all paragraphs move. */
+  const changeListLevel = (delta: 1 | -1) => {
+    if (!textObject) return;
+    if (editingObject?.id === textObject.id && editorApi.current) editorApi.current.changeLevel(delta);
+    else dispatch({ type: "shiftListLevel", objectId: textObject.id, delta });
+  };
+  const toggleFormat = (key: "bold" | "italic" | "underline" | "strike") => {
+    if (textObject) formatSelected(formatPatch(key, !textObject[key]));
+  };
 
   const startEditing = (objectId: string, caret: Point | null) => {
     setEditCaret(caret);
@@ -74,11 +154,14 @@ export function Editor({ initial }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingObject?.id]);
 
-  // Announce a newly selected object (clearing the selection is not announced).
+  // Announce a newly selected object or group (clearing the selection is not announced).
   useEffect(() => {
     if (selectedObject) setAnnouncement(`Selected ${selectedObject.name}`);
+    else if (selectedObjects.length > 1) {
+      setAnnouncement(wholeGroup ? `Group of ${selectedObjects.length} objects selected` : `${selectedObjects.length} objects selected`);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObject?.id]);
+  }, [selectedObjectIds.join(",")]);
 
   /** Saves a snapshot. Status only changes to "saved" if no newer edit is waiting. */
   const persist = useCallback(async (p: Presentation) => {
@@ -162,8 +245,36 @@ export function Editor({ initial }: Props) {
   };
 
   // PageUp / PageDown move between slides unless focus is in a text field or open menu.
+  const undoLabel = history.past[history.past.length - 1]?.label ?? null;
+  const redoLabel = history.future[history.future.length - 1]?.label ?? null;
+  const undo = () => {
+    if (!undoLabel) return;
+    dispatch({ type: "undo" });
+    setHistoryNote(`Undid ${undoLabel}`);
+  };
+  const redo = () => {
+    if (!redoLabel) return;
+    dispatch({ type: "redo" });
+    setHistoryNote(`Redid ${redoLabel}`);
+  };
+
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Text fields and the text editor keep the browser's own undo while you type in them.
     if ((e.target as HTMLElement).closest("input, textarea, [role=menu], [contenteditable=true]")) return;
+    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+      const k = e.key.toLowerCase();
+      if (k === "z") {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if (k === "y") {
+        e.preventDefault();
+        redo();
+        return;
+      }
+    }
     if (e.key === "PageDown") {
       e.preventDefault();
       go(1);
@@ -186,6 +297,24 @@ export function Editor({ initial }: Props) {
             { label: "Close presentation", onSelect: () => appDispatch({ type: "closePresentation" }) },
           ]}
         />
+        <button
+          className="btn"
+          aria-label="Undo"
+          title={undoLabel ? `Undo ${undoLabel} (Ctrl+Z)` : "Nothing to undo"}
+          disabled={!undoLabel}
+          onClick={undo}
+        >
+          Undo
+        </button>
+        <button
+          className="btn"
+          aria-label="Redo"
+          title={redoLabel ? `Redo ${redoLabel} (Ctrl+Y)` : "Nothing to redo"}
+          disabled={!redoLabel}
+          onClick={redo}
+        >
+          Redo
+        </button>
         <input
           className="editor__title"
           aria-label="Presentation title"
@@ -205,11 +334,30 @@ export function Editor({ initial }: Props) {
         onMoveDown={() => dispatch({ type: "moveSlide", slideId: slide.id, toIndex: index + 1 })}
         onPrevious={() => go(-1)}
         onNext={() => go(1)}
-        hasSelection={selectedObject !== null}
+        hasSelection={selectedObjects.length > 0}
+        selectionCount={selectedObjects.length}
+        canGroup={selectedObjects.length >= 2 && !wholeGroup}
+        canUngroup={selectedObjects.some((o) => o.groupId !== null)}
+        allLocked={allLocked}
+        onGroup={() => dispatch({ type: "groupSelection" })}
+        onUngroup={() => dispatch({ type: "ungroupSelection" })}
+        onToggleLock={() => dispatch({ type: "setObjectsLocked", locked: !allLocked })}
+        onSelectAll={() => dispatch({ type: "selectAllObjects" })}
         canEditText={selectedObject?.type === "text"}
         onEditText={() => selectedObject && startEditing(selectedObject.id, null)}
+        format={textObject}
+        onFormat={formatSelected}
+        onParagraph={paragraphSelected}
+        onListLevel={changeListLevel}
+        onBox={boxSelected}
+        position={selectedObject && !selectedObject.locked ? { x: selectedObject.x, y: selectedObject.y, width: selectedObject.width, height: selectedObject.height } : null}
+        slideSize={{ width: presentation.width, height: presentation.height }}
+        viewOptions={settings}
+        onViewOptions={(patch) => updateSettings({ ...settings, ...patch })}
+        onRect={(rect) => selectedObject && dispatch({ type: "setObjectRect", objectId: selectedObject.id, rect })}
+        onFit={fitSelected}
         onAddTextBox={() => dispatch({ type: "addTextBox" })}
-        onDeleteObject={() => selectedObject && dispatch({ type: "deleteObject", objectId: selectedObject.id })}
+        onDeleteObject={deleteSelected}
         showSlidePane={showSlidePane}
         showTextPanel={showTextPanel}
         onToggleSlidePane={() => setShowSlidePane((v) => !v)}
@@ -232,12 +380,32 @@ export function Editor({ initial }: Props) {
         )}
 
         <section className="editor__stage" aria-label="Slide editor">
+          <div className={`canvas-area${settings.showRulers ? " canvas-area--rulers" : ""}`}>
+            {settings.showRulers && (
+              <>
+                <div className="canvas-area__corner" aria-hidden="true" />
+                <Ruler
+                  orientation="horizontal"
+                  view={canvas.view}
+                  length={canvas.size.width}
+                  slideLength={presentation.width}
+                  selection={selectionBounds ? [selectionBounds.x, selectionBounds.x + selectionBounds.width] : null}
+                />
+                <Ruler
+                  orientation="vertical"
+                  view={canvas.view}
+                  length={canvas.size.height}
+                  slideLength={presentation.height}
+                  selection={selectionBounds ? [selectionBounds.y, selectionBounds.y + selectionBounds.height] : null}
+                />
+              </>
+            )}
           <CanvasViewport
             canvas={canvas}
             slide={slide}
             width={presentation.width}
             height={presentation.height}
-            selectedObjectId={selectedObject?.id ?? null}
+            selectedObjectIds={selectedObjectIds}
             editingObjectId={editingObject?.id ?? null}
             editCaret={editCaret}
             onStartEditing={startEditing}
@@ -245,15 +413,31 @@ export function Editor({ initial }: Props) {
               dispatch({ type: "setObjectText", slideId: slide.id, objectId, text })
             }
             onStopEditing={stopEditing}
+            onToggleFormat={toggleFormat}
+            onAlign={alignSelected}
+            onOverflowChange={setOverflowIds}
+            snap={{ objects: settings.snapToObjects, grid: settings.snapToGrid ? settings.gridSize : null }}
+            gridLines={settings.showGrid ? settings.gridSize : null}
+            registerEditorApi={(api) => {
+              editorApi.current = api;
+            }}
             onPointer={pointerStore.set}
-            onSelectObject={(objectId) => dispatch({ type: "selectObject", objectId })}
+            onSelectObjects={(objectIds, expand) => dispatch({ type: "selectObjects", objectIds, expand })}
+            onToggleObject={(objectId) => dispatch({ type: "toggleObjectSelection", objectId })}
+            onSelectAll={() => dispatch({ type: "selectAllObjects" })}
             onChangeRect={(objectId, rect) => dispatch({ type: "setObjectRect", objectId, rect })}
-            onDeleteSelected={() => selectedObject && dispatch({ type: "deleteObject", objectId: selectedObject.id })}
+            onChangeRects={(rects) => dispatch({ type: "setObjectRects", rects })}
+            onDeleteSelected={deleteSelected}
+            onGroup={() => dispatch({ type: "groupSelection" })}
+            onUngroup={() => dispatch({ type: "ungroupSelection" })}
+            onLockedAttempt={notifyLocked}
+            onGestureEnd={() => dispatch({ type: "breakHistory" })}
           />
+          </div>
           {showTextPanel && (
             <div className="editor__text">
               {slide.objects.map((o) => (
-                <label key={o.id} className={o.id === selectedObject?.id ? "editor__field--selected" : undefined}>
+                <label key={o.id} className={selectedObjectIds.includes(o.id) ? "editor__field--selected" : undefined}>
                   <span className="muted">{o.role === "title" ? "Title" : o.role === "body" ? "Body text" : o.name}</span>
                   <textarea
                     rows={o.role === "body" ? 3 : 1}
@@ -292,6 +476,9 @@ export function Editor({ initial }: Props) {
         />
       )}
 
+      <div className="sr-only" aria-live="polite" aria-atomic="true" data-testid="history-note">
+        {historyNote}
+      </div>
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>

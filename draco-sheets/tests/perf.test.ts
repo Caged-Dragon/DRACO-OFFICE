@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import * as P from '../src/perf/perf';
+let n = 0; const eq = (a: unknown, b: unknown) => { assert.deepEqual(a, b); n++; }; const ok = (c: unknown) => { assert.ok(c); n++; };
+eq(P.chunkPlan(0, 10), []); eq(P.chunkPlan(25, 10), [{ start: 0, count: 10 }, { start: 10, count: 10 }, { start: 20, count: 5 }]); eq(P.chunkPlan(5, 0).length, 5); eq(P.chunkPlan(10, 10).length, 1);
+eq(P.chunkPlan(1000, 300).reduce((a, c) => a + c.count, 0), 1000);
+eq(P.genRows(0, 3, 6, 5), P.genRows(0, 3, 6, 5)); ok(JSON.stringify(P.genRows(0, 3, 6, 5)) !== JSON.stringify(P.genRows(0, 3, 6, 6))); eq(P.genRows(10, 4, 3).length, 4); ok(P.genRows(0, 2, 6).every((r) => r.length === 6));
+eq(P.fmtMs(450), '450 ms'); eq(P.fmtMs(2500), '2.5 s'); eq(P.fmtMs(125000), '2 min 5 s'); eq(P.fmtCount(1048576), '1,048,576'); eq(P.cellsOf(10, 5), 50);
+eq(P.summarize([{ name: 'a', ms: 5 }, { name: 'b', ms: 20 }]).total, 25); eq(P.summarize([{ name: 'a', ms: 5 }, { name: 'b', ms: 20 }]).slowest?.name, 'b');
+eq(P.warnFor(100, 10), null); ok(P.warnFor(1_048_576, 100)); eq(P.a1End(100, 5), 'A1:E100'); eq(P.a1End(10, 27), 'A1:AA10'); eq(P.EXCEL_LIMITS.cols, 16384);
+console.log(`perf.test.ts: ${n} assertions OK`);

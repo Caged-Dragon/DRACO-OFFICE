@@ -1,6 +1,6 @@
 # Draco Slides
 
-Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.12.0**.
+Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.20.0**.
 
 ## Run (Windows CMD)
 ```cmd

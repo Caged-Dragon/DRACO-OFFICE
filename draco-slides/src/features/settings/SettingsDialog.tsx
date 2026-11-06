@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "../../components/dialogs/Modal";
 import { SLIDE_SIZE_IDS, SLIDE_SIZES, type SlideSizeId } from "../../core/document-model/sizes";
-import { DEFAULT_SETTINGS, parseSettings, type Settings, type ThemeSetting } from "../../services/settings/settingsStore";
+import { DEFAULT_SETTINGS, GRID_SIZES, parseSettings, type Settings, type ThemeSetting } from "../../services/settings/settingsStore";
 
 interface Props {
   settings: Settings;
@@ -50,6 +50,32 @@ export function SettingsDialog({ settings, onSave, onClose }: Props) {
         <label className="checkrow">
           <input type="checkbox" checked={form.showTextPanel} onChange={(e) => set("showTextPanel", e.target.checked)} />
           <span>Show the text panel when a presentation opens</span>
+        </label>
+        <label className="field">
+          <span>Grid size</span>
+          <select value={form.gridSize} onChange={(e) => set("gridSize", Number(e.target.value))}>
+            {GRID_SIZES.map((g) => (
+              <option key={g} value={g}>
+                {g} px
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="checkrow">
+          <input type="checkbox" checked={form.showRulers} onChange={(e) => set("showRulers", e.target.checked)} />
+          <span>Show rulers</span>
+        </label>
+        <label className="checkrow">
+          <input type="checkbox" checked={form.showGrid} onChange={(e) => set("showGrid", e.target.checked)} />
+          <span>Show gridlines</span>
+        </label>
+        <label className="checkrow">
+          <input type="checkbox" checked={form.snapToGrid} onChange={(e) => set("snapToGrid", e.target.checked)} />
+          <span>Snap objects to the grid</span>
+        </label>
+        <label className="checkrow">
+          <input type="checkbox" checked={form.snapToObjects} onChange={(e) => set("snapToObjects", e.target.checked)} />
+          <span>Snap objects to other objects and the slide edges</span>
         </label>
         <div className="modal__actions">
           <button type="button" className="btn" onClick={() => setForm({ ...DEFAULT_SETTINGS })}>

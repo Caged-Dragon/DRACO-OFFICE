@@ -1,0 +1,51 @@
+import { stdev, percentileInc, percentileExc, boxStats, niceScale, logScale, fmtNum, linearFit, expFit, logFit, powerFit, polyFit, movingAverage, histogram, scottBinWidth, squarify, mean } from '../src/charts/math';
+let fails = 0, passes = 0;
+const eq = (n: string, g: unknown, w: unknown) => { const ok = JSON.stringify(g) === JSON.stringify(w); ok ? passes++ : fails++; if (!ok) console.log('FAIL', n, '\n  got ', JSON.stringify(g), '\n  want', JSON.stringify(w)); };
+const near = (n: string, g: number, w: number, t = 1e-6) => { const ok = Math.abs(g - w) <= t; ok ? passes++ : fails++; if (!ok) console.log('FAIL', n, 'got', g, 'want', w); };
+
+near('stdev sample [10..50]', stdev([10, 20, 30, 40, 50]), 15.811388, 1e-6); near('stdev pop', stdev([10, 20, 30, 40, 50], false), 14.142136, 1e-6);
+near('percentile inc 25%', percentileInc([10, 20, 30, 40, 50], 0.25), 20); near('percentile inc 90%', percentileInc([1, 2, 3, 4], 0.9), 3.7);
+near('percentile exc 25% of 1..5', percentileExc([1, 2, 3, 4, 5], 0.25), 1.5);
+let b = boxStats([1, 2, 3, 4, 5, 6, 7, 8, 9, 100])!;
+eq('box quartiles', [b.q1, b.median, b.q3], [3.25, 5.5, 7.75]); eq('box outlier 100 excluded from whisker', [b.max, b.outliers], [9, [100]]);
+eq('box empty', boxStats([]), null);
+eq('box single', boxStats([5])!.median, 5);
+eq('nice 0..97', [niceScale(0, 97).min, niceScale(0, 97).max, niceScale(0, 97).step], [0, 100, 20]);
+eq('nice ticks 0..1', niceScale(0, 1).ticks, [0, 0.2, 0.4, 0.6, 0.8, 1]);
+eq('nice negatives', [niceScale(-37, 52).min, niceScale(-37, 52).max], [-40, 60]);
+eq('nice equal values', niceScale(5, 5).min < 5 && niceScale(5, 5).max > 5, true);
+eq('nice zeros', niceScale(0, 0).max, 1);
+eq('nice small range', niceScale(0.001, 0.0095).max, 0.01);
+eq('nice big', niceScale(0, 12_345_678).max, 12_500_000);
+eq('log ticks', logScale(3, 4500).ticks, [1, 10, 100, 1000, 10000]);
+eq('fmtNum', [fmtNum(1200), fmtNum(25000), fmtNum(3_400_000), fmtNum(0.00123), fmtNum(12.345), fmtNum(-2_500_000)], ['1,200', '25K', '3.4M', '0.00123', '12.35', '-2.5M']);
+const f = linearFit([1, 2, 3, 4, 5], [2.2, 4.1, 6.2, 7.9, 10.1])!;
+near('linear slope', f.coeffs[1], 1.96, 1e-9); near('linear intercept', f.coeffs[0], 0.22, 1e-9); near('linear r2', f.r2, 0.99886, 1e-4); eq('linear equation', f.equation, 'y = 1.96x + 0.22');
+eq('linear needs 2 pts / vertical', [linearFit([1], [1]), linearFit([2, 2], [1, 3])], [null, null]);
+const e = expFit([0, 1, 2, 3], [1, 2.718281828, 7.389056099, 20.08553692])!; near('exp A', e.coeffs[0], 1, 1e-6); near('exp B', e.coeffs[1], 1, 1e-6); near('exp r2', e.r2, 1, 1e-9);
+eq('exp rejects non-positive', expFit([1, 2], [1, -1]), null);
+const l = logFit([1, 2, 4, 8], [0, 1, 2, 3])!; near('log b', l.coeffs[1], 1 / Math.LN2, 1e-9); near('log a', l.coeffs[0], 0, 1e-9);
+const pw = powerFit([1, 2, 3, 4], [2, 8, 18, 32])!; near('power A', pw.coeffs[0], 2, 1e-9); near('power B', pw.coeffs[1], 2, 1e-9);
+const q = polyFit([-2, -1, 0, 1, 2, 3], [4 - 2 + 1, 1 - 1 + 1, 1, 1 + 1 + 1, 4 + 2 + 1, 9 + 3 + 1], 2)!; // y = x^2 + x + 1
+near('poly2 c0', q.coeffs[0], 1, 1e-9); near('poly2 c1', q.coeffs[1], 1, 1e-9); near('poly2 c2', q.coeffs[2], 1, 1e-9); near('poly2 predict(10)', q.predict(10), 111, 1e-8); eq('poly equation', q.equation, 'y = x^2 + x + 1'.replace('y = x^2', 'y = 1x^2').replace(' + x ', ' + 1x '));
+const c3 = polyFit([0, 1, 2, 3, 4, 5], [0, 1, 8, 27, 64, 125], 3)!; near('poly3 c3', c3.coeffs[3], 1, 1e-8); near('poly3 r2', c3.r2, 1, 1e-9);
+eq('poly too few points', polyFit([1, 2], [1, 2], 3), null);
+eq('moving average period 3', movingAverage([1, 2, 3, 4, 5], 3), [null, null, 2, 3, 4]);
+eq('moving average period 1', movingAverage([4, 6], 1), [4, 6]);
+// histogram
+const hv = [1, 2, 2, 3, 3, 3, 4, 4, 5, 10];
+const h = histogram(hv, { bins: 3 }); eq('hist 3 bins total', h.reduce((s, x) => s + x.count, 0), 10); eq('hist bin counts (1,4],(4,7],(7,10] with first closed', h.map((x) => x.count), [8, 1, 1]);
+eq('hist first bin includes min', histogram([5, 5, 6, 7], { bins: 2 })[0].count >= 2, true);
+eq('hist single value', histogram([3, 3, 3]), [{ lo: 3, hi: 3, count: 3 }]); eq('hist empty', histogram([]), []);
+eq('hist width option', histogram([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], { width: 5 }).map((x) => x.count), [6, 4]);
+near('scott width n=5', scottBinWidth([10, 20, 30, 40, 50]), (3.5 * 15.811388) / Math.cbrt(5), 1e-5);
+eq('hist auto sums to n', histogram(hv).reduce((s, x) => s + x.count, 0), 10);
+// treemap
+const tm = squarify([{ label: 'a', value: 6 }, { label: 'b', value: 6 }, { label: 'c', value: 4 }, { label: 'd', value: 3 }, { label: 'e', value: 2 }, { label: 'f', value: 2 }, { label: 'g', value: 1 }], 0, 0, 600, 400);
+near('treemap total area = canvas', tm.reduce((s, r) => s + r.w * r.h, 0), 240000, 1e-3); eq('treemap count', tm.length, 7);
+near('treemap area proportional (a=6/24)', tm.find((r) => r.label === 'a')!.w * tm.find((r) => r.label === 'a')!.h, 60000, 1e-3);
+eq('treemap rects inside bounds', tm.every((r) => r.x >= -1e-9 && r.y >= -1e-9 && r.x + r.w <= 600 + 1e-6 && r.y + r.h <= 400 + 1e-6), true);
+eq('treemap no overlaps', tm.every((a, i) => tm.every((b, j) => i >= j || a.x + a.w <= b.x + 1e-6 || b.x + b.w <= a.x + 1e-6 || a.y + a.h <= b.y + 1e-6 || b.y + b.h <= a.y + 1e-6)), true);
+eq('treemap ignores zero/negative', squarify([{ label: 'x', value: 0 }, { label: 'y', value: -2 }], 0, 0, 10, 10), []);
+near('mean', mean([2, 4, 6]), 4);
+console.log(fails ? `\n${fails} FAILED, ${passes} passed` : `all ${passes} chart-math tests passed`); process.exit(fails ? 1 : 0);

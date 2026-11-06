@@ -1,5 +1,68 @@
 # Changelog
 
+## 0.20.0 (Roadmap Version 20: end of Phase 2)
+- Undo and Redo for every document change, with buttons, Ctrl/Cmd+Z, Ctrl/Cmd+Y and Ctrl/Cmd+Shift+Z, tooltips naming the change, and screen-reader announcements. 100 steps per session.
+- History layer (`state/history.ts`) around the editor reducer: snapshots with slide and selection; selection, navigation and view changes are not recorded.
+- Continuous gestures merge into one step (a drag, a held arrow key, a typing session, a color-picker stream); the browser's own undo keeps working inside text fields and the text editor.
+- Undoing while editing ends the editing without writing stale text back.
+- Limits: history is per session (not saved); typing undo is per session, not per word.
+
+## 0.19.0 (Roadmap Version 19)
+- Multi-object selection: Shift/Ctrl/Cmd+click, rubber-band (objects completely enclosed), Ctrl/Cmd+A, Select all; bounding box and handles for the selection; status bar and screen-reader announcements.
+- Move, nudge, resize (scaling) and delete several objects together; snapping and guides treat the selection as one rectangle.
+- Grouping: Group / Ungroup (Ctrl/Cmd+G, Ctrl/Cmd+Shift+G); one-level flat groups (`groupId`), click selects the group, click again or double-click drills into a member; groups of one member dissolve automatically; slide duplication gives independent groups.
+- Locking: Lock/Unlock the selection; locked objects can't be moved, resized or deleted (with an explanation) but text and formatting remain editable.
+- Document schema 8 (`groupId`, `locked`) with automatic migration from schemas 1 to 7.
+- Reducer: `selectedObjectIds` plus `selectedObjectId` (set only when exactly one object is selected, so single-object features keep working); new actions for selection, setObjectRects, deleteSelection, group/ungroup, lock.
+- Behaviour change: a click on empty canvas now starts a rubber-band selection (it still clears the selection first).
+- Limits: no object copy/paste, align/distribute (V27) or nested groups; pointer interactions only tested in jsdom.
+
+## 0.18.0 (Roadmap Version 18)
+- Snapping while moving and resizing: to the slide's edges and center, other objects' edges and centers, and optionally a grid; 6 screen pixels reach, nearest target wins, Alt disables it. Pink alignment guides during the drag.
+- Rulers (View > Rulers) in slide pixels with zoom-aware labels, shaded slide area and selection highlight.
+- Gridlines (View > Gridlines) with sizes 5 to 100 px; hidden when too dense to be useful.
+- New per-user settings (stored with the others): rulers, gridlines, snap to grid, snap to objects, grid size; also in the Settings dialog and the View tab.
+- Pure, tested geometry: `core/geometry/snap.ts` (snapMove, snapResize, alignmentGuides) and `core/geometry/ruler.ts`.
+- Limits: single-object snapping only; no draggable guides or equal-spacing guides (V27).
+
+## 0.17.0 (Roadmap Version 17)
+- Keyboard nudging and resizing: arrows move the selected object 10 px (Ctrl/Cmd: 1 px), Shift+arrows resize. With nothing selected the arrows still pan.
+- Tab and Shift+Tab select objects in order and release focus past the ends (no keyboard trap); selection is announced as before.
+- Home > Position: X, Y, Width, Height fields for the selected object, clamped and rounded to two decimals.
+- Mouse modifiers: Shift constrains movement to one axis or keeps proportions on corner handles; Ctrl/Cmd resizes around the center. Larger hit areas on handles.
+- `resizeRect` gained options (keepAspect, fromCenter, min); `lockAxis` added. `NumberField` can round entries.
+- Behaviour change: arrow keys move a selected object instead of panning the view.
+- Limits: no snapping or grid (V18), no rotation or aspect lock toggle (V24); modifier and Tab behaviour only tested in jsdom.
+
+## 0.16.0 (Roadmap Version 16)
+- Text box layout: internal margins (four sides), vertical alignment (top, middle, bottom), clip/visible overflow. Home > Text box group.
+- Overflow warning: red outline and a status-bar note when text does not fit its box (measured in the browser).
+- Text fitting as explicit commands: Shrink to fit (largest fitting font size, never larger than now) and Fit box (box height holds the text). Pure search algorithm (`core/geometry/fit.ts`) plus a DOM adapter, both tested; no live autofit.
+- Document schema 7 with automatic migration from schemas 1 to 6; existing objects keep zero margins, top alignment and clipping.
+- New shared `NumberField` input that clamps and restores invalid entries.
+- Limits: layout is measured only in a real browser (tests simulate it); flex-based vertical alignment on the editing surface untested in real browsers; no live autofit.
+
+## 0.15.0 (Roadmap Version 15)
+- Bullet lists, numbered lists and multilevel lists (9 levels): Home > List group, Tab / Shift+Tab in the editor. Bullets cycle • – ▪; numbers use 1. a. i. and restart under each higher level; empty paragraphs keep their marker.
+- List levels are stored as leading tabs in the text (outline); the list type is an object setting (schema 6, migration from schema 5). Markers are drawn by CSS counters, so they keep working while the browser edits the surface.
+- The editor exposes an API so ribbon buttons change the level of only the paragraphs in the selection while editing.
+- Limits: one list style per object; no custom markers or restart numbering; markers are generated content, not list semantics; Enter copying `data-level` is assumed but unverified in real browsers.
+
+## 0.14.0 (Roadmap Version 14)
+- Paragraph formatting per text object: alignment (left, center, right, justify), indent (0 to 8 levels), line spacing (1.0 to 3.0 presets) and text direction (LTR, RTL, via the `dir` attribute). Home > Paragraph group; Ctrl/Cmd+L, E, R, J on the canvas and inside the editor.
+- Switching direction mirrors left/right alignment; indent follows the reading-start side.
+- Ribbon buttons keep focus in the editor, and settings apply without touching the typed text.
+- Document schema 5 with automatic migration from schemas 1 to 4 (defaults match the previous look). Validation covers all four settings.
+- Limits: settings apply to the whole object, not per paragraph; no bullets/numbering (V15) or margins/vertical alignment (V16); real-browser bidirectional layout not checked.
+
+## 0.13.0 (Roadmap Version 13)
+- Text formatting: font family (8 fonts with fallbacks), font size (type or A+/A-), bold, italic, underline, strikethrough, text color. Home > Font group; Ctrl/Cmd+B, I, U on the canvas and inside the editor.
+- Formatting applies to the whole text object. Formatting a range of characters inside one object is **not** supported yet (needs a character-run model).
+- Changing formatting never touches the editing DOM, so the caret and selection are unaffected; ribbon buttons keep focus in the editor.
+- Document schema 4 (formatting fields) with automatic migration from schemas 1 to 3; titles stay bold. Validation allows only known fonts and hex colors; imports normalize colors.
+- One CSS mapping (`textStyle`) shared by the canvas, thumbnails and the editor.
+- Limits: font/size/color controls move focus out of the editor (ends the editing session); no theme colors or eyedropper yet (Version 45); real-browser behaviour untested.
+
 ## 0.12.0 (Roadmap Version 12, text editing surface)
 - In-place text editing on the canvas: double-click, Enter, F2 or Home > Edit text; Escape or clicking elsewhere finishes. Works for titles, bodies and text boxes.
 - The browser owns the editing surface while you type (built once, never re-rendered), so caret, selection, IME and native undo behave normally. Text is read back on every input (`domToText`) and flows into the document, thumbnails, Text panel and autosave.

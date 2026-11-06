@@ -53,7 +53,7 @@ describe("serialize / deserialize", () => {
       slides: [{ id: "s", name: "S", objects: [{ id: "o", type: "text", role: "title", x: 0, y: 0, width: 5, height: 5, text: "T", fontSize: 30 }] }],
     };
     const r = deserializePresentation(wrap(v1));
-    expect(r.ok && r.presentation.schemaVersion).toBe(3);
+    expect(r.ok && r.presentation.schemaVersion).toBe(8);
   });
 
   it("reports damaged content with the first problems", () => {
@@ -88,6 +88,57 @@ describe("serialize / deserialize", () => {
       slides: [{ id: "s", name: "s", objects: Array.from({ length: MAX_OBJECTS_PER_SLIDE + 1 }, (_, i) => ({ ...base.slides[0].objects[0], id: `o${i}` })) }],
     };
     expect(validatePresentation(manyObjects).ok).toBe(false);
+  });
+});
+
+describe("formatting in files", () => {
+  it("survives a round trip", () => {
+    const p = createPresentation("Styled");
+    Object.assign(p.slides[0].objects[1], { fontFamily: "Georgia", fontSize: 31.5, bold: true, italic: true, underline: true, strike: true, color: "#336699" });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation).toEqual(p);
+  });
+
+  it("keeps paragraph settings through a round trip", () => {
+    const p = createPresentation("Paras");
+    Object.assign(p.slides[0].objects[1], { align: "justify", indent: 4, lineSpacing: 2.5, direction: "rtl" });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation.slides[0].objects[1]).toMatchObject({ align: "justify", indent: 4, lineSpacing: 2.5, direction: "rtl" });
+  });
+
+  it("keeps a list and its levels through a round trip", () => {
+    const p = createPresentation("Lists");
+    Object.assign(p.slides[0].objects[1], { list: "number", text: "one\n\ttwo\n\t\tthree\nfour" });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation.slides[0].objects[1]).toMatchObject({ list: "number", text: "one\n\ttwo\n\t\tthree\nfour" });
+  });
+
+  it("keeps box settings through a round trip, and strips extra fields from margins", () => {
+    const p = createPresentation("Boxes");
+    Object.assign(p.slides[0].objects[1], { margins: { top: 1, right: 2, bottom: 3, left: 4 }, verticalAlign: "middle", overflow: "visible" });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation.slides[0].objects[1]).toMatchObject({ margins: { top: 1, right: 2, bottom: 3, left: 4 }, verticalAlign: "middle", overflow: "visible" });
+    const dirty = JSON.parse(JSON.stringify(p));
+    dirty.slides[0].objects[1].margins.evil = "x";
+    const clean = deserializePresentation(wrap(dirty));
+    expect(clean.ok && Object.keys(clean.presentation.slides[0].objects[1].margins).sort()).toEqual(["bottom", "left", "right", "top"]);
+  });
+
+  it("keeps groups and locks through a round trip", () => {
+    const p = createPresentation("Groups");
+    Object.assign(p.slides[0].objects[0], { groupId: "g-1", locked: true });
+    Object.assign(p.slides[0].objects[1], { groupId: "g-1" });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation.slides[0].objects.map((o) => [o.groupId, o.locked])).toEqual([["g-1", true], ["g-1", false]]);
+  });
+
+  it("normalizes colors and rejects unknown fonts on import", () => {
+    const p = JSON.parse(JSON.stringify(createPresentation()));
+    p.slides[0].objects[0].color = "#ABCDEF";
+    const ok = deserializePresentation(wrap(p));
+    expect(ok.ok && ok.presentation.slides[0].objects[0].color).toBe("#abcdef");
+    p.slides[0].objects[0].fontFamily = "Papyrus";
+    expect(errorOf(wrap(p))).toContain("unknown font family");
   });
 });
 

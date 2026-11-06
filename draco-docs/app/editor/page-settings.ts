@@ -9,6 +9,10 @@ export type PageSettings = {
   orientation: Orientation;
   margin: MarginPreset;
   styleSet: StyleSetId;
+  /** null = use the style set's own page background (the normal case). */
+  backgroundColor: string | null;
+  /** Empty string = no watermark. */
+  watermarkText: string;
 };
 
 export const DEFAULT_PAGE_SETTINGS: PageSettings = {
@@ -16,7 +20,12 @@ export const DEFAULT_PAGE_SETTINGS: PageSettings = {
   orientation: "portrait",
   margin: "normal",
   styleSet: DEFAULT_STYLE_SET_ID,
+  backgroundColor: null,
+  watermarkText: "",
 };
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const MAX_WATERMARK_LENGTH = 60;
 
 /**
  * Merge untrusted/partial settings (old localStorage entries, .dwdoc files
@@ -45,6 +54,15 @@ export function sanitizePageSettings(input: unknown): PageSettings {
       ? (partial.margin as MarginPreset)
       : d.margin,
     styleSet: isStyleSetId(partial.styleSet) ? partial.styleSet : d.styleSet,
+    backgroundColor:
+      typeof partial.backgroundColor === "string" &&
+      HEX_COLOR_RE.test(partial.backgroundColor)
+        ? partial.backgroundColor
+        : d.backgroundColor,
+    watermarkText:
+      typeof partial.watermarkText === "string"
+        ? partial.watermarkText.slice(0, MAX_WATERMARK_LENGTH)
+        : d.watermarkText,
   };
 }
 

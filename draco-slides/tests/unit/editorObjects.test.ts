@@ -14,7 +14,7 @@ describe("addTextBox", () => {
     const [box] = boxes(s);
     expect(box).toMatchObject({ name: "Text box 1", x: 330, y: 230, width: 300, height: 80, text: "Text box", visible: true, rotation: 0 });
     expect(s.selectedObjectId).toBe(box.id);
-    expect(s.presentation.schemaVersion).toBe(3);
+    expect(s.presentation.schemaVersion).toBe(8);
     expect(parsePresentation(s.presentation).ok).toBe(true);
   });
 
@@ -123,3 +123,150 @@ describe("deleteObject", () => {
     expect(editorReducer(s, { type: "deleteObject", objectId: "nope" })).toBe(s);
   });
 });
+
+describe("setTextFormat", () => {
+  const withBox = () => {
+    const s = addBox(fresh());
+    return { s, id: boxes(s)[0].id };
+  };
+
+  it("applies valid changes to one object only", () => {
+    const { s, id } = withBox();
+    const other = objects(s).find((o) => o.id !== id)!;
+    const e = editorReducer(s, { type: "setTextFormat", objectId: id, patch: { bold: true, fontFamily: "Georgia", fontSize: 36, color: "#FF0000" } });
+    expect(boxes(e)[0]).toMatchObject({ bold: true, fontFamily: "Georgia", fontSize: 36, color: "#ff0000" });
+    expect(objects(e).find((o) => o.id === other.id)).toEqual(other);
+    expect(parsePresentation(e.presentation).ok).toBe(true);
+  });
+
+  it("clamps sizes and ignores invalid values", () => {
+    const { s, id } = withBox();
+    expect(boxes(editorReducer(s, { type: "setTextFormat", objectId: id, patch: { fontSize: 1 } }))[0].fontSize).toBe(6);
+    expect(boxes(editorReducer(s, { type: "setTextFormat", objectId: id, patch: { fontSize: 5000 } }))[0].fontSize).toBe(400);
+    const bad = { fontFamily: "Papyrus", color: "red", bold: "yes" };
+    expect(editorReducer(s, { type: "setTextFormat", objectId: id, patch: bad })).toBe(s);
+  });
+
+  it("returns the same state when nothing changes or the object is unknown", () => {
+    const { s, id } = withBox();
+    expect(editorReducer(s, { type: "setTextFormat", objectId: id, patch: { bold: false, fontSize: 24 } })).toBe(s);
+    expect(editorReducer(s, { type: "setTextFormat", objectId: "nope", patch: { bold: true } })).toBe(s);
+  });
+
+  it("can turn off the bold a title starts with", () => {
+    const s0 = fresh();
+    const title = objects(s0).find((o) => o.role === "title")!;
+    expect(title.bold).toBe(true);
+    const e = editorReducer(s0, { type: "setTextFormat", objectId: title.id, patch: { bold: false } });
+    expect(objects(e).find((o) => o.id === title.id)!.bold).toBe(false);
+  });
+});
+
+describe("setParagraphFormat", () => {
+  const withBox = () => {
+    const s = addBox(fresh());
+    return { s, id: boxes(s)[0].id };
+  };
+
+  it("applies valid changes to one object only", () => {
+    const { s, id } = withBox();
+    const other = objects(s).find((o) => o.id !== id)!;
+    const e = editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { align: "center", indent: 2, lineSpacing: 1.5 } });
+    expect(boxes(e)[0]).toMatchObject({ align: "center", indent: 2, lineSpacing: 1.5, direction: "ltr" });
+    expect(objects(e).find((o) => o.id === other.id)).toEqual(other);
+    expect(parsePresentation(e.presentation).ok).toBe(true);
+  });
+
+  it("mirrors the alignment when switching to right-to-left, and back", () => {
+    const { s, id } = withBox();
+    const rtl = editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { direction: "rtl" } });
+    expect(boxes(rtl)[0]).toMatchObject({ direction: "rtl", align: "right" });
+    const ltr = editorReducer(rtl, { type: "setParagraphFormat", objectId: id, patch: { direction: "ltr" } });
+    expect(boxes(ltr)[0]).toMatchObject({ direction: "ltr", align: "left" });
+  });
+
+  it("clamps indent and ignores invalid values", () => {
+    const { s, id } = withBox();
+    expect(boxes(editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { indent: 99 } }))[0].indent).toBe(8);
+    expect(editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { align: "middle", indent: "2" } })).toBe(s);
+  });
+
+  it("returns the same state when nothing changes or the object is unknown", () => {
+    const { s, id } = withBox();
+    expect(editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { align: "left", indent: 0, lineSpacing: 1.2 } })).toBe(s);
+    expect(editorReducer(s, { type: "setParagraphFormat", objectId: "nope", patch: { align: "right" } })).toBe(s);
+  });
+});
+
+describe("lists in the reducer", () => {
+  const withBox = (text = "a\nb") => {
+    let s = addBox(fresh());
+    const id = boxes(s)[0].id;
+    s = editorReducer(s, { type: "setObjectText", slideId: s.currentSlideId, objectId: id, text });
+    return { s, id };
+  };
+
+  it("setParagraphFormat switches between none, bullet and number", () => {
+    const { s, id } = withBox();
+    const bullet = editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { list: "bullet" } });
+    expect(boxes(bullet)[0].list).toBe("bullet");
+    const number = editorReducer(bullet, { type: "setParagraphFormat", objectId: id, patch: { list: "number" } });
+    expect(boxes(number)[0].list).toBe("number");
+    expect(editorReducer(number, { type: "setParagraphFormat", objectId: id, patch: { list: "number" } })).toBe(number);
+    expect(parsePresentation(number.presentation).ok).toBe(true);
+  });
+
+  it("shiftListLevel moves every paragraph, only in a list", () => {
+    const { s, id } = withBox("a\n\tb");
+    expect(editorReducer(s, { type: "shiftListLevel", objectId: id, delta: 1 })).toBe(s); // not a list yet
+    const list = editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { list: "bullet" } });
+    const deeper = editorReducer(list, { type: "shiftListLevel", objectId: id, delta: 1 });
+    expect(boxes(deeper)[0].text).toBe("\ta\n\t\tb");
+    const back = editorReducer(deeper, { type: "shiftListLevel", objectId: id, delta: -1 });
+    expect(boxes(back)[0].text).toBe("a\n\tb");
+    // only the direction of the change matters: one level at a time
+    expect(boxes(editorReducer(list, { type: "shiftListLevel", objectId: id, delta: 5 }))[0].text).toBe("\ta\n\t\tb");
+  });
+
+  it("shiftListLevel does nothing at the limits or for unknown objects", () => {
+    const { s, id } = withBox("a");
+    const list = editorReducer(s, { type: "setParagraphFormat", objectId: id, patch: { list: "number" } });
+    expect(editorReducer(list, { type: "shiftListLevel", objectId: id, delta: -1 })).toBe(list);
+    expect(editorReducer(list, { type: "shiftListLevel", objectId: "nope", delta: 1 })).toBe(list);
+  });
+});
+
+describe("setBoxFormat", () => {
+  const withBox = () => {
+    const s = addBox(fresh());
+    return { s, id: boxes(s)[0].id };
+  };
+
+  it("sets margins one side at a time, alignment and overflow", () => {
+    const { s, id } = withBox();
+    let e = editorReducer(s, { type: "setBoxFormat", objectId: id, patch: { margins: { left: 12 } } });
+    e = editorReducer(e, { type: "setBoxFormat", objectId: id, patch: { margins: { top: 3 }, verticalAlign: "bottom", overflow: "visible" } });
+    expect(boxes(e)[0]).toMatchObject({ margins: { top: 3, right: 0, bottom: 0, left: 12 }, verticalAlign: "bottom", overflow: "visible" });
+    expect(parsePresentation(e.presentation).ok).toBe(true);
+  });
+
+  it("clamps margins and ignores invalid values", () => {
+    const { s, id } = withBox();
+    expect(boxes(editorReducer(s, { type: "setBoxFormat", objectId: id, patch: { margins: { top: 999 } } }))[0].margins.top).toBe(200);
+    expect(editorReducer(s, { type: "setBoxFormat", objectId: id, patch: { verticalAlign: "center", margins: { left: "x" } } })).toBe(s);
+  });
+
+  it("returns the same state when nothing changes or the object is unknown", () => {
+    const { s, id } = withBox();
+    expect(editorReducer(s, { type: "setBoxFormat", objectId: id, patch: { verticalAlign: "top", overflow: "hidden", margins: { top: 0 } } })).toBe(s);
+    expect(editorReducer(s, { type: "setBoxFormat", objectId: "nope", patch: { overflow: "visible" } })).toBe(s);
+  });
+
+  it("does not touch other objects", () => {
+    const { s, id } = withBox();
+    const other = objects(s).find((o) => o.id !== id)!;
+    const e = editorReducer(s, { type: "setBoxFormat", objectId: id, patch: { overflow: "visible" } });
+    expect(objects(e).find((o) => o.id === other.id)).toEqual(other);
+  });
+});
+

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_SETTINGS,
+  GRID_SIZES,
   SETTINGS_KEY,
   loadSettings,
   parseSettings,
@@ -49,4 +50,19 @@ describe("settings store", () => {
     expect(resolveTheme("dark", true)).toBe("dark");
     expect(resolveTheme("light", false)).toBe("light");
   });
+
+  it("has snapping on and rulers and gridlines off by default", () => {
+    expect(DEFAULT_SETTINGS).toMatchObject({ showRulers: false, showGrid: false, snapToGrid: false, snapToObjects: true, gridSize: 20 });
+    expect(GRID_SIZES).toContain(DEFAULT_SETTINGS.gridSize);
+  });
+
+  it("repairs the editing-aid settings field by field", () => {
+    expect(parseSettings({ gridSize: 33, showRulers: "yes", snapToGrid: true }).gridSize).toBe(20);
+    expect(parseSettings({ gridSize: 50 }).gridSize).toBe(50);
+    const s = parseSettings({ showRulers: true, showGrid: 1, snapToObjects: false });
+    expect(s.showRulers).toBe(true);
+    expect(s.showGrid).toBe(false);
+    expect(s.snapToObjects).toBe(false);
+  });
 });
+
