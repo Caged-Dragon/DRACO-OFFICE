@@ -5,7 +5,7 @@ Needs: pip install playwright && playwright install chromium
 import json, sys
 from playwright.sync_api import sync_playwright
 
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/"
+URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/app"
 results = []  # (version, name, ok, detail)
 
 PRE = """

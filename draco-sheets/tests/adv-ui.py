@@ -6,7 +6,7 @@ def ck(n,c,x=''):
     global P,F
     if c: P+=1
     else: F+=1; print('FAIL',n,x)
-URL='http://localhost:4174'
+URL='http://localhost:4174/app'
 def boot(ctx):
     pg=ctx.new_page(); pg.errs=[]; pg.on('pageerror',lambda e:pg.errs.append(str(e)))
     pg.goto(URL); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook() && window.dracoAuto && window.dracoCmd',timeout=60000); time.sleep(1.5); return pg

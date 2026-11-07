@@ -4,7 +4,7 @@ Run: python3 tests/formulas.py [url]   (needs preview server on :4174)"""
 import json, sys, math
 from playwright.sync_api import sync_playwright
 
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/"
+URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/app"
 T, F = True, False
 # (version, category, formula, expected)
 CASES = []

@@ -9,7 +9,7 @@ def ck(n,c,x=''):
 with sync_playwright() as p:
     b=p.chromium.launch(); ctx=b.new_context(viewport={'width':1400,'height':900}); pg=ctx.new_page(); errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)))
-    pg.goto('http://localhost:4174'); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook()',timeout=60000); time.sleep(1.5)
+    pg.goto('http://localhost:4174/app'); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook()',timeout=60000); time.sleep(1.5)
     def js(s,a=None): return pg.evaluate(s,a) if a is not None else pg.evaluate(s)
     js('''()=>{const ws=dracoAPI.getActiveWorkbook().getActiveSheet();
       ws.getRange('A1:C7').setValues([['Month','Sales','Costs'],['Jan',120,80],['Feb',150,95],['Mar',90,70],['Apr',180,110],['May',210,130],['Jun',170,100]]);

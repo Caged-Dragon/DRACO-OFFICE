@@ -4,6 +4,7 @@ export interface Table {
   r0: number; c0: number; r1: number; c1: number; // r0 = header row, r1 = last row (incl. total row when totalRow)
   headers: string[]; style: number; banded: boolean; totalRow: boolean; filter: boolean;
   totals: Record<number, TotalFn>; // column offset -> function
+  needsFormat?: boolean; // set by the xlsx importer: apply the style to the cells on first load
 }
 export type TotalFn = 'none' | 'sum' | 'average' | 'count' | 'countnums' | 'min' | 'max' | 'stdev' | 'var';
 export const TOTAL_FNS: Array<[TotalFn, string, number | null]> = [['none', 'None', null], ['average', 'Average', 101], ['count', 'Count', 103], ['countnums', 'Count Numbers', 102], ['max', 'Max', 104], ['min', 'Min', 105], ['sum', 'Sum', 109], ['stdev', 'StdDev', 107], ['var', 'Var', 110]];
@@ -102,3 +103,17 @@ export const overlaps = (a: Table, r0: number, c0: number, r1: number, c1: numbe
 export function totalFormula(t: Table, colOffset: number, fn: TotalFn): string | null { const code = TOTAL_FNS.find((x) => x[0] === fn)?.[2]; if (!code) return null; return `=SUBTOTAL(${code},${t.name}[${t.headers[colOffset].replace(/([\[\]#'])/g, "'$1")}])`; }
 /** Detect a header row + data block starting at (r,c) given a value grid (first row text). */
 export function looksLikeHeaders(row: unknown[]): boolean { return row.length > 0 && row.every((v) => typeof v === 'string' && v.trim() !== '') ; }
+
+/* ---------- .xlsx interchange helpers ---------- */
+export const EXCEL_STYLES = ['TableStyleMedium2', 'TableStyleMedium3', 'TableStyleMedium7', 'TableStyleMedium4', 'TableStyleMedium5', 'TableStyleDark1'];
+export const excelStyleOf = (idx: number) => EXCEL_STYLES[idx] ?? EXCEL_STYLES[0];
+export const styleFromExcel = (name?: string): number => { const i = EXCEL_STYLES.indexOf(name ?? ''); if (i >= 0) return i; if (/Dark/i.test(name ?? '')) return 5; if (/Light/i.test(name ?? '')) return 3; return 0; };
+const FN_FROM_XLSX: Record<string, TotalFn> = { sum: 'sum', average: 'average', count: 'count', countNums: 'countnums', min: 'min', max: 'max', stdDev: 'stdev', var: 'var' };
+const FN_TO_XLSX: Record<TotalFn, string> = { none: 'none', sum: 'sum', average: 'average', count: 'count', countnums: 'countNums', min: 'min', max: 'max', stdev: 'stdDev', var: 'var' };
+export const totalFnFromXlsx = (f?: string): TotalFn => FN_FROM_XLSX[f ?? ''] ?? 'none';
+export const totalFnToXlsx = (f: TotalFn) => FN_TO_XLSX[f] ?? 'none';
+/** Our `[@Col]` / `[@[Col X]]` / `Tbl[@Col]` → the spelling Excel writes in files: `Tbl[[#This Row],[Col]]`. */
+export function toExcelStructured(formula: string, tableName: string): string {
+  const parts = formula.replace(/^=/, '').split(/("(?:[^"]|"")*")/);
+  return parts.map((seg, i) => (i % 2 ? seg : seg.replace(/(^|[^A-Za-z0-9_.!'$])(?:[A-Za-z_\\][A-Za-z0-9_.]*)?\[@(?:\[((?:[^\]']|'.)+)\]|((?:[^\]'\[]|'.)+))\]/g, (_m, pre: string, a: string | undefined, b: string | undefined) => `${pre}${tableName}[[#This Row],[${a ?? b}]]`))).join('');
+}

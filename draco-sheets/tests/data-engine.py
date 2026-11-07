@@ -2,7 +2,7 @@
 Run: python3 tests/data-engine.py   (preview server on :4174)"""
 import sys, json
 from playwright.sync_api import sync_playwright
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/"
+URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/app"
 res = []
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1440, "height": 900}); errs = []

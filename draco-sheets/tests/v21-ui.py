@@ -8,7 +8,7 @@ def ck(n,c,x=''):
     else: F+=1; print('FAIL',n,x)
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={'width':1440,'height':900}); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
-    pg.goto('http://localhost:4174'); pg.wait_for_function('window.dracoTables',timeout=60000); time.sleep(2); js=pg.evaluate
+    pg.goto('http://localhost:4174/app'); pg.wait_for_function('window.dracoTables',timeout=60000); time.sleep(2); js=pg.evaluate
     def val(a): return js("(a)=>String(dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).getValue())",a)
     def fml(a): return js("(a)=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).getFormula()",a)
     def setf(a,f,r,c): js("([a,f,r,c])=>{dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).setFormula(f)}",[a,f,r,c]); time.sleep(.3); js("([r,c])=>dracoTables.onEdit('Sheet1',r,c)",[r,c]); time.sleep(1.2)

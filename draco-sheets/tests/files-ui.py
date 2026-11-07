@@ -8,7 +8,7 @@ def ck(n,c,x=''):
     else: F+=1; print('FAIL',n,x)
 with sync_playwright() as p:
     b=p.chromium.launch(); ctx=b.new_context(viewport={'width':1500,'height':950},accept_downloads=True); pg=ctx.new_page(); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
-    pg.goto('http://localhost:4174'); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook()',timeout=60000); time.sleep(1.5)
+    pg.goto('http://localhost:4174/app'); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook()',timeout=60000); time.sleep(1.5)
     def js(s,a=None): return pg.evaluate(s,a) if a is not None else pg.evaluate(s)
     def vals(r): return js('([r])=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(r).getValues()',[r])
     def sty(a): return js('([a])=>{const c=dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).getCellStyles()[0][0]; const s=c._style||c; return [s.bl?"bold":"normal", s.bg&&s.bg.rgb]}',[a])

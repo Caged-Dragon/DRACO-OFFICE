@@ -1,7 +1,7 @@
 """UI tests for the Data tools dialog (v48, v50, v53, v56-v60), real clicks. Run: python3 tests/data-ui.py"""
 import sys, json
 from playwright.sync_api import sync_playwright
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/"
+URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/app"
 res = []
 def rec(v, name, ok, detail=""): res.append((v, name, bool(ok), detail))
 with sync_playwright() as p:

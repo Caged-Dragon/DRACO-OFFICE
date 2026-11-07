@@ -1,7 +1,7 @@
 """UI + behavior tests for v26 and v41-v45 (real clicks and keystrokes). Run: python3 tests/formula-ui.py"""
 import sys, json
 from playwright.sync_api import sync_playwright
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/"
+URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:4174/app"
 res = []
 def rec(v, name, ok, detail=""): res.append((v, name, bool(ok), detail))
 with sync_playwright() as p:

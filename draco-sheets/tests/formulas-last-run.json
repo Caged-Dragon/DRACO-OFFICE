@@ -1,0 +1,2466 @@
+[
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUM(A1:A5)",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUMIF(C1:C5,\"apple\",B1:B5)",
+  "expected": 50,
+  "got": 50,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUMIFS(B1:B5,C1:C5,\"apple\",A1:A5,\">1\")",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUMPRODUCT(A1:A5,B1:B5)",
+  "expected": 460,
+  "got": 460,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(2.567,2)",
+  "expected": 2.57,
+  "got": 2.57,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUNDUP(2.341,1)",
+  "expected": 2.4,
+  "got": 2.4,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUNDDOWN(-2.99,1)",
+  "expected": -2.9,
+  "got": -2.9,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=MROUND(10,3)",
+  "expected": 9,
+  "got": 9,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=CEILING(2.5,1)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=FLOOR(2.5,1)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=INT(-1.5)",
+  "expected": -2,
+  "got": -2,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=TRUNC(-1.9)",
+  "expected": -1,
+  "got": -1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=MOD(-3,2)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=QUOTIENT(7,2)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ABS(-4)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SIGN(-9)",
+  "expected": -1,
+  "got": -1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SQRT(144)",
+  "expected": 12,
+  "got": 12,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=POWER(2,10)",
+  "expected": 1024,
+  "got": 1024,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=EXP(0)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=LN(1)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=LOG(8,2)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=LOG10(1000)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(PI(),5)",
+  "expected": 3.14159,
+  "got": 3.14159,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(SIN(PI()/2),6)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(COS(0),6)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(ATAN2(1,1),6)",
+  "expected": 0.785398,
+  "got": 0.785398,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(DEGREES(PI()),6)",
+  "expected": 180,
+  "got": 180,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(RADIANS(180),5)",
+  "expected": 3.14159,
+  "got": 3.14159,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=FACT(5)",
+  "expected": 120,
+  "got": 120,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=COMBIN(5,2)",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=PERMUT(5,2)",
+  "expected": 20,
+  "got": 20,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=GCD(12,18)",
+  "expected": 6,
+  "got": 6,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=LCM(4,6)",
+  "expected": 12,
+  "got": 12,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=EVEN(3)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ODD(2)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=PRODUCT(A1:A3)",
+  "expected": 12,
+  "got": 12,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUMSQ(A1:A3)",
+  "expected": 26,
+  "got": 26,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROMAN(1994)",
+  "expected": "MCMXCIV",
+  "got": "MCMXCIV",
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ARABIC(\"XIV\")",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=BASE(255,16)",
+  "expected": "FF",
+  "got": "FF",
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=DECIMAL(\"FF\",16)",
+  "expected": 255,
+  "got": 255,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUBTOTAL(9,B1:B5)",
+  "expected": 150,
+  "got": 150,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=AGGREGATE(9,6,B1:B5)",
+  "expected": 150,
+  "got": 150,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=MDETERM({1,2;3,4})",
+  "expected": -2,
+  "got": -2,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUM(MMULT({1,2;3,4},{1;1}))",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=RANDBETWEEN(5,5)",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=MULTINOMIAL(2,3,4)",
+  "expected": 1260,
+  "got": 1260,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(SQRTPI(1),6)",
+  "expected": 1.772454,
+  "got": 1.772454,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(TAN(PI()/4),6)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(ASIN(1),6)",
+  "expected": 1.570796,
+  "got": 1.570796,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(ACOS(1),6)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(ATAN(1),6)",
+  "expected": 0.785398,
+  "got": 0.785398,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=ROUND(SINH(0),6)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SUMX2MY2(A1:A3,B1:B3)",
+  "expected": -1374,
+  "got": -1374,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=SERIESSUM(2,0,1,{1,1,1})",
+  "expected": 7,
+  "got": 7,
+  "ok": true
+ },
+ {
+  "v": 27,
+  "cat": "Math & Trig",
+  "formula": "=COUNT(RAND())",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=AVERAGE(B1:B5)",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=AVERAGEIF(C1:C5,\"apple\",B1:B5)",
+  "expected": 25,
+  "got": 25,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=AVERAGEIFS(B1:B5,C1:C5,\"apple\")",
+  "expected": 25,
+  "got": 25,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNT(A1:C5)",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNTA(A1:C5)",
+  "expected": 15,
+  "got": 15,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNTBLANK(A6:A9)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNTIF(C1:C5,\"apple\")",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNTIFS(C1:C5,\"apple\",A1:A5,\">1\")",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MAX(A1:A5)",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MIN(A1:A5)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MAXIFS(B1:B5,C1:C5,\"apple\")",
+  "expected": 40,
+  "got": 40,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MINIFS(B1:B5,C1:C5,\"apple\")",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MEDIAN(A1:A5)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=MODE.SNGL(A1:A5)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=LARGE(A1:A5,2)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=SMALL(A1:A5,2)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=RANK.EQ(4,A1:A5)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(STDEV.S(B1:B5),6)",
+  "expected": 15.811388,
+  "got": 15.811388,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(STDEV.P(B1:B5),6)",
+  "expected": 14.142136,
+  "got": 14.142136,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=VAR.S(B1:B5)",
+  "expected": 250,
+  "got": 250,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=VAR.P(B1:B5)",
+  "expected": 200,
+  "got": 200,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(CORREL(A1:A5,B1:B5),6)",
+  "expected": 0.353553,
+  "got": 0.353553,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=SLOPE(B1:B5,A1:A5)",
+  "expected": 3.125,
+  "got": 3.125,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=INTERCEPT(B1:B5,A1:A5)",
+  "expected": 21.25,
+  "got": 21.25,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=FORECAST.LINEAR(6,B1:B5,A1:A5)",
+  "expected": 40,
+  "got": 40,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=PERCENTILE.INC(B1:B5,0.25)",
+  "expected": 20,
+  "got": 20,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=QUARTILE.INC(B1:B5,3)",
+  "expected": 40,
+  "got": 40,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(GEOMEAN(A1:A5),6)",
+  "expected": 2.267933,
+  "got": 2.267933,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(HARMEAN(A1:A5),6)",
+  "expected": 1.796407,
+  "got": 1.796407,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=NORM.S.DIST(0,TRUE)",
+  "expected": 0.5,
+  "got": 0.5,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(NORM.S.INV(0.975),4)",
+  "expected": 1.96,
+  "got": 1.96,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(NORM.DIST(1,0,1,FALSE),6)",
+  "expected": 0.241971,
+  "got": 0.241971,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNTIF(A1:A5,\">2\")",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=AVEDEV(B1:B5)",
+  "expected": 12,
+  "got": 12,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=DEVSQ(B1:B5)",
+  "expected": 1000,
+  "got": 1000,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=PERCENTRANK.INC(B1:B5,30)",
+  "expected": 0.5,
+  "got": 0.5,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(RSQ(B1:B5,A1:A5),6)",
+  "expected": 0.125,
+  "got": 0.125,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=STANDARDIZE(30,30,10)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(BINOM.DIST(2,5,0.5,FALSE),6)",
+  "expected": 0.3125,
+  "got": 0.3125,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(POISSON.DIST(2,3,FALSE),6)",
+  "expected": 0.224042,
+  "got": 0.224042,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(T.DIST.2T(2,10),4)",
+  "expected": 0.0734,
+  "got": 0.0734,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=ROUND(CHISQ.DIST.RT(3.84,1),3)",
+  "expected": 0.05,
+  "got": 0.05,
+  "ok": true
+ },
+ {
+  "v": 28,
+  "cat": "Statistical",
+  "formula": "=COUNT(A1:A5,B1:B5)",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IF(A1>2,\"y\",\"n\")",
+  "expected": "y",
+  "got": "y",
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IFS(A1>5,\"a\",A1>2,\"b\",TRUE,\"c\")",
+  "expected": "b",
+  "got": "b",
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=AND(TRUE,A1=3)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=OR(FALSE,A1=0)",
+  "expected": false,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=NOT(FALSE)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=XOR(TRUE,TRUE)",
+  "expected": false,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=SWITCH(A1,1,\"one\",3,\"three\",\"other\")",
+  "expected": "three",
+  "got": "three",
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IFERROR(1/0,\"err\")",
+  "expected": "err",
+  "got": "err",
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IFNA(NA(),\"na\")",
+  "expected": "na",
+  "got": "na",
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IF(AND(A1>1,B1>5),1,0)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IF(OR(A1>5,B1>50),1,0)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 29,
+  "cat": "Logical",
+  "formula": "=IFS(A1=1,\"x\",A1=3,\"y\")",
+  "expected": "y",
+  "got": "y",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LEFT(\"Draco\",2)",
+  "expected": "Dr",
+  "got": "Dr",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=RIGHT(\"Draco\",2)",
+  "expected": "co",
+  "got": "co",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=MID(\"Draco\",2,3)",
+  "expected": "rac",
+  "got": "rac",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LEN(\"Draco\")",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=UPPER(\"draco\")",
+  "expected": "DRACO",
+  "got": "DRACO",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LOWER(\"DRACO\")",
+  "expected": "draco",
+  "got": "draco",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=PROPER(\"hello world\")",
+  "expected": "Hello World",
+  "got": "Hello World",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TRIM(\"  a   b  \")",
+  "expected": "a b",
+  "got": "a b",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=CONCAT(\"a\",\"b\",1)",
+  "expected": "ab1",
+  "got": "ab1",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=CONCATENATE(\"x\",\"y\")",
+  "expected": "xy",
+  "got": "xy",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXTJOIN(\"-\",TRUE,\"a\",\"\",\"b\")",
+  "expected": "a-b",
+  "got": "a-b",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=SUBSTITUTE(\"aabb\",\"a\",\"x\")",
+  "expected": "xxbb",
+  "got": "xxbb",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=REPLACE(\"abcdef\",2,3,\"X\")",
+  "expected": "aXef",
+  "got": "aXef",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=FIND(\"c\",\"abcabc\")",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=SEARCH(\"C\",\"abcabc\")",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=REPT(\"ab\",3)",
+  "expected": "ababab",
+  "got": "ababab",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXT(1234.5,\"#,##0.00\")",
+  "expected": "1,234.50",
+  "got": "1,234.50",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=VALUE(\"12.5\")",
+  "expected": 12.5,
+  "got": 12.5,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=EXACT(\"a\",\"A\")",
+  "expected": false,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=CHAR(65)",
+  "expected": "A",
+  "got": "A",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=CODE(\"A\")",
+  "expected": 65,
+  "got": 65,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=FIXED(1234.567,1)",
+  "expected": "1,234.6",
+  "got": "1,234.6",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=DOLLAR(1234.5)",
+  "expected": "$1,234.50",
+  "got": "$1,234.50 ",
+  "ok": false
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXTBEFORE(\"a-b-c\",\"-\")",
+  "expected": "a",
+  "got": "a",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXTAFTER(\"a-b-c\",\"-\")",
+  "expected": "b-c",
+  "got": "b-c",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=NUMBERVALUE(\"1.234,5\",\",\",\".\")",
+  "expected": 1234.5,
+  "got": 1234.5,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=UNICHAR(9731)",
+  "expected": "\u2603",
+  "got": "\u2603",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=COLUMNS(TEXTSPLIT(\"a,b,c\",\",\"))",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXT(0.256,\"0.0%\")",
+  "expected": "25.6%",
+  "got": "25.6%",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXT(DATE(2023,3,15),\"yyyy-mm-dd\")",
+  "expected": "2023-03-15",
+  "got": "2023-03-15",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LEFT(C1,3)",
+  "expected": "app",
+  "got": "app",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LEN(C2)",
+  "expected": 6,
+  "got": 6,
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=CLEAN(\"a\"&CHAR(7)&\"b\")",
+  "expected": "ab",
+  "got": "ab",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=T(\"x\")",
+  "expected": "x",
+  "got": "x",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=UPPER(LEFT(C3,1))&MID(C3,2,10)",
+  "expected": "Cherry",
+  "got": "Cherry",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=TEXT(5,\"000\")",
+  "expected": "005",
+  "got": "005",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=SUBSTITUTE(C1,\"p\",\"P\",1)",
+  "expected": "aPple",
+  "got": "aPple",
+  "ok": true
+ },
+ {
+  "v": 30,
+  "cat": "Text",
+  "formula": "=LEN(TEXTJOIN(\",\",TRUE,C1:C5))",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DATE(2023,3,15)",
+  "expected": 45000,
+  "got": 45000,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=YEAR(45000)",
+  "expected": 2023,
+  "got": 2023,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=MONTH(45000)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DAY(45000)",
+  "expected": 15,
+  "got": 15,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=WEEKDAY(45000)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=WEEKNUM(DATE(2023,1,1))",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=EDATE(45000,1)",
+  "expected": 45031,
+  "got": 45031,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=EOMONTH(45000,0)",
+  "expected": 45016,
+  "got": 45016,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DATEDIF(DATE(2020,1,15),DATE(2023,3,20),\"Y\")",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DATEDIF(DATE(2020,1,15),DATE(2023,3,20),\"M\")",
+  "expected": 38,
+  "got": 38,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DAYS(DATE(2023,3,20),DATE(2023,3,15))",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=NETWORKDAYS(DATE(2023,3,13),DATE(2023,3,17))",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=WORKDAY(DATE(2023,3,17),1)",
+  "expected": 45005,
+  "got": 45005,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=TIME(12,0,0)",
+  "expected": 0.5,
+  "got": 0.5,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=HOUR(0.75)",
+  "expected": 18,
+  "got": 18,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=MINUTE(TIME(1,30,0))",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=SECOND(TIME(1,2,3))",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DATEVALUE(\"2023-03-15\")",
+  "expected": 45000,
+  "got": 45000,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=TIMEVALUE(\"12:00 PM\")",
+  "expected": 0.5,
+  "got": 0.5,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=YEARFRAC(DATE(2023,1,1),DATE(2023,7,1))",
+  "expected": 0.5,
+  "got": 0.5,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=ISOWEEKNUM(DATE(2023,1,1))",
+  "expected": 52,
+  "got": 52,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=TODAY()>45000",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=NOW()>45000",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DAYS360(DATE(2023,1,1),DATE(2023,3,1))",
+  "expected": 60,
+  "got": 60,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=EOMONTH(DATE(2024,1,31),1)",
+  "expected": 45351,
+  "got": 45351,
+  "ok": true
+ },
+ {
+  "v": 31,
+  "cat": "Date & Time",
+  "formula": "=DATE(2024,2,29)+1",
+  "expected": 45352,
+  "got": 45352,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=VLOOKUP(2,E1:F3,2,FALSE)",
+  "expected": "two",
+  "got": "two",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=HLOOKUP(3,P1:R2,2,FALSE)",
+  "expected": "c",
+  "got": "c",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=INDEX(B1:B5,3)",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=MATCH(30,B1:B5,0)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=LOOKUP(2,E1:E3,F1:F3)",
+  "expected": "two",
+  "got": "two",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=CHOOSE(2,\"a\",\"b\",\"c\")",
+  "expected": "b",
+  "got": "b",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=OFFSET(B1,2,0)",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=INDIRECT(\"B3\")",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=ROW(B3)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=COLUMN(C1)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=ROWS(A1:A5)",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=COLUMNS(A1:C1)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=ADDRESS(2,3)",
+  "expected": "$C$2",
+  "got": "$C$2",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=SUM(TRANSPOSE(A1:A5))",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=INDEX(A1:C5,2,3)",
+  "expected": "banana",
+  "got": "banana",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=MATCH(\"cherry\",C1:C5,0)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=MATCH(25,B1:B5,1)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=VLOOKUP(2.5,E1:F3,2,TRUE)",
+  "expected": "two",
+  "got": "two",
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=INDEX(B1:B5,MATCH(\"date\",C1:C5,0))",
+  "expected": 50,
+  "got": 50,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=SUM(INDEX(A1:B5,0,2))",
+  "expected": 150,
+  "got": 150,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=AREAS(A1:B5)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 32,
+  "cat": "Lookup & Reference",
+  "formula": "=ROUND(RAND(),0)>=0",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XLOOKUP(3,E1:E3,F1:F3)",
+  "expected": "three",
+  "got": "three",
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XMATCH(4,A1:A5)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XLOOKUP(\"z\",C1:C5,A1:A5,\"none\")",
+  "expected": "none",
+  "got": "none",
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XLOOKUP(\"apple\",C1:C5,B1:B5,,0,-1)",
+  "expected": 40,
+  "got": 40,
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XLOOKUP(25,B1:B5,C1:C5,,-1)",
+  "expected": "banana",
+  "got": "banana",
+  "ok": true
+ },
+ {
+  "v": 33,
+  "cat": "XLOOKUP family",
+  "formula": "=XMATCH(\"b*\",C1:C5,2)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(PMT(0.05/12,60,-10000),2)",
+  "expected": 188.71,
+  "got": 188.71,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(FV(0.06/12,12,-100),2)",
+  "expected": 1233.56,
+  "got": 1233.56,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(PV(0.08/12,240,-500),2)",
+  "expected": 59777.15,
+  "got": 59777.15,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(NPV(0.1,100,100,100),2)",
+  "expected": 248.69,
+  "got": 248.69,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(IRR({-100,60,60}),4)",
+  "expected": 0.1307,
+  "got": 0.1307,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(RATE(60,-188.71,10000)*12,3)",
+  "expected": 0.05,
+  "got": 0.05,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(NPER(0.05/12,-188.71,10000),0)",
+  "expected": 60,
+  "got": 60,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(IPMT(0.05/12,1,60,-10000),2)",
+  "expected": 41.67,
+  "got": 41.67,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(PPMT(0.05/12,1,60,-10000),2)",
+  "expected": 147.05,
+  "got": 147.05,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=SLN(10000,1000,5)",
+  "expected": 1800,
+  "got": 1800,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=SYD(10000,1000,5,1)",
+  "expected": 3000,
+  "got": 3000,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(DB(10000,1000,5,1),2)",
+  "expected": 3690,
+  "got": 3690,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=DDB(10000,1000,5,1)",
+  "expected": 4000,
+  "got": 4000,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(EFFECT(0.1,4),6)",
+  "expected": 0.103813,
+  "got": 0.103813,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(NOMINAL(0.103813,4),4)",
+  "expected": 0.1,
+  "got": 0.1,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(CUMIPMT(0.05/12,60,10000,1,12,0),2)",
+  "expected": -459.0,
+  "got": -459,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(XNPV(0.1,{-100,110},{45000,45365}),4)",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 34,
+  "cat": "Financial",
+  "formula": "=ROUND(XIRR({-100,110},{45000,45365}),4)",
+  "expected": 0.1,
+  "got": 0.1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISNUMBER(A1)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISTEXT(C1)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISBLANK(A9)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISERROR(1/0)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISNA(NA())",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISLOGICAL(TRUE)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISEVEN(4)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISODD(3)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=TYPE(A1)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=TYPE(C1)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=TYPE(TRUE)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ERROR.TYPE(1/0)",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ERROR.TYPE(NA())",
+  "expected": 7,
+  "got": 7,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=N(\"a\")",
+  "expected": 0,
+  "got": 0,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=N(5)",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISREF(A1)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISNONTEXT(A1)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=ISERR(1/0)",
+  "expected": true,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 35,
+  "cat": "Information",
+  "formula": "=IFERROR(VLOOKUP(99,E1:F3,2,FALSE),\"missing\")",
+  "expected": "missing",
+  "got": "missing",
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BIN2DEC(\"1010\")",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=DEC2BIN(10)",
+  "expected": "1010",
+  "got": "1010",
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=DEC2HEX(255)",
+  "expected": "FF",
+  "got": "FF",
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=HEX2DEC(\"FF\")",
+  "expected": 255,
+  "got": 255,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=OCT2DEC(\"17\")",
+  "expected": 15,
+  "got": 15,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BITAND(12,10)",
+  "expected": 8,
+  "got": 8,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BITOR(12,10)",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BITXOR(12,10)",
+  "expected": 6,
+  "got": 6,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BITLSHIFT(1,4)",
+  "expected": 16,
+  "got": 16,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=BITRSHIFT(16,2)",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=ROUND(CONVERT(1,\"mi\",\"km\"),4)",
+  "expected": 1.6093,
+  "got": 1.6093,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=CONVERT(100,\"C\",\"F\")",
+  "expected": 212,
+  "got": 212,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=DELTA(5,5)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=GESTEP(5,3)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=ROUND(ERF(1),6)",
+  "expected": 0.842701,
+  "got": 0.842701,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=COMPLEX(3,4)",
+  "expected": "3+4i",
+  "got": "3+4i",
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=IMSUM(\"1+2i\",\"3+4i\")",
+  "expected": "4+6i",
+  "got": "4+6i",
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=IMABS(\"3+4i\")",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 36,
+  "cat": "Engineering",
+  "formula": "=DEC2OCT(8)",
+  "expected": "10",
+  "got": "10",
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DSUM(J1:L6,\"Sales\",N1:N2)",
+  "expected": 90,
+  "got": 90,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DCOUNT(J1:L6,\"Sales\",N1:N2)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DAVERAGE(J1:L6,\"Sales\",N1:N2)",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DMAX(J1:L6,\"Sales\",N1:N2)",
+  "expected": 50,
+  "got": 50,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DMIN(J1:L6,\"Sales\",N1:N2)",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DGET(J1:L6,\"Sales\",O1:O2)",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DCOUNTA(J1:L6,\"Name\",N1:N2)",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 37,
+  "cat": "Database",
+  "formula": "=DPRODUCT(J1:L6,\"Sales\",N1:N2)",
+  "expected": 15000,
+  "got": 15000,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(SEQUENCE(5))",
+  "expected": 15,
+  "got": 15,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=ROWS(UNIQUE(A1:A5))",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(UNIQUE(A1:A5))",
+  "expected": 13,
+  "got": 13,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=INDEX(SORT(A1:A5),1)",
+  "expected": 1,
+  "got": 1,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=INDEX(SORT(A1:A5,1,-1),1)",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(FILTER(B1:B5,A1:A5>2))",
+  "expected": 90,
+  "got": 90,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=INDEX(SORTBY(C1:C5,B1:B5,-1),1)",
+  "expected": "date",
+  "got": "date",
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(TAKE(B1:B5,2))",
+  "expected": 30,
+  "got": 30,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(DROP(B1:B5,2))",
+  "expected": 120,
+  "got": 120,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=ROWS(VSTACK(A1:A5,B1:B5))",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=COLUMNS(HSTACK(A1:A5,B1:B5))",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=ROWS(TOCOL(A1:B5))",
+  "expected": 10,
+  "got": 10,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=COLUMNS(TOROW(A1:A5))",
+  "expected": 5,
+  "got": 5,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(CHOOSECOLS(A1:B5,2))",
+  "expected": 150,
+  "got": 150,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=COUNT(RANDARRAY(3,2))",
+  "expected": 6,
+  "got": 6,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(SEQUENCE(2,3))",
+  "expected": 21,
+  "got": 21,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=ROWS(WRAPROWS(A1:A5,2))",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=ROWS(FILTER(A1:A5,A1:A5>1))",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=SUM(SORT(UNIQUE(A1:A5)))",
+  "expected": 13,
+  "got": 13,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=COUNTA(UNIQUE(C1:C5))",
+  "expected": 4,
+  "got": 4,
+  "ok": true
+ },
+ {
+  "v": 38,
+  "cat": "Dynamic arrays",
+  "formula": "=INDEX(SEQUENCE(3,1,10,5),3)",
+  "expected": 20,
+  "got": 20,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=LET(x,5,y,x*2,y+1)",
+  "expected": 11,
+  "got": 11,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=LAMBDA(x,x*3)(4)",
+  "expected": 12,
+  "got": 12,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=SUM(MAP(A1:A5,LAMBDA(v,v*2)))",
+  "expected": 28,
+  "got": 28,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=REDUCE(0,A1:A5,LAMBDA(a,v,a+v))",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=INDEX(SCAN(0,A1:A5,LAMBDA(a,v,a+v)),5)",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=SUM(BYROW(A1:B2,LAMBDA(r,SUM(r))))",
+  "expected": 34,
+  "got": 34,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=SUM(BYCOL(A1:B2,LAMBDA(c,MAX(c))))",
+  "expected": 23,
+  "got": 23,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=SUM(MAKEARRAY(2,2,LAMBDA(r,c,r*c)))",
+  "expected": 9,
+  "got": 9,
+  "ok": true
+ },
+ {
+  "v": 39,
+  "cat": "LET / LAMBDA",
+  "formula": "=LET(a,A1:A5,SUM(a)*2)",
+  "expected": 28,
+  "got": 28,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=SUM(A1:A5*B1:B5)",
+  "expected": 460,
+  "got": 460,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=SUM((C1:C5=\"apple\")*B1:B5)",
+  "expected": 50,
+  "got": 50,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=SUM(--(A1:A5>2))",
+  "expected": 3,
+  "got": 3,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=MAX(IF(C1:C5=\"apple\",B1:B5))",
+  "expected": 40,
+  "got": 40,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=SUMPRODUCT((A1:A5>1)*(B1:B5))",
+  "expected": 90,
+  "got": 90,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=SUM(IF(A1:A5>2,B1:B5,0))",
+  "expected": 90,
+  "got": 90,
+  "ok": true
+ },
+ {
+  "v": 40,
+  "cat": "Array evaluation",
+  "formula": "=COUNT(IF(C1:C5=\"apple\",1))",
+  "expected": 2,
+  "got": 2,
+  "ok": true
+ },
+ {
+  "v": 41,
+  "cat": "Named ranges",
+  "formula": "=SUM(SalesData)*2",
+  "expected": 300,
+  "got": 300,
+  "ok": true
+ },
+ {
+  "v": 42,
+  "cat": "Cross-sheet",
+  "formula": "=Data!A1*2",
+  "expected": 14,
+  "got": 14,
+  "ok": true
+ },
+ {
+  "v": 42,
+  "cat": "Cross-sheet",
+  "formula": "=SUM(Data!A1:A2)",
+  "expected": 15,
+  "got": 15,
+  "ok": true
+ },
+ {
+  "v": 42,
+  "cat": "Cross-sheet",
+  "formula": "=SUM('Data'!A1:A2)+SUM(B1:B2)",
+  "expected": 45,
+  "got": 45,
+  "ok": true
+ }
+]

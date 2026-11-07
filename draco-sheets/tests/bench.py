@@ -4,7 +4,7 @@ from playwright.sync_api import sync_playwright
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 50000
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1440, "height": 900})
-    pg.goto("http://localhost:4174/", wait_until="networkidle")
+    pg.goto("http://localhost:4174/app", wait_until="networkidle")
     pg.wait_for_function("window.dracoAPI && window.dracoAPI.getActiveWorkbook()"); pg.wait_for_timeout(1000)
     r = pg.evaluate("""async (N) => {
       const api = window.dracoAPI, sh = api.getActiveWorkbook().getActiveSheet();

@@ -8,7 +8,7 @@ def ck(n,c,x=''):
     else: F+=1; print('FAIL',n,x)
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={'width':1440,'height':900}); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
-    pg.goto('http://localhost:4174'); pg.wait_for_function('window.dracoTrace',timeout=60000); time.sleep(2); js=pg.evaluate
+    pg.goto('http://localhost:4174/app'); pg.wait_for_function('window.dracoTrace',timeout=60000); time.sleep(2); js=pg.evaluate
     # spill ref
     js("""()=>{const ws=dracoAPI.getActiveWorkbook().getActiveSheet(); ws.getRange('A1').setFormula('=SEQUENCE(4)'); ws.getRange('C1').setFormula('=SUM(A1#)'); ws.getRange('C2').setFormula('=ROWS(A1#)'); ws.getRange('C3').setFormula('=SUM(E1#)');
       ws.getRange('E1:G2').setValues([[1,2,3],[4,5,6]]); ws.getRange('C4').setFormula('=COLUMNS(E1#)'); }""")
