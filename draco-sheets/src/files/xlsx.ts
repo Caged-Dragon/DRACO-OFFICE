@@ -1,6 +1,7 @@
 // .xlsx import/export between Univer snapshots and ExcelJS workbooks (v79, v83).
 import ExcelJS from 'exceljs';
 import { injectCharts, type ChartOut } from './xlsxCharts';
+import { readCharts } from './xlsxChartsIn';
 import * as TM from '../tables/tableModel';
 import { DEFAULT_COL_PX, DEFAULT_ROW_PX, OFFICE_THEME, applyTint, cellValue, colName, dateToSerial, fromArgb, orderedSheets, styleOf, toArgb, usedExtent, type Bd, type Cell, type SheetSnap, type Snap, type Style } from './model';
 
@@ -100,6 +101,11 @@ export async function xlsxToSnapshot(buf: ArrayBuffer | Uint8Array, name = 'Impo
     const extra = ws as unknown as { conditionalFormattings?: unknown[]; dataValidations?: { model?: Record<string, unknown> }; getImages?: () => unknown[] };
     if ((extra.conditionalFormattings?.length ?? 0) > 0 || Object.keys(extra.dataValidations?.model ?? {}).length > 0 || (extra.getImages?.().length ?? 0) > 0) dropped = true;
   });
+  try {
+    const grids: Record<string, Record<string, Record<string, Cell>>> = {}; for (const sh of Object.values(sheets)) grids[sh.name] = sh.cellData ?? {};
+    const charts = await readCharts(buf, grids as never);
+    if (charts.length) { (snapResources as Array<{ name: string; data: string }>).push({ name: 'DRACO_OBJECTS', data: JSON.stringify(charts) }); warnings.push(`${charts.length} chart${charts.length === 1 ? '' : 's'} imported from the workbook.`); }
+  } catch { /* charts that cannot be read are skipped */ }
   if (tables.length) {
     // Excel writes structured references (Table1[[#This Row],[Col]]) into the file: resolve them to A1 for the engine and keep the original text.
     for (const sh of Object.values(sheets)) for (const [rk, row] of Object.entries(sh.cellData ?? {})) for (const [ck, cell] of Object.entries(row)) { if (!cell.f) continue; const r = TM.resolveFormula(cell.f, tables, { sheet: sh.name, row: +rk, col: +ck }); if (r.used && !r.error) { tformulas[`${sh.name}|${rk}|${ck}`] = cell.f; cell.f = r.formula; } }

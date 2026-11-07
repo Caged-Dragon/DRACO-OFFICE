@@ -30,6 +30,9 @@ import * as a11yGlue from './a11y/a11yGlue';
 import * as gallery from './gallery/galleryGlue';
 import * as i18n from './i18n/i18nGlue';
 import { buildSnapshot, byId as templateById } from './gallery/templates';
+import ThemeToggle from './site/ThemeToggle';
+import Ribbon from './ribbon/Ribbon';
+import { isDarkNow } from './gallery/galleryGlue';
 import { addResources, loadResources } from './persist';
 import './pivot/pivotGlue';
 import './query/queryGlue';
@@ -62,6 +65,7 @@ export default function App() {
   const openReview = (t: CollabTab) => { setRtab(t); setDialog('review'); setMenu(false); };
   const [menu, setMenu] = useState(false);
   const [ready, setReady] = useState(false);
+  const [booted, setBooted] = useState(false); // the last workbook (or a blank one) is mounted
   const sessionRef = useRef<Session | null>(null);
   const cloudShareToken = useRef<string | null>(null);
   sessionRef.current = session;
@@ -160,6 +164,7 @@ export default function App() {
       (window as unknown as { dracoAPI: unknown }).dracoAPI = engine.current.api; // used by tests and, later, macros/scripting
       cmdGlue.init(engine.current); setReady(true);
       try {
+       try {
         const last = JSON.parse(localStorage.getItem(LAST_KEY) ?? 'null') as { id: string; cloud: boolean } | null;
         const rec = last ? await loadLocal(last.id) : null;
         const draft = last ? await loadDraft(last.id).catch(() => undefined) : undefined;
@@ -171,6 +176,7 @@ export default function App() {
         if (last && draft) { mount(last.id, draft.title, draft.cloud, draft.data); setNotice('Recovered your unsaved work from the last session.'); setTimeout(() => void flush(), 500); return; }
       } catch { /* fall through to blank */ }
       mount(newId(), 'Untitled workbook', false);
+      } finally { setBooted(true); }
     })();
     return () => {
       cancelled = true;
@@ -202,6 +208,24 @@ export default function App() {
       const rm = collab.roomFromUrl(); if (rm) { history.replaceState(null, '', location.pathname); collab.joinSession(rm.room, rm.role); setNotice(`Joining live session ${rm.room}…`); }
     })();
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!ready) return;
+    const sync = () => { try { (engine.current?.api as unknown as { toggleDarkMode(d: boolean): void }).toggleDarkMode(isDarkNow()); } catch { /* engine not ready */ } };
+    sync(); window.addEventListener('draco-theme', sync); const mq = window.matchMedia?.('(prefers-color-scheme: dark)'); mq?.addEventListener?.('change', sync);
+    return () => { window.removeEventListener('draco-theme', sync); mq?.removeEventListener?.('change', sync); };
+  }, [ready]);
+  useEffect(() => {
+    if (!booted) return;
+    const q = new URLSearchParams(location.search); if (![...q.keys()].length) return;
+    const clean = () => history.replaceState(null, '', location.pathname);
+    const tpl = q.get('template'); const open = q.get('open'); const src = q.get('src') === 'cloud' ? 'cloud' : 'local';
+    clean();
+    if (tpl) { openTemplate(tpl); return; }
+    if (q.get('new')) { void newWorkbook(); return; }
+    if (open === '1') { setDialog('open'); return; }
+    if (open) { void openMeta({ id: open, source: src }); return; }
+    if (q.get('account')) setDialog('auth');
+  }, [booted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // auth session
   useEffect(() => {
@@ -275,7 +299,7 @@ export default function App() {
     <div className="app">
       <a className="skip" href="#grid" onClick={(e) => { e.preventDefault(); a11yGlue.skipToGrid(); }}>{t('Skip to spreadsheet')}</a>
       <header className="topbar">
-        <img src="/logo-128.png" srcSet="/logo-128.png 1x, /logo-256.png 2x" alt="Draco Sheets" className="logo" width={28} height={28} />
+        <a href="/home" className="logo-link" title="Back to Start" aria-label="Back to the start screen" onClick={(e) => { e.preventDefault(); void flush().then(() => { history.pushState(null, '', '/home'); window.dispatchEvent(new PopStateEvent('popstate')); }); }}><img src="/logo-128.png" srcSet="/logo-128.png 1x, /logo-256.png 2x" alt="Draco Sheets" className="logo" width={28} height={28} /></a>
         <input
           className="title"
           aria-label="Workbook title"
@@ -304,6 +328,8 @@ export default function App() {
           </span>
           <button onClick={() => openTools('macros')} title="Macros, scripts, links, accessibility, language, templates, shortcuts">{t('Tools')}</button>
           {cloudEnabled && !cloud && <button onClick={moveToCloud}>{t('☁ Sync')}</button>}
+          <ThemeToggle className="tt" />
+          <button title="Settings" aria-label="Settings" onClick={() => { void flush().then(() => { history.pushState(null, '', '/settings'); window.dispatchEvent(new PopStateEvent('popstate')); }); }}>⚙</button>
           <button className="primary" onClick={() => setDialog('auth')}>{session ? (session.user.email ?? t('Account')).split('@')[0] : t('Sign in')}</button>
         </nav>
         <button className="icon burger" aria-label={t('Menu')} aria-expanded={menu} onClick={() => setMenu(!menu)}>☰</button>
@@ -329,11 +355,11 @@ export default function App() {
             <button onClick={() => openTools('macros')}>{t('Tools (macros, scripts…)')}</button>
             <button onClick={() => openTools('templates')}>{t('Templates & themes')}</button>
             <button onClick={() => setPalette(true)}>{t('Command search')}</button>
-            <button onClick={() => setDialog('roadmap')}>{t('Roadmap')}</button>
             <button onClick={() => setDialog('auth')}>{session ? t('Account') : t('Sign in')}</button>
           </div>
         )}
       </header>
+      <Ribbon ready={ready} newWb={() => void newWorkbook()} save={() => void flush()} home={() => { void flush().then(() => { history.pushState(null, '', '/home'); window.dispatchEvent(new PopStateEvent('popstate')); }); }} settings={() => { void flush().then(() => { history.pushState(null, '', '/settings'); window.dispatchEvent(new PopStateEvent('popstate')); }); }} palette={() => setPalette(true)} />
       {recovery && <div className="banner" role="alert">Unsaved changes from {new Date(recovery.at).toLocaleTimeString()} were found after the last session.
         <button onClick={() => { const d = recovery; setRecovery(null); mount(d.id, d.title, d.cloud, d.data as Snapshot); void flush(); }}>Restore them</button>
         <button onClick={() => { void clearDraft(recovery.id).catch(() => undefined); setRecovery(null); }}>Discard</button></div>}

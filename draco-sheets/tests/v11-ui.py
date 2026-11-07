@@ -8,7 +8,7 @@ def ck(n,c,x=''):
     else: F+=1; print('FAIL',n,x)
 URL='http://localhost:4174/app'
 with sync_playwright() as p:
-    b=p.chromium.launch(); ctx=b.new_context(viewport={'width':1500,'height':950}); pg=ctx.new_page(); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
+    b=p.chromium.launch(); ctx=b.new_context(viewport={'width':1500,'height':1100}); pg=ctx.new_page(); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
     pg.goto(URL); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook() && window.dracoPivots',timeout=60000); time.sleep(1.5)
     js=lambda s,a=None: pg.evaluate(s,a) if a is not None else pg.evaluate(s)
     js('''()=>{const ws=dracoAPI.getActiveWorkbook().getActiveSheet(); ws.getRange('A1:D7').setValues([['Region','Product','Date','Sales'],['East','Apple','2024-01-15',100],['East','Pear','2024-02-10',50],['West','Apple','2024-01-20',200],['West','Apple','2024-04-05',150],['West','Pear','2024-05-01',80],['North','Pear','2024-05-20',70]]); ws.getRange('A1').activate();}''')

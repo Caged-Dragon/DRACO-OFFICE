@@ -1,9 +1,9 @@
 // UI themes + colour palettes (v100). Pure data.
 export interface Theme { id: string; label: string; dark: boolean; vars: Record<string, string> }
 export const THEMES: Theme[] = [
-  { id: 'system', label: 'Match my device', dark: false, vars: {} },
-  { id: 'light', label: 'Light', dark: false, vars: { '--bg': '#ffffff', '--fg': '#1c2321', '--muted': '#5b6662', '--line': '#dfe5e2', '--bar': '#f4f7f5', '--brand': '#0f5132', '--brand-2': '#14783f' } },
-  { id: 'dark', label: 'Dark', dark: true, vars: { '--bg': '#14181a', '--fg': '#e8eeeb', '--muted': '#9aa8a2', '--line': '#2a3330', '--bar': '#1b2123', '--brand': '#2f9e63', '--brand-2': '#3fbf7a' } },
+  { id: 'system', label: 'Match my device (gold / purple)', dark: false, vars: {} },
+  { id: 'light', label: 'Gold (light)', dark: false, vars: { '--bg': '#fffdf6', '--fg': '#2a2310', '--muted': '#6f6444', '--line': '#eadfbd', '--bar': '#faf3dc', '--brand': '#8a6508', '--brand-2': '#b8860b' } },
+  { id: 'dark', label: 'Purple (dark)', dark: true, vars: { '--bg': '#13101f', '--fg': '#ece8f8', '--muted': '#a79fc4', '--line': '#2e2748', '--bar': '#1c1730', '--brand': '#7c4dff', '--brand-2': '#a78bfa' } },
   { id: 'ocean', label: 'Ocean', dark: false, vars: { '--bg': '#ffffff', '--fg': '#10222f', '--muted': '#51667a', '--line': '#d6e2ee', '--bar': '#eef5fb', '--brand': '#0b5cad', '--brand-2': '#1976d2' } },
   { id: 'sunset', label: 'Sunset', dark: false, vars: { '--bg': '#fffdfb', '--fg': '#2b1a14', '--muted': '#7a5a4d', '--line': '#f0ddd2', '--bar': '#fff3ea', '--brand': '#b23a0e', '--brand-2': '#d9531e' } },
   { id: 'graphite', label: 'Graphite (dark)', dark: true, vars: { '--bg': '#1a1b1e', '--fg': '#e6e6e9', '--muted': '#9a9aa3', '--line': '#32333a', '--bar': '#222328', '--brand': '#7c8cff', '--brand-2': '#98a4ff' } },

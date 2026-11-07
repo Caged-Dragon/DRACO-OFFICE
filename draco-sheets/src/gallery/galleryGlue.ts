@@ -11,7 +11,10 @@ export function applyTheme(id: string, persist = true) {
   for (const [k, v] of Object.entries(t.vars)) root.style.setProperty(k, v);
   root.dataset.dracoTheme = t.id; root.style.colorScheme = t.id === 'system' ? '' : t.dark ? 'dark' : 'light';
   if (persist) { try { localStorage.setItem(KEY, t.id); } catch { /* blocked */ } }
+  try { window.dispatchEvent(new Event('draco-theme')); } catch { /* no window */ }
 }
+export const isDarkNow = (): boolean => { const t = themeById(getTheme()); return t.id === 'system' ? window.matchMedia?.('(prefers-color-scheme: dark)').matches === true : t.dark; };
+export const toggleTheme = () => applyTheme(isDarkNow() ? 'light' : 'dark');
 export const initTheme = () => applyTheme(getTheme(), false);
 export interface CheckResult { name: string; formula: string; expect: unknown; got: unknown; pass: boolean }
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));

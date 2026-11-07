@@ -112,7 +112,7 @@ with sync_playwright() as p:
     for t in ['budget','invoice','timesheet','gradebook','project']:
         tools(pg,'Templates & themes'); pg.locator(f'[data-template={t}]').get_by_role('button',name='Use this template').click(); time.sleep(1.8)
         errs=pg.evaluate('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getDataRange().getValues().flat().filter(x=>typeof x==="string"&&x.startsWith("#")).length'); ck('template '+t+' no errors',errs==0,errs)
-    tools(pg,'Templates & themes'); pg.get_by_role('button',name='Dark',exact=True).click(); time.sleep(.3); ck('dark theme bg',pg.evaluate('()=>getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()')=='#14181a')
+    tools(pg,'Templates & themes'); pg.get_by_role('button',name='Purple (dark)',exact=True).click(); time.sleep(.3); ck('dark theme bg',pg.evaluate('()=>getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()')=='#13101f')
     pg.reload(); pg.wait_for_function('window.dracoCmd',timeout=60000); time.sleep(1.5); ck('theme persists',pg.evaluate('()=>document.documentElement.dataset.dracoTheme')=='dark')
     tools(pg,'Templates & themes'); pg.get_by_role('button',name='Match my device').click(); time.sleep(.2); ck('system theme resets',pg.evaluate('()=>document.documentElement.style.getPropertyValue("--bg")')=='')
     pg.evaluate('()=>{const w=dracoAPI.getActiveWorkbook().getActiveSheet(); w.getRange("A1:B4").setValues([["Item","Price"],["a",10],["b",20],["c",30]]); w.getRange("B2:B4").activate();}')

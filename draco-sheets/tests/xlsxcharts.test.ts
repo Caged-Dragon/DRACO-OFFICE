@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
 import { writeFileSync } from 'fs';
-import { snapshotToXlsx } from '../src/files/xlsx';
+import { snapshotToXlsx, xlsxToSnapshot } from '../src/files/xlsx';
 
 const mk = (type: string) => ({
   id: 'w', name: 'T', appVersion: '1', locale: 'enUS', styles: {}, sheetOrder: ['s1'],
@@ -17,4 +17,14 @@ describe('xlsx native charts', () => {
     expect(await z.file('xl/charts/chart1.xml')!.async('string')).toContain('Sheet1!$B$2:$B$3');
     if (t === 'column') writeFileSync('/tmp/xt/chart-col.xlsx', buf); if (t === 'pie') writeFileSync('/tmp/xt/chart-pie.xlsx', buf);
   });
+
+  for (const t of ['column', 'line', 'pie', 'scatter', 'bar']) it(`reads ${t} back`, async () => {
+    const r = await xlsxToSnapshot(await snapshotToXlsx(mk(t), 'T')); const res = (r.snap.resources as Array<{ name: string; data: string }>).find((x) => x.name === 'DRACO_OBJECTS'); expect(res).toBeTruthy();
+    const o = JSON.parse(res!.data)[0]; expect(o.data.type).toBe(t); expect(o.data.range).toBe(t === 'pie' ? 'A1:B3' : 'A1:C3'); expect(o.data.title).toBe('T & Co'); expect(o.data.byRows).toBe(false); expect(o.data.spec.series.length).toBeGreaterThan(0); expect(o.sheet).toBe('Sheet1'); expect(o.left).toBeGreaterThan(100);
+  });
+  it('reads a chart that LibreOffice re-saved', async () => {
+    const { execSync } = await import('child_process'); const { readFileSync, mkdirSync } = await import('fs'); mkdirSync('/tmp/xt/lo', { recursive: true });
+    execSync('cd /tmp/xt && timeout 90 soffice --headless --convert-to xlsx:"Calc MS Excel 2007 XML" --outdir lo chart-col.xlsx >/dev/null 2>&1');
+    const r = await xlsxToSnapshot(readFileSync('/tmp/xt/lo/chart-col.xlsx')); const res = (r.snap.resources as Array<{ name: string; data: string }>).find((x) => x.name === 'DRACO_OBJECTS'); expect(res).toBeTruthy(); expect(JSON.parse(res!.data)[0].data.type).toBe('column');
+  }, 100000);
 });
