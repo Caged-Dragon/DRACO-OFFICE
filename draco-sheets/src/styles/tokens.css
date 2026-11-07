@@ -1,0 +1,17 @@
+/* Design tokens: gold light theme, purple dark theme */
+:root {
+  --brand: #8a6508;
+  --brand-2: #b8860b;
+  --accent: #f5b942;
+  --bg: #fffdf6;
+  --fg: #2a2310;
+  --muted: #6f6444;
+  --line: #eadfbd;
+  --bar: #faf3dc;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --brand: #7c4dff; --brand-2: #a78bfa; --accent: #c4b5fd; --bg: #13101f; --fg: #ece8f8; --muted: #a79fc4; --line: #2e2748; --bar: #1c1730; color-scheme: dark; }
+}

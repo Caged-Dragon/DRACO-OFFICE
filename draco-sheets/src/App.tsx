@@ -32,6 +32,9 @@ import * as i18n from './i18n/i18nGlue';
 import { buildSnapshot, byId as templateById } from './gallery/templates';
 import ThemeToggle from './site/ThemeToggle';
 import Ribbon from './ribbon/Ribbon';
+import TopBar, { type DialogId } from './workspace/TopBar';
+import DialogHost from './workspace/DialogHost';
+import { goTo } from './workspace/navigate';
 import { isDarkNow } from './gallery/galleryGlue';
 import { addResources, loadResources } from './persist';
 import './pivot/pivotGlue';
@@ -58,7 +61,7 @@ export default function App() {
   const [cloud, setCloud] = useState(false);
   const [status, setStatus] = useState<Status>('saved');
   const [session, setSession] = useState<Session | null>(null);
-  const [dialog, setDialog] = useState<null | 'open' | 'auth' | 'roadmap' | 'styles' | 'formulas' | 'data' | 'charts' | 'objects' | 'pivot' | 'query' | 'files' | 'print' | 'review' | 'tools'>(null);
+  const [dialog, setDialog] = useState<DialogId>(null);
   const [ttab, setTtab] = useState<ToolsTab>('macros'); const [palette, setPalette] = useState(false);
   const [rtab, setRtab] = useState<CollabTab>('comments');
   const openTools = (t: ToolsTab) => { setTtab(t); setDialog('tools'); setMenu(false); };
@@ -298,68 +301,8 @@ export default function App() {
   return (
     <div className="app">
       <a className="skip" href="#grid" onClick={(e) => { e.preventDefault(); a11yGlue.skipToGrid(); }}>{t('Skip to spreadsheet')}</a>
-      <header className="topbar">
-        <a href="/home" className="logo-link" title="Back to Start" aria-label="Back to the start screen" onClick={(e) => { e.preventDefault(); void flush().then(() => { history.pushState(null, '', '/home'); window.dispatchEvent(new PopStateEvent('popstate')); }); }}><img src="/logo-128.png" srcSet="/logo-128.png 1x, /logo-256.png 2x" alt="Draco Sheets" className="logo" width={28} height={28} /></a>
-        <input
-          className="title"
-          aria-label="Workbook title"
-          value={title}
-          onChange={(e) => { setTitleState(e.target.value); }}
-          onBlur={(e) => rename(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        />
-        <span className={'status ' + status} aria-live="polite">{t(statusText)}</span>
-        <nav className="actions">
-          <button onClick={newWorkbook}>{t('New')}</button>
-          <button onClick={() => setDialog('open')}>{t('Open')}</button>
-          <button onClick={() => void flush()}>{t('Save')}</button>
-          <button onClick={() => setDialog('styles')}>{t('Styles')}</button>
-          <button onClick={() => setDialog('formulas')}>{t('Formulas')}</button>
-          <button onClick={() => setDialog('data')}>{t('Data')}</button>
-          <button onClick={() => setDialog('charts')}>{t('Charts')}</button>
-          <button onClick={() => setDialog('objects')}>{t('Objects')}</button>
-          <button onClick={() => setDialog('pivot')}>{t('PivotTable')}</button>
-          <button onClick={() => setDialog('query')}>{t('Queries')}</button>
-          <button onClick={() => setDialog('files')}>{t('Files')}</button>
-          <button onClick={() => openReview('comments')} title="Comments, notes, share, changes, protect">{t('Review')}</button>
-          <span className="pair" role="group" aria-label="Indent">
-            <button title="Decrease indent" aria-label="Decrease indent" onClick={() => engine.current && void changeIndent(engine.current, -1)}>⇤</button>
-            <button title="Increase indent" aria-label="Increase indent" onClick={() => engine.current && void changeIndent(engine.current, 1)}>⇥</button>
-          </span>
-          <button onClick={() => openTools('macros')} title="Macros, scripts, links, accessibility, language, templates, shortcuts">{t('Tools')}</button>
-          {cloudEnabled && !cloud && <button onClick={moveToCloud}>{t('☁ Sync')}</button>}
-          <ThemeToggle className="tt" />
-          <button title="Settings" aria-label="Settings" onClick={() => { void flush().then(() => { history.pushState(null, '', '/settings'); window.dispatchEvent(new PopStateEvent('popstate')); }); }}>⚙</button>
-          <button className="primary" onClick={() => setDialog('auth')}>{session ? (session.user.email ?? t('Account')).split('@')[0] : t('Sign in')}</button>
-        </nav>
-        <button className="icon burger" aria-label={t('Menu')} aria-expanded={menu} onClick={() => setMenu(!menu)}>☰</button>
-        {menu && (
-          <div className="sheet" onClick={() => setMenu(false)}>
-            <button onClick={newWorkbook}>{t('New workbook')}</button>
-            <button onClick={() => setDialog('open')}>{t('Open…')}</button>
-            <button onClick={() => void flush()}>{t('Save now')}</button>
-            {cloudEnabled && !cloud && <button onClick={moveToCloud}>{t('Sync to cloud')}</button>}
-            <button onClick={() => setDialog('styles')}>{t('Cell styles')}</button>
-            <button onClick={() => setDialog('formulas')}>{t('Formulas')}</button>
-            <button onClick={() => setDialog('data')}>{t('Data tools')}</button>
-            <button onClick={() => setDialog('charts')}>{t('Charts')}</button>
-            <button onClick={() => setDialog('objects')}>{t('Objects')}</button>
-            <button onClick={() => setDialog('pivot')}>{t('PivotTable')}</button>
-            <button onClick={() => setDialog('query')}>{t('Queries')}</button>
-          <button onClick={() => setDialog('files')}>{t('Files')}</button>
-            <button onClick={() => openReview('comments')}>{t('Review (comments, changes)')}</button>
-            <button onClick={() => openReview('share')}>{t('Share & live session')}</button>
-            <button onClick={() => openReview('protect')}>{t('Protect')}</button>
-            <button onClick={() => engine.current && void changeIndent(engine.current, 1)}>{t('Increase indent')}</button>
-            <button onClick={() => engine.current && void changeIndent(engine.current, -1)}>{t('Decrease indent')}</button>
-            <button onClick={() => openTools('macros')}>{t('Tools (macros, scripts…)')}</button>
-            <button onClick={() => openTools('templates')}>{t('Templates & themes')}</button>
-            <button onClick={() => setPalette(true)}>{t('Command search')}</button>
-            <button onClick={() => setDialog('auth')}>{session ? t('Account') : t('Sign in')}</button>
-          </div>
-        )}
-      </header>
-      <Ribbon ready={ready} newWb={() => void newWorkbook()} save={() => void flush()} home={() => { void flush().then(() => { history.pushState(null, '', '/home'); window.dispatchEvent(new PopStateEvent('popstate')); }); }} settings={() => { void flush().then(() => { history.pushState(null, '', '/settings'); window.dispatchEvent(new PopStateEvent('popstate')); }); }} palette={() => setPalette(true)} />
+      <TopBar t={t} title={title} setTitle={setTitleState} rename={rename} status={status} statusText={statusText} flush={flush} newWorkbook={newWorkbook} setDialog={setDialog} openReview={openReview} openTools={openTools} engine={engine.current} cloud={cloud} moveToCloud={moveToCloud} session={session} menu={menu} setMenu={setMenu} setPalette={setPalette} />
+      <Ribbon ready={ready} newWb={() => void newWorkbook()} save={() => void flush()} home={() => { void flush().then(() => { goTo('/home'); }); }} settings={() => { void flush().then(() => { goTo('/settings'); }); }} palette={() => setPalette(true)} />
       {recovery && <div className="banner" role="alert">Unsaved changes from {new Date(recovery.at).toLocaleTimeString()} were found after the last session.
         <button onClick={() => { const d = recovery; setRecovery(null); mount(d.id, d.title, d.cloud, d.data as Snapshot); void flush(); }}>Restore them</button>
         <button onClick={() => { void clearDraft(recovery.id).catch(() => undefined); setRecovery(null); }}>Discard</button></div>}
@@ -368,20 +311,8 @@ export default function App() {
         <main ref={host} className="grid" />
         {!ready && <div className="splash" role="status"><div className="spin" /><span>Loading spreadsheet engine…</span></div>}
       </div>
-      {dialog === 'open' && <OpenDialog signedIn={Boolean(session)} onOpen={(m: WorkbookMeta) => void openMeta(m)} onClose={() => setDialog(null)} />}
-      {dialog === 'review' && engine.current && <CollabDialog tab={rtab} title={title} getSnapshot={() => snapshot()} onClose={() => setDialog(null)} />}
-      {dialog === 'auth' && <AuthDialog session={session} onClose={() => setDialog(null)} />}
-      {dialog === 'tools' && engine.current && <ToolsDialog engine={engine.current} tab={ttab} openTemplate={openTemplate} onRoadmap={() => setDialog('roadmap')} onClose={() => setDialog(null)} />}
       {palette && <Palette onClose={() => setPalette(false)} />}
-      {dialog === 'roadmap' && <RoadmapDialog onClose={() => setDialog(null)} />}
-      {dialog === 'data' && engine.current && <DataDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {dialog === 'pivot' && engine.current && <PivotDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {(dialog === 'files' || dialog === 'print') && engine.current && <FilesDialog engine={engine.current} tab={dialog === 'print' ? 'print' : 'files'} onClose={() => setDialog(null)} ctx={{ id: current.current.id, title: current.current.title, getSnapshot: () => snapshot() as never, onImport: (imp) => void importIntoNew(imp), onRestore: (snap) => { mount(current.current.id, current.current.title, current.current.cloud, snap as unknown as Snapshot); void flush(); }, onSetupChanged: scheduleSave, markCheckpoint: (h) => { lastAuto.current = { at: new Date().toISOString(), hash: h }; } }} />}
-      {dialog === 'query' && engine.current && <QueryDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {dialog === 'objects' && engine.current && <ObjectsDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {dialog === 'charts' && engine.current && <ChartDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {dialog === 'formulas' && engine.current && <FormulasDialog engine={engine.current} onClose={() => setDialog(null)} />}
-      {dialog === 'styles' && <CellStylesDialog engine={engine.current} onClose={() => setDialog(null)} />}
+      <DialogHost dialog={dialog} setDialog={setDialog} engine={engine.current} session={session} rtab={rtab} ttab={ttab} title={title} getSnapshot={() => snapshot()} openMeta={openMeta} openTemplate={openTemplate} cur={current.current} onImportNew={(imp) => void importIntoNew(imp)} onRestore={(snap) => { mount(current.current.id, current.current.title, current.current.cloud, snap as Snapshot); void flush(); }} scheduleSave={scheduleSave} markCheckpoint={(h) => { lastAuto.current = { at: new Date().toISOString(), hash: h }; }} />
     </div>
   );
 }

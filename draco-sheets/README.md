@@ -49,6 +49,12 @@ New in v0.8.0: **Files** dialog (Ctrl+P opens its print tab) — open .xlsx/.xls
 
 New in v0.9.0: **Review** dialog (top bar, and the phone menu) — **comments** with threaded replies, resolve/reopen, edit/delete, filters, search, CSV export and a marker on every commented cell (anchors follow row/column inserts and deletes); **notes** (plain sticky notes with a list and CSV export); **Share & live** — start a live co-editing session (6-letter code or link, presence cursors with names, host-controlled roles: view / comment / edit) and create a self-contained share link (the workbook is packed into the link; opens as a view-only, comment-only or editable copy); **Changes** — who changed which cell (before/after), filters, CSV, revert selected; **Protect** — lock a sheet (optional password, choose what everyone may still do, ranges that stay editable) and protect the workbook structure.
 
+New in v1.5.0
+
+- Formulas tab: Trace precedents / Trace dependents / Remove arrows / Error checking (circle invalid) / Clear circles now act directly on the sheet instead of opening a dialog.
+
+New in v1.4.1: **Modular code layout**, one file per section. `src/workspace/` (TopBar, DialogHost, navigate), `src/ribbon/` (tab and Home-group files), `src/site/pages/` (one file per page), `src/site/components/`, and per-section stylesheets in `src/styles/` and `src/site/styles/`. `App.tsx` is down to the editor's state logic. No behaviour change.
+
 New in v1.4.0: **Multipage product**. Pages: Home, Features, Templates (cards now open the template), Shortcuts, About, Settings (appearance, accessibility, region, server status) and an Excel-style Start screen at `/home`; the editor is at `/app`. The Roadmap page is removed from the website. A sun/moon button sits next to Sign in and Settings on every screen. The editor has an Excel-style ribbon (File, Home, Insert, Draw, Page Layout, Formulas, Data, Review, View, Automate, Help); every button runs a registered command and a test checks that none points at a missing command. Univer's grid follows the gold/purple theme. Native Excel charts are now read back from .xlsx. New optional Python backend in `backend/` (FastAPI: LibreOffice file conversion and numpy/scipy statistics, with Docker and tests).
 
 Code layout: `src/site/` (pages), `src/ribbon/` (`tabs/<tab>.ts` and `tabs/home/<group>.ts`: one file per tab and per Home group), `src/backend/` (API client), `backend/` (Python service).

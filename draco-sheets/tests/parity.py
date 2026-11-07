@@ -23,7 +23,7 @@ def check(pg, v, name, js, expect=None):
         results.append((v, name, False, str(e).splitlines()[0][:160]))
 
 with sync_playwright() as p:
-    b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1440, "height": 900})
+    b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1440, "height": 1100})
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)[:200]))
     pg.goto(URL, wait_until="networkidle"); pg.wait_for_function("window.dracoAPI && window.dracoAPI.getActiveWorkbook()")
@@ -140,10 +140,12 @@ with sync_playwright() as p:
     # v19 format painter with real clicks: style A27, click it, click painter, click C27
     pg.evaluate("window.dracoAPI.getActiveWorkbook().getActiveSheet().getRange('A27').setValue('src').setFontWeight('bold').setBackground('#abcdef').setFontSize(16)")
     pg.evaluate("window.dracoAPI.getActiveWorkbook().getActiveSheet().getRange('A1').activate()"); pg.wait_for_timeout(200)
-    pg.mouse.click(90, 184 + 24*26 + 4); pg.wait_for_timeout(200)           # select A27
+    gy = pg.evaluate("[...document.querySelectorAll('main.grid canvas')].map(c=>c.getBoundingClientRect()).sort((a,b)=>b.height-a.height)[0].y") + 27
+    ry = gy + pg.evaluate("(()=>{const ws=window.dracoAPI.getActiveWorkbook().getActiveSheet(); let y=0; for(let k=0;k<26;k++) y+=ws.getRowHeight(k); return y+ws.getRowHeight(26)/2})()")
+    pg.mouse.click(90, ry); pg.wait_for_timeout(200)           # select A27
     btn = pg.get_by_role("button", name="Format Painter").first
     btn.click(); pg.wait_for_timeout(200)
-    pg.mouse.click(266, 184 + 24*26 + 4); pg.wait_for_timeout(500)          # click C27
+    pg.mouse.click(266, ry); pg.wait_for_timeout(1200)          # click C27
     check(pg, 19, "format painter (UI): copies bold/size/fill", """
       const s = sd('C27'); return s.bl===1 && s.fs===16 && JSON.stringify(s.bg).toLowerCase().includes('abcdef') ? true : JSON.stringify(s);""")
     b.close()

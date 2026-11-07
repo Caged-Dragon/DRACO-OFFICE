@@ -1,0 +1,25 @@
+/* Shared components: splash, tabs, forms */
+.splash { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; color: var(--muted); font-size: 14px; }
+.spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--brand-2); animation: sp .8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 13px; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
+.swatch { border-radius: 4px; border: 1px solid var(--line); text-align: left; min-height: 34px; padding: 6px 8px; }
+
+.pair { display: inline-flex; } .pair button { padding: 7px 9px; } .pair button:first-child { border-radius: 8px 0 0 8px; } .pair button:last-child { border-radius: 0 8px 8px 0; border-left: 0; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.tabs button { border-radius: 8px; } .tabs button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+.inline { display: inline-flex; grid-auto-flow: column; align-items: center; gap: 6px; }
+.watch { width: 100%; border-collapse: collapse; font-size: 13px; } .watch th, .watch td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+code { background: var(--bar); padding: 1px 5px; border-radius: 4px; }
+
+select, textarea { font: 14px inherit; font-family: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); width: 100%; }
+.checks { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 8px; }
+.okmsg { color: var(--brand-2); }
+button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
+button:disabled { opacity: .55; cursor: progress; }
