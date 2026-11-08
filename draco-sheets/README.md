@@ -49,6 +49,24 @@ New in v0.8.0: **Files** dialog (Ctrl+P opens its print tab) — open .xlsx/.xls
 
 New in v0.9.0: **Review** dialog (top bar, and the phone menu) — **comments** with threaded replies, resolve/reopen, edit/delete, filters, search, CSV export and a marker on every commented cell (anchors follow row/column inserts and deletes); **notes** (plain sticky notes with a list and CSV export); **Share & live** — start a live co-editing session (6-letter code or link, presence cursors with names, host-controlled roles: view / comment / edit) and create a self-contained share link (the workbook is packed into the link; opens as a view-only, comment-only or editable copy); **Changes** — who changed which cell (before/after), filters, CSV, revert selected; **Protect** — lock a sheet (optional password, choose what everyone may still do, ranges that stay editable) and protect the workbook structure.
 
+New in v1.6.1
+
+- Top bar now only has New / Open / Save / Review / Tools / theme / settings / Sign in. PivotTable, Charts, Objects, Queries, Files, Formulas, Data and Styles live in the ribbon (Insert, Data, Formulas, File, Home tabs) like Excel.
+
+New in v1.6.0
+
+- Cleaner top bar: the eight panel buttons (Styles, Formulas, Data, Charts, Objects, PivotTable, Queries, Files) moved into one Panels menu; the ribbon already covers them.
+- Ribbon groups stay on a single line, no more wrapped buttons.
+
+New in v1.5.2
+
+- View tab: Zoom group (in/out/50-200%) and Headings toggle.
+
+New in v1.5.1
+
+- Evaluate formula: step through the active cell's formula one reduction at a time (src/formulas/).
+- Formulas and Data ribbon buttons open the exact tab (Error checking, Watch window, Calculation, Text to columns, Remove duplicates, Flash Fill, Advanced filter, Subtotal, What-if, Consolidate).
+
 New in v1.5.0
 
 - Formulas tab: Trace precedents / Trace dependents / Remove arrows / Error checking (circle invalid) / Clear circles now act directly on the sheet instead of opening a dialog.

@@ -21,3 +21,7 @@ main.grid header[data-draco-home="0"] [data-draco-u="toolbar"] { display: none !
 @media (max-width: 800px) { .ribbon { display: none; } }
 .topbar .theme-toggle, .topbar .tt { width: 32px; height: 32px; min-height: 32px; padding: 0; font-size: 16px; }
 .rb-panel { min-height: 74px; } .rb-btn { min-height: 52px; } .rb-btn.s { min-height: 38px; } .rb-ic { font-size: 19px; }
+/* ribbon: keep each group on one line, readable */
+.rb-items { flex-wrap: nowrap; max-width: none; }
+.rb-btn { max-width: 84px; }
+.rb-panel { scrollbar-width: thin; }

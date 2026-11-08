@@ -16,7 +16,7 @@ with sync_playwright() as p:
       ws.getRange('A8').setValue('Total'); ws.getRange('B8').setFormula('=SUM(B2:B7)'); ws.getRange('A1').activate();}''')
     time.sleep(1)
     # --- insert via UI (single cell active -> current region)
-    pg.get_by_role('button',name='Charts',exact=True).first.click()
+    pg.evaluate("()=>dracoCmd.run('open.charts')")
     pg.wait_for_selector('.chart-types'); ck('dialog opens with 20 types',pg.locator('.ctype').count()==20)
     ck('range prefilled',pg.locator('input[placeholder^="e.g. A1"]').input_value()=='A1:C8',pg.locator('input[placeholder^="e.g. A1"]').input_value())
     pg.locator('input[placeholder^="e.g. A1"]').fill('A1:C7')
@@ -44,7 +44,7 @@ with sync_playwright() as p:
     ck('chart survives reload',js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getAllFloatDoms().filter(f=>f.componentKey==="draco-chart").length')==1)
     ck('chart re-rendered after reload',pg.locator('.draco-chart svg').count()==1)
     # --- manage tab: change type + options, then delete
-    pg.get_by_role('button',name='Charts',exact=True).first.click(); pg.get_by_role('tab',name='Manage charts').click()
+    pg.evaluate("()=>dracoCmd.run('open.charts')"); pg.get_by_role('tab',name='Manage charts').click()
     ck('manage lists the chart',pg.locator('.chart-list li').count()==1)
     pg.locator('.chart-list button').first.click(); time.sleep(.3)
     pg.get_by_role('radio',name='Line').click(); pg.get_by_label('Data labels').check(); pg.get_by_role('button',name='Apply changes').click(); time.sleep(1.2)

@@ -32,14 +32,6 @@ export default function TopBar({ t, title, setTitle, rename, status, statusText,
       <button onClick={newWorkbook}>{t('New')}</button>
       <button onClick={() => setDialog('open')}>{t('Open')}</button>
       <button onClick={() => void flush()}>{t('Save')}</button>
-      <button onClick={() => setDialog('styles')}>{t('Styles')}</button>
-      <button onClick={() => setDialog('formulas')}>{t('Formulas')}</button>
-      <button onClick={() => setDialog('data')}>{t('Data')}</button>
-      <button onClick={() => setDialog('charts')}>{t('Charts')}</button>
-      <button onClick={() => setDialog('objects')}>{t('Objects')}</button>
-      <button onClick={() => setDialog('pivot')}>{t('PivotTable')}</button>
-      <button onClick={() => setDialog('query')}>{t('Queries')}</button>
-      <button onClick={() => setDialog('files')}>{t('Files')}</button>
       <button onClick={() => openReview('comments')} title="Comments, notes, share, changes, protect">{t('Review')}</button>
       <span className="pair" role="group" aria-label="Indent">
         <button title="Decrease indent" aria-label="Decrease indent" onClick={() => engine && void changeIndent(engine, -1)}>⇤</button>

@@ -10,7 +10,7 @@ with sync_playwright() as p:
     pg.goto(URL, wait_until="networkidle"); pg.wait_for_function("window.dracoAPI && window.dracoAPI.getActiveWorkbook()"); pg.wait_for_timeout(1200)
     ev = lambda js: pg.evaluate("(async()=>{const api=window.dracoAPI,wb=api.getActiveWorkbook(),sh=wb.getActiveSheet();const wait=(ms)=>new Promise(x=>setTimeout(x,ms));const col=(a)=>sh.getRange(a).getValues().map(r=>r[0]);" + js + "})()")
     def opn(tab):
-        pg.get_by_role("button", name="Data", exact=True).click(); pg.wait_for_timeout(250)
+        pg.evaluate("()=>dracoCmd.run('open.data')"); pg.wait_for_timeout(250)
         pg.get_by_role("tab", name=tab, exact=True).click(); pg.wait_for_timeout(200)
     def close(): pg.locator(".dialog header .icon").click(); pg.wait_for_timeout(200)
     def msg(): return pg.locator(".dialog [role=status], .dialog [role=alert], .dialog .msg").first.inner_text()

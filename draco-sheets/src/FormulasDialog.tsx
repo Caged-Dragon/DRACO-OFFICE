@@ -1,6 +1,7 @@
 import * as traceGlue from './trace/traceGlue';
 import { useEffect, useMemo, useState } from 'react';
 import Dialog from './Dialog';
+import EvaluateTab from './formulas/EvaluateTab';
 import type { Engine } from './engine';
 import { a1, dependents, precedents, rectLabel } from './audit';
 import {
@@ -8,7 +9,7 @@ import {
   saveName, selectionRef, stopCalculation, validateName, type ErrorCell, type NameRow,
 } from './formulaTools';
 
-type Tab = 'names' | 'audit' | 'errors' | 'watch' | 'calc';
+type Tab = 'names' | 'audit' | 'evaluate' | 'errors' | 'watch' | 'calc';
 interface Watch { sheet: string; row: number; col: number }
 const WATCH_KEY = 'draco:watch';
 const loadWatch = (): Watch[] => { try { return JSON.parse(localStorage.getItem(WATCH_KEY) ?? '[]'); } catch { return []; } };
@@ -19,12 +20,13 @@ export default function FormulasDialog({ engine, initial = 'names', onClose }: {
   return (
     <Dialog title="Formulas" onClose={onClose} wide>
       <div className="tabs" role="tablist">
-        {([['names', 'Name Manager'], ['audit', 'Auditing'], ['errors', 'Error checking'], ['watch', 'Watch window'], ['calc', 'Calculation']] as [Tab, string][]).map(([k, l]) => (
+        {([['names', 'Name Manager'], ['audit', 'Auditing'], ['evaluate', 'Evaluate formula'], ['errors', 'Error checking'], ['watch', 'Watch window'], ['calc', 'Calculation']] as [Tab, string][]).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
       {tab === 'names' && <Names engine={engine} />}
       {tab === 'audit' && <Audit engine={engine} jump={jump} />}
+      {tab === 'evaluate' && <EvaluateTab engine={engine} />}
       {tab === 'errors' && <Errors engine={engine} jump={jump} />}
       {tab === 'watch' && <WatchWindow engine={engine} jump={jump} />}
       {tab === 'calc' && <Calc engine={engine} />}

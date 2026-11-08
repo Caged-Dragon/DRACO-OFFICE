@@ -130,11 +130,11 @@ with sync_playwright() as p:
     check(pg, 13, "indent buttons (UI): +,+,- = 1 level", "return (sd('J50').pd?.l) === 10;")
     pg.evaluate("window.dracoAPI.getActiveWorkbook().getActiveSheet().getRange('J51').setValue('style me').activate()")
     pg.wait_for_timeout(200)
-    pg.get_by_role("button", name="Styles", exact=True).click(); pg.wait_for_timeout(300)
+    pg.evaluate("()=>dracoCmd.run('open.styles')"); pg.wait_for_timeout(300)
     pg.locator(".swatch", has_text="Good").first.click(); pg.wait_for_timeout(400)
     check(pg, 20, "cell style gallery (UI): Good", "const s = sd('J51'); return JSON.stringify(s.bg).toLowerCase().includes('c6efce') && JSON.stringify(s.cl).toLowerCase().includes('006100');")
     pg.evaluate("window.dracoAPI.getActiveWorkbook().getActiveSheet().getRange('J52').setValue(1234.5).activate()")
-    pg.get_by_role("button", name="Styles", exact=True).click(); pg.wait_for_timeout(300)
+    pg.evaluate("()=>dracoCmd.run('open.styles')"); pg.wait_for_timeout(300)
     pg.locator(".swatch", has_text="Heading 1").first.click(); pg.wait_for_timeout(400)
     check(pg, 20, "cell style gallery (UI): Heading 1 (bold, 15pt, border)", "const s = sd('J52'); return s.bl===1 && s.fs===15 && !!s.bd?.b;")
     # v19 format painter with real clicks: style A27, click it, click painter, click C27

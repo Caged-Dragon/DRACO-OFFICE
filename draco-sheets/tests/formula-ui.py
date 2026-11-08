@@ -14,7 +14,7 @@ with sync_playwright() as p:
 
     # v41 Name Manager (UI)
     ev("sh.getRange('B1:B3').activate()"); pg.wait_for_timeout(200)
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.wait_for_timeout(300)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.wait_for_timeout(300)
     pg.get_by_label("Name", exact=True).fill("A1"); pg.get_by_role("button", name="Add name").click(); pg.wait_for_timeout(200)
     rec(41, "rejects cell-like name (A1)", pg.locator(".msg").count() == 1 and "cell reference" in pg.locator(".msg").inner_text())
     pg.get_by_label("Name", exact=True).fill("1bad"); pg.get_by_role("button", name="Add name").click()
@@ -29,14 +29,14 @@ with sync_playwright() as p:
     r = ev("sh.getRange('H1').setFormula('=SUM(SalesData)'); sh.getRange('H2').setFormula('=SUM(Doubled)'); await new Promise(x=>setTimeout(x,1200)); return [sh.getRange('H1').getValue(), sh.getRange('H2').getValue()];")
     rec(41, "names usable in formulas (range name + formula name)", r == [60, 120], str(r))
     # edit + delete
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.wait_for_timeout(300)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.wait_for_timeout(300)
     pg.get_by_role("button", name="Delete name Doubled").click(); pg.wait_for_timeout(200)
     rec(41, "delete name", "Doubled" not in pg.locator(".filelist").inner_text())
     pg.locator(".dialog header .icon").click(); pg.wait_for_timeout(200)
 
     # v43 Auditing
     ev("sh.getRange('F1').activate()"); pg.wait_for_timeout(200)
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Auditing").click(); pg.wait_for_timeout(300)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Auditing").click(); pg.wait_for_timeout(300)
     t = pg.locator(".filelist").inner_text()
     rec(43, "trace precedents (direct) of F1 = D1:E1", "D1:E1" in t and "A1" not in t.replace("D1:E1", ""), t)
     pg.get_by_label("All levels").check(); pg.wait_for_timeout(200)
@@ -46,18 +46,18 @@ with sync_playwright() as p:
     rec(43, "formula list shows F1 =SUM(D1:E1)", "=SUM(D1:E1)" in pg.locator(".filelist").inner_text())
     pg.locator(".filelist .row", has_text="D1").first.click(); pg.wait_for_timeout(400)   # jump & close
     rec(43, "click jumps to cell and closes dialog", pg.locator(".dialog").count() == 0 and ev("return sh.getActiveRange().getA1Notation()") in ("D1", "D1:D1"))
-    ev("sh.getRange('D1').activate()"); pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Auditing").click()
+    ev("sh.getRange('D1').activate()"); pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Auditing").click()
     pg.get_by_role("button", name="Trace dependents").click(); pg.wait_for_timeout(200)
     t = pg.locator(".filelist").inner_text()
     rec(43, "trace dependents of D1 = E1, F1", "E1" in t and "F1" in t, t.replace("\n", " "))
     pg.locator(".dialog header .icon").click()
 
     # v44 Error checking + Watch window
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Error checking").click(); pg.wait_for_timeout(400)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Error checking").click(); pg.wait_for_timeout(400)
     t = pg.locator(".filelist").inner_text()
     rec(44, "error scan finds #DIV/0! and #N/A with cell refs", "A20" in t and "#DIV/0!" in t and "B22" in t and "#N/A" in t, t.replace("\n", " "))
     pg.locator(".dialog header .icon").click()
-    ev("sh.getRange('B3').activate()"); pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Watch window").click()
+    ev("sh.getRange('B3').activate()"); pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Watch window").click()
     pg.get_by_role("button", name="Add watch for current cell").click(); pg.wait_for_timeout(300)
     rec(44, "watch window lists B3 = 30", "30" in pg.locator(".watch").inner_text(), pg.locator(".watch").inner_text().replace("\n", " "))
     ev("sh.getRange('B3').setValue(99)"); pg.wait_for_timeout(1600)
@@ -65,7 +65,7 @@ with sync_playwright() as p:
     pg.locator(".dialog header .icon").click()
 
     # v45 Calculation
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Calculation").click()
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Calculation").click()
     pg.get_by_role("button", name="Calculate now").click(); pg.wait_for_timeout(400)
     rec(45, "Calculate now runs without error", "started" in pg.locator("[role=status]").inner_text())
     pg.locator(".dialog header .icon").click()
@@ -73,7 +73,7 @@ with sync_playwright() as p:
     rec(45, "circular reference does not hang the engine (value reported)", r is not None, str(r))
     r = ev("sh.getRange('A40').setValue(5); await new Promise(x=>setTimeout(x,500)); return sh.getRange('A40').getValue();")
     rec(45, "engine still responsive after circular ref", r == 5, str(r))
-    pg.get_by_role("button", name="Formulas", exact=True).click(); pg.get_by_role("tab", name="Error checking").click(); pg.wait_for_timeout(500)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Error checking").click(); pg.wait_for_timeout(500)
     t = pg.locator(".dialog").inner_text()
     rec(45, "circular references flagged in Error checking (A30, A31)", "circular references (2)" in t.lower() and "A30" in t and "A31" in t, t.replace("\n", " ")[:200])
     pg.locator(".dialog header .icon").click()

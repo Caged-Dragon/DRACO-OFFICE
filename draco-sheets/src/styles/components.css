@@ -23,3 +23,5 @@ select, textarea { font: 14px inherit; font-family: inherit; padding: 9px 10px; 
 .okmsg { color: var(--brand-2); }
 button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
 button:disabled { opacity: .55; cursor: progress; }
+.eval-box { margin: 10px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2, var(--bg)); font-size: 16px; overflow-x: auto; }
+.eval-box u { text-decoration-thickness: 2px; text-underline-offset: 4px; color: var(--accent); font-weight: 600; }

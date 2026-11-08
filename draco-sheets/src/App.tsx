@@ -64,6 +64,8 @@ export default function App() {
   const [dialog, setDialog] = useState<DialogId>(null);
   const [ttab, setTtab] = useState<ToolsTab>('macros'); const [palette, setPalette] = useState(false);
   const [rtab, setRtab] = useState<CollabTab>('comments');
+  const [ftab, setFtab] = useState<string | undefined>();
+  const [dtab, setDtab] = useState<string | undefined>();
   const openTools = (t: ToolsTab) => { setTtab(t); setDialog('tools'); setMenu(false); };
   const openReview = (t: CollabTab) => { setRtab(t); setDialog('review'); setMenu(false); };
   const [menu, setMenu] = useState(false);
@@ -193,7 +195,7 @@ export default function App() {
   const openTemplate = (id: string) => { const t = templateById(id); if (!t) return; const nid = newId(); mount(nid, t.title, false, buildSnapshot(t, nid) as unknown as Snapshot); setNotice(`Opened the “${t.title}” template as a new workbook.`); scheduleSave(); };
   useEffect(() => {
     autoGlue.setSaveHook(scheduleSave); autoGlue.setToast((m) => setNotice(m)); gallery.initTheme();
-    cmdGlue.setApp({ open: (d, t) => { if (d === 'tools') { setTtab((t as ToolsTab) ?? 'macros'); setDialog('tools'); } else if (d === 'review') { setRtab((t as CollabTab) ?? 'comments'); setDialog('review'); } else if (d === 'files' && t === 'versions') setDialog('files'); else setDialog(d as never); }, save: () => void flush(), print: () => setDialog('print'), palette: () => setPalette(true), help: () => { setTtab('keys'); setDialog('tools'); } });
+    cmdGlue.setApp({ open: (d, t) => { if (d === 'tools') { setTtab((t as ToolsTab) ?? 'macros'); setDialog('tools'); } else if (d === 'review') { setRtab((t as CollabTab) ?? 'comments'); setDialog('review'); } else if (d === 'data') { setDtab(t); setDialog('data'); } else if (d === 'formulas') { setFtab(t); setDialog('formulas'); } else if (d === 'files' && t === 'versions') setDialog('files'); else setDialog(d as never); }, save: () => void flush(), print: () => setDialog('print'), palette: () => setPalette(true), help: () => { setTtab('keys'); setDialog('tools'); } });
     return () => cmdGlue.dispose();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -312,7 +314,7 @@ export default function App() {
         {!ready && <div className="splash" role="status"><div className="spin" /><span>Loading spreadsheet engine…</span></div>}
       </div>
       {palette && <Palette onClose={() => setPalette(false)} />}
-      <DialogHost dialog={dialog} setDialog={setDialog} engine={engine.current} session={session} rtab={rtab} ttab={ttab} title={title} getSnapshot={() => snapshot()} openMeta={openMeta} openTemplate={openTemplate} cur={current.current} onImportNew={(imp) => void importIntoNew(imp)} onRestore={(snap) => { mount(current.current.id, current.current.title, current.current.cloud, snap as Snapshot); void flush(); }} scheduleSave={scheduleSave} markCheckpoint={(h) => { lastAuto.current = { at: new Date().toISOString(), hash: h }; }} />
+      <DialogHost dialog={dialog} setDialog={setDialog} engine={engine.current} session={session} rtab={rtab} ttab={ttab} ftab={ftab} dtab={dtab} title={title} getSnapshot={() => snapshot()} openMeta={openMeta} openTemplate={openTemplate} cur={current.current} onImportNew={(imp) => void importIntoNew(imp)} onRestore={(snap) => { mount(current.current.id, current.current.title, current.current.cloud, snap as Snapshot); void flush(); }} scheduleSave={scheduleSave} markCheckpoint={(h) => { lastAuto.current = { at: new Date().toISOString(), hash: h }; }} />
     </div>
   );
 }

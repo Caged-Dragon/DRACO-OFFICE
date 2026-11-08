@@ -16,7 +16,7 @@ with sync_playwright() as p:
     time.sleep(.8)
     n=lambda sel:pg.locator(sel).count()
     # sparklines via UI
-    pg.get_by_role('button',name='Objects',exact=True).first.click(); pg.wait_for_selector('.dialog')
+    pg.evaluate("()=>dracoCmd.run('open.objects')"); pg.wait_for_selector('.dialog')
     pg.locator('input[placeholder="e.g. B2:G6"]').fill('B2:F4'); pg.locator('input[placeholder="e.g. H2"]').fill('G2')
     ck('spark preview svg',n('.obj-preview svg')==1)
     pg.get_by_label('High point').check(); pg.get_by_label('Markers').check()

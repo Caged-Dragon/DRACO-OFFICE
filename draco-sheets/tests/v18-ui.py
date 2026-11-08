@@ -33,11 +33,11 @@ with sync_playwright() as p:
     js("()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange('N20').activate()"); time.sleep(.5)
     r=js("()=>dracoTrace.trace('precedents',false)"); ck('plain cell: friendly message',r['ok'] and r['drawn']==0 and 'no precedents' in r['message'],r)
     # dialog buttons
-    pg.get_by_role('button',name='Formulas',exact=True).click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Auditing').click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Auditing').click(); time.sleep(.3)
     ck('dialog has Draw arrows + Remove arrows',pg.get_by_role('button',name='Draw arrows on sheet').count()==1 and pg.get_by_role('button',name='Remove arrows').count()==1)
     pg.keyboard.press('Escape'); time.sleep(.3)
     js("()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange('L5').activate()"); time.sleep(.4)
-    pg.get_by_role('button',name='Formulas',exact=True).click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Auditing').click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Auditing').click(); time.sleep(.3)
     pg.get_by_role('button',name='Draw arrows on sheet').click(); time.sleep(.8); ck('dialog draws arrows + status text','arrow' in pg.locator('.dialog [role=status]').inner_text(),pg.locator('.dialog').inner_text()[-150:])
     pg.keyboard.press('Escape'); time.sleep(.5); ck('arrows stay after closing dialog',pg.locator('svg[aria-label="Formula trace arrows"]').count()==1)
     # circle invalid data
@@ -51,7 +51,7 @@ with sync_playwright() as p:
     r=js("async()=>await dracoTrace.circleInvalid()"); ck('after fixing P2 only P4 left',r['cells']==['P4'],r); js("()=>dracoTrace.clearCircles()")
     js("()=>{const wb=dracoAPI.getActiveWorkbook(); wb.setActiveSheet(wb.insertSheet('NoRules'))}"); time.sleep(.5)
     r=js("async()=>await dracoTrace.circleInvalid()"); ck('sheet without rules: clear message','no data-validation' in r['message'],r)
-    pg.get_by_role('button',name='Formulas',exact=True).click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Error checking').click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Error checking').click(); time.sleep(.3)
     ck('Error checking tab has Circle invalid data',pg.get_by_role('button',name='Circle invalid data').count()==1); pg.keyboard.press('Escape')
     ck('no page errors',not errs,errs[:2]); b.close()
 print(f'v18-ui: {P} passed, {F} failed')

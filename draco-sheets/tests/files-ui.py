@@ -15,7 +15,7 @@ with sync_playwright() as p:
     def disp(r): return js('([r])=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(r).getDisplayValues()',[r])
     def reload(): time.sleep(2.2); pg.reload(); pg.wait_for_function('window.dracoAPI && window.dracoAPI.getActiveWorkbook()',timeout=60000); time.sleep(2.5)
     def open_files(tab=None):
-        pg.get_by_role('button',name='Files',exact=True).first.click(); pg.wait_for_selector('.dialog')
+        pg.evaluate("()=>dracoCmd.run('open.files')"); pg.wait_for_selector('.dialog')
         if tab: pg.get_by_role('tab',name=tab).click()
     def close():
         if pg.locator('.dialog').count(): pg.locator('.dialog header .icon').click(); time.sleep(.2)

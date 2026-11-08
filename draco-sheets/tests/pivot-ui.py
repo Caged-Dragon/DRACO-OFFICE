@@ -71,7 +71,7 @@ with sync_playwright() as p:
     # ---- delete pivot clears output
     js('([id])=>dracoPivots.remove(id)',[pid]); time.sleep(.8); ck('delete clears output + widgets',cells('H2:I6')==[[None,None]]*5 or all(v in (None,'') for row in cells('H2:I6') for v in row),str(cells('H2:I6'))); ck('widgets removed',pg.locator('.draco-slicer').count()==0 and pg.locator('.draco-timeline').count()==0)
     # ---- Pivot dialog UI
-    pg.get_by_role('button',name='PivotTable',exact=True).first.click(); pg.wait_for_selector('.dialog')
+    pg.evaluate("()=>dracoCmd.run('open.pivot')"); pg.wait_for_selector('.dialog')
     pg.locator('input[placeholder^="e.g. A1:E200"]').fill('A1:E7'); pg.locator('input[placeholder^="blank = to the right"]').fill('H20'); pg.get_by_role('button',name='Create PivotTable').click(); time.sleep(.8)
     ck('ui: editor opens',pg.get_by_text('Add field').count()>=1)
     def add(field,area):
@@ -106,7 +106,7 @@ with sync_playwright() as p:
     ql=js('()=>dracoQueries.list()'); ck('queries survive reload',[q['name'] for q in ql][:3]==['Clean pay','CSV','JSON'],str([q['name'] for q in ql]))
     js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("C21").setValue(10)'); time.sleep(1.8); ck('query refresh works after reload','Ann' in str(cells('H30:J34')) and ['Ann','Eng',10] in cells('H30:J34'),str(cells('H30:J34')))
     # Query dialog UI
-    pg.get_by_role('button',name='Queries',exact=True).first.click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='＋ New query').click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.query')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='＋ New query').click(); time.sleep(.3)
     pg.get_by_label('Query name').fill('From csv ui'); L('Source').select_option('csv'); pg.locator('textarea').first.fill('city,pop\nA,10\nB,20\nC,30')
     ck('ui: preview shows 3 rows',pg.locator('.qprev tbody tr').count()==3)
     L('Transformation').select_option('filter'); L('Column').select_option('pop'); L('Condition').select_option('>'); pg.get_by_label('Value',exact=True).fill('10'); pg.get_by_role('button',name='Add step',exact=True).click(); time.sleep(.4)

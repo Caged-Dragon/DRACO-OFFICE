@@ -61,7 +61,7 @@ with sync_playwright() as p:
     import subprocess,os
     open('/tmp/mk.mjs','w').write("import * as X from '/home/claude/draco-sheets/node_modules/@e965/xlsx/xlsx.mjs'; import fs from 'node:fs'; const wb=X.utils.book_new(); X.utils.book_append_sheet(wb,X.utils.aoa_to_sheet([['Name','Score'],['Ann',90],['Bob',75]]),'Marks'); fs.writeFileSync('/tmp/old.xls',X.write(wb,{type:'buffer',bookType:'xls'}));")
     rc=subprocess.run(['node','/tmp/mk.mjs'],capture_output=True,text=True); ck('xls fixture written',os.path.exists('/tmp/old.xls'),rc.stderr[-200:])
-    pg.get_by_role('button',name='Files',exact=True).click(); pg.wait_for_selector('.dialog'); pg.set_input_files('input[aria-label="Choose file to import"]','/tmp/old.xls'); time.sleep(3)
+    pg.evaluate("()=>dracoCmd.run('open.files')"); pg.wait_for_selector('.dialog'); pg.set_input_files('input[aria-label="Choose file to import"]','/tmp/old.xls'); time.sleep(3)
     ck('xls opened as new workbook',js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getSheetName()')=='Marks',js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getSheetName()'))
     ck('xls values',js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("B3").getValue()')==75)
     ck('no page errors',not errs,errs[:3]); b.close()
