@@ -13,5 +13,15 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --brand: #7c4dff; --brand-2: #a78bfa; --accent: #c4b5fd; --bg: #13101f; --fg: #ece8f8; --muted: #a79fc4; --line: #2e2748; --bar: #1c1730; color-scheme: dark; }
+  :root {
+    --brand: #7c4dff;
+    --brand-2: #a78bfa;
+    --accent: #c4b5fd;
+    --bg: #13101f;
+    --fg: #ece8f8;
+    --muted: #a79fc4;
+    --line: #2e2748;
+    --bar: #1c1730;
+    color-scheme: dark;
+  }
 }

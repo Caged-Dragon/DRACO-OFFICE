@@ -1,4 +1,4 @@
-import { splitText, currentRegion, parseDisplayNumber, parseNumberList, type Grid } from '../src/dataTools';
+import { splitText, currentRegion, parseDisplayNumber, parseNumberList, type Grid } from '../src/data/dataTools';
 let fails = 0, passes = 0;
 const eq = (name: string, got: unknown, want: unknown) => { const ok = JSON.stringify(got) === JSON.stringify(want); ok ? passes++ : fails++; if (!ok) console.log('FAIL', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); };
 eq('split: comma', splitText('a,b,c', { delim: ',' }), ['a', 'b', 'c']);

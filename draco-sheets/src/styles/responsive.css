@@ -1,14 +1,30 @@
 /* Small-screen and standalone rules */
 @media (max-width: 800px) {
-  .actions { display: none; }
-  .burger { display: inline-block; }
-  .status { margin-left: auto; margin-right: 4px; }
-  .title { flex: 1 1 100px; }
+  .actions {
+    display: none;
+  }
+  .burger {
+    display: inline-flex;
+  }
+  .status {
+    margin-left: auto;
+    margin-right: 4px;
+  }
+  .title {
+    flex: 1 1 100px;
+  }
 }
 @media (max-width: 520px) {
-  .status { display: none; }
-  .logo { width: 24px; height: 24px; }
+  .status {
+    display: none;
+  }
+  .logo {
+    width: 24px;
+    height: 24px;
+  }
 }
 @media (display-mode: standalone) {
-  .topbar { padding-top: max(6px, var(--safe-t)); }
+  .topbar {
+    padding-top: max(6px, var(--safe-t));
+  }
 }

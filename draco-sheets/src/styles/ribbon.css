@@ -1,27 +1,430 @@
 /* Ribbon and Univer header */
 /* Excel-style ribbon (tab strip + groups) */
-.ribbon { background: var(--bar); border-bottom: 1px solid var(--line); flex: 0 0 auto; }
-.rb-tabs { display: flex; align-items: center; gap: 2px; padding: 4px 10px 0; overflow-x: auto; scrollbar-width: none; }
-.rb-tabs button { min-height: 0; padding: 7px 13px; border: 0; border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0; background: transparent; color: var(--muted); font-weight: 600; font-size: 13.5px; white-space: nowrap; }
-.rb-tabs button:hover { color: var(--fg); background: color-mix(in srgb, var(--brand-2) 10%, transparent); }
-.rb-tabs button.on { color: var(--brand-2); border-bottom-color: var(--brand-2); background: var(--bg); }
-.rb-sp { flex: 1; } .rb-tabs .rb-fold { font-size: 16px; padding: 4px 10px; }
-.rb-panel { display: flex; gap: 0; padding: 6px 10px 4px; overflow-x: auto; background: var(--bg); border-top: 1px solid var(--line); min-height: 86px; }
-.rb-group { display: grid; grid-template-rows: 1fr auto; padding: 0 10px; border-right: 1px solid var(--line); flex: 0 0 auto; }
-.rb-items { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 2px; max-width: 460px; }
-.rb-btn { display: grid; justify-items: center; align-content: center; gap: 3px; min-width: 62px; max-width: 92px; min-height: 62px; padding: 4px 6px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--fg); font-size: 11.5px; font-weight: 500; text-align: center; line-height: 1.15; }
-.rb-btn:hover { background: color-mix(in srgb, var(--brand-2) 14%, transparent); border-color: color-mix(in srgb, var(--brand-2) 40%, transparent); }
-.rb-btn.s { min-width: 54px; min-height: 40px; }
-.rb-ic { font-size: 21px; line-height: 1; color: var(--brand-2); } .rb-btn.s .rb-ic { font-size: 16px; }
-.rb-gn { text-align: center; font-size: 11px; color: var(--muted); padding-top: 2px; }
+.ribbon {
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.rb-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.rb-tabs button {
+  min-height: 0;
+  padding: 7px 13px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+.rb-tabs button:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--brand-2) 10%, transparent);
+}
+.rb-tabs button.on {
+  color: var(--brand-2);
+  border-bottom-color: var(--brand-2);
+  background: var(--bg);
+}
+.rb-sp {
+  flex: 1;
+}
+.rb-tabs .rb-fold {
+  font-size: 16px;
+  padding: 4px 10px;
+}
+.rb-panel {
+  display: flex;
+  gap: 0;
+  padding: 6px 10px 4px;
+  overflow-x: auto;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  min-height: 86px;
+}
+.rb-group {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 0 10px;
+  border-right: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.rb-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 2px;
+  max-width: 460px;
+}
+.rb-btn {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  min-width: 62px;
+  max-width: 92px;
+  min-height: 62px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 11.5px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.15;
+}
+.rb-btn:hover {
+  background: color-mix(in srgb, var(--brand-2) 14%, transparent);
+  border-color: color-mix(in srgb, var(--brand-2) 40%, transparent);
+}
+.rb-btn.s {
+  min-width: 54px;
+  min-height: 40px;
+}
+.rb-ic {
+  font-size: 21px;
+  line-height: 1;
+  color: var(--brand-2);
+}
+.rb-btn.s .rb-ic {
+  font-size: 16px;
+}
+.rb-gn {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding-top: 2px;
+}
 /* hide Univer's own tab strip; show its toolbar only on Home */
-main.grid header [data-draco-u="strip"] { display: none !important; }
-main.grid header[data-draco-home="0"] [data-draco-u="toolbar"] { display: none !important; }
-.logo-link { display: inline-flex; } .tt { flex: 0 0 auto; }
-@media (max-width: 800px) { .ribbon { display: none; } }
-.topbar .theme-toggle, .topbar .tt { width: 32px; height: 32px; min-height: 32px; padding: 0; font-size: 16px; }
-.rb-panel { min-height: 74px; } .rb-btn { min-height: 52px; } .rb-btn.s { min-height: 38px; } .rb-ic { font-size: 19px; }
+main.grid header [data-draco-u='strip'] {
+  display: none !important;
+}
+main.grid header[data-draco-home='0'] [data-draco-u='toolbar'] {
+  display: none !important;
+}
+.logo-link {
+  display: inline-flex;
+}
+.tt {
+  flex: 0 0 auto;
+}
+.topbar .theme-toggle,
+.topbar .tt {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  font-size: 16px;
+}
+.rb-panel {
+  min-height: 74px;
+}
+.rb-btn {
+  min-height: 52px;
+}
+.rb-btn.s {
+  min-height: 38px;
+}
+.rb-ic {
+  font-size: 19px;
+}
 /* ribbon: keep each group on one line, readable */
-.rb-items { flex-wrap: nowrap; max-width: none; }
-.rb-btn { max-width: 84px; }
-.rb-panel { scrollbar-width: thin; }
+.rb-items {
+  flex-wrap: nowrap;
+  max-width: none;
+}
+.rb-btn {
+  max-width: 84px;
+}
+.rb-panel {
+  scrollbar-width: thin;
+}
+
+/* Excel-style ribbon: stacked lines, split buttons and drop-downs; groups wrap instead of scrolling */
+.rb-panel {
+  flex-wrap: wrap;
+  overflow: visible;
+  gap: 2px 0;
+  padding: 4px 8px 2px;
+  min-height: 0;
+  align-items: stretch;
+}
+.rb-group {
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.rb-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+  flex: 1;
+  padding: 2px 0;
+}
+.rb-line {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.rb-items,
+.rb-items.grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--rows, 3), min-content);
+  gap: 1px;
+  align-content: center;
+  max-width: none;
+  flex-wrap: nowrap;
+  flex: 1;
+}
+.rb-btn,
+.rb-items.grid .rb-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+}
+.rb-btn:hover,
+.rb-arrow:hover,
+.rb-text:hover {
+  background: color-mix(in srgb, var(--brand-2) 16%, transparent);
+  border-color: color-mix(in srgb, var(--brand-2) 40%, transparent);
+}
+.rb-ic,
+.rb-items.grid .rb-ic {
+  font-size: 15px;
+  line-height: 1;
+  min-width: 0;
+  color: var(--brand-2);
+}
+.rb-gn {
+  font-size: 10.5px;
+  padding-top: 1px;
+  white-space: nowrap;
+  text-align: center;
+}
+.rb-split {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+}
+.rb-split .rb-main {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  position: relative;
+}
+.rb-arrow {
+  width: 13px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  font-size: 9px;
+  line-height: 1;
+  border-radius: 0 5px 5px 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+}
+.rb-arrow[aria-expanded='true'],
+.rb-text[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--brand-2) 24%, transparent);
+}
+.rb-bar {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 2px;
+  height: 3px;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+  box-sizing: border-box;
+}
+.rb-ctl {
+  position: relative;
+}
+.rb-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 28px;
+  min-height: 0;
+  min-width: 78px;
+  padding: 0 6px 0 9px;
+  font-size: 12.5px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.rb-caret {
+  font-size: 9px;
+  color: var(--muted);
+}
+.rb-tabs button.file {
+  background: var(--brand-2);
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+  border-bottom-color: transparent;
+}
+.rb-tabs button.file:hover {
+  background: var(--brand);
+  color: #fff;
+}
+/* drop-down menu */
+.rb-menu {
+  position: fixed;
+  z-index: 200;
+  min-width: 200px;
+  max-height: min(70vh, 460px);
+  overflow: auto;
+  display: grid;
+  gap: 1px;
+  padding: 5px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+}
+.rb-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+}
+.rb-menu button:hover,
+.rb-menu button:focus-visible {
+  background: color-mix(in srgb, var(--brand-2) 18%, transparent);
+  outline: none;
+}
+.rb-menu .mi {
+  width: 20px;
+  text-align: center;
+  color: var(--brand-2);
+  flex: none;
+}
+.rb-menu.grid {
+  grid-template-columns: repeat(var(--rb-cols, 5), 26px);
+  gap: 4px;
+  min-width: 0;
+  padding: 8px;
+}
+.rb-menu.grid .sw {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+}
+.rb-menu.grid .sw:hover,
+.rb-menu.grid .sw:focus-visible {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 1px;
+}
+
+/* Univer's own formatting toolbar duplicates the ribbon, so it stays hidden */
+main.grid header [data-draco-u='toolbar'] {
+  display: none !important;
+}
+
+/* large captioned buttons (Insert, Data, Review… tabs) */
+.rb-bigs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  flex: 1;
+  padding: 2px 0;
+}
+.rb-btn.big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: auto;
+  min-width: 56px;
+  max-width: 84px;
+  height: 66px;
+  padding: 4px 6px;
+}
+.rb-btn.big .rb-ic {
+  font-size: 24px;
+}
+.rb-cap {
+  font-size: 11px;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+  max-width: 76px;
+}
+.rb-split.big .rb-arrow {
+  height: auto;
+  align-self: stretch;
+}
+
+/* Phones / small tablets: the ribbon stays available — tabs and groups scroll sideways with touch */
+@media (max-width: 800px) {
+  .rb-tabs {
+    padding: 2px 4px 0;
+  }
+  .rb-tabs button {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  .rb-panel {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding: 4px 4px 2px;
+  }
+  .rb-group {
+    scroll-snap-align: start;
+    padding: 0 6px;
+  }
+  .rb-btn,
+  .rb-lines button {
+    min-width: 34px;
+    min-height: 34px;
+  }
+}
+/* glyph picker (Insert ▸ Symbol) reuses the swatch grid */
+.rb-menu.grid .sw.glyph {
+  background: transparent;
+  border: 1px solid var(--line);
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+}
+.rb-menu.grid .sw.glyph:hover {
+  background: color-mix(in srgb, var(--brand-2) 18%, transparent);
+}

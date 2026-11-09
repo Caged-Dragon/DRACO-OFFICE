@@ -1,4 +1,4 @@
-import { findCircular, extractRefs, extractNameRefs, precedents, dependents, rectLabel, isErrorValue, a1, colToNum, type FormulaCell } from '../src/audit';
+import { findCircular, extractRefs, extractNameRefs, precedents, dependents, rectLabel, isErrorValue, a1, colToNum, type FormulaCell } from '../src/formulas/audit';
 let fails = 0;
 const eq = (name: string, got: unknown, want: unknown) => { const ok = JSON.stringify(got) === JSON.stringify(want); if (!ok) { fails++; console.log('FAIL', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); } else console.log('PASS', name); };
 const lab = (f: string, home = 'S1') => extractRefs(f, home).map((r) => rectLabel(r, 'S1'));

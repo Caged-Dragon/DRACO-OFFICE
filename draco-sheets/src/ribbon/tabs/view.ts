@@ -1,11 +1,63 @@
-import type { Group, RibbonCtx } from '../types';
+import { bigGroup, stacked, type Group, type RibbonCtx } from '../types';
+import { swatches } from './home/palette';
 
 /** View tab */
 export const viewGroups = (x: RibbonCtx): Group[] => [
-      { n: 'Workbook Views', items: [{ l: 'Normal', i: '▦', run: () => undefined }, { l: 'Command search', i: '⌕', run: x.palette }] },
-      { n: 'Show', items: [{ l: 'Gridlines', i: '▦', c: 'view.grid' }, { l: 'Headings', i: '#', c: 'view.headings' }] },
-      { n: 'Zoom', items: [{ l: 'Zoom in', i: '🔍＋', c: 'view.zoomin' }, { l: 'Zoom out', i: '🔍－', c: 'view.zoomout' }, { l: '50%', i: '½', c: 'view.zoom50' }, { l: '75%', i: '¾', c: 'view.zoom75' }, { l: '100%', i: '1×', c: 'view.zoom100' }, { l: '150%', i: '1½', c: 'view.zoom150' }, { l: '200%', i: '2×', c: 'view.zoom200' }] },
-      { n: 'Freeze', items: [{ l: 'Freeze top row', i: '⤒', c: 'view.freezerow' }, { l: 'Freeze first column', i: '⇤', c: 'view.freezecol' }, { l: 'Freeze at selection', i: '⊞', c: 'view.freezesel' }, { l: 'Unfreeze', i: '⊡', c: 'view.unfreeze' }] },
-      { n: 'Sheets', items: [{ l: 'New sheet', i: '＋', c: 'sheet.new' }, { l: 'Duplicate', i: '⧉', c: 'sheet.dup' }, { l: 'Hide sheet', i: '🙈', c: 'sheet.hide' }, { l: 'Delete', i: '🗑', c: 'sheet.delete' }, { l: 'Previous', i: '◀', c: 'sheet.prev' }, { l: 'Next', i: '▶', c: 'sheet.next' }] },
-      { n: 'Performance', items: [{ l: 'Large data', i: '⚡', c: 'open.perf' }] },
+  bigGroup('Views', [
+    { l: 'Command search', i: '⌕', run: x.palette },
+    { l: 'Large data', i: '⚡', c: 'open.perf' },
+  ]),
+  bigGroup('Show', [
+    { l: 'Gridlines', i: '▦', c: 'view.grid' },
+    { l: 'Headings', i: '#', c: 'view.headings' },
+    { l: 'Formula bar', i: 'ƒx', c: 'view.formulabar' },
+  ]),
+  bigGroup('Zoom', [
+    {
+      l: 'Zoom',
+      i: '🔍',
+      c: 'view.zoom100',
+      menu: [50, 75, 100, 150, 200].map((n) => ({ l: `${n}%`, i: '🔍', c: `view.zoom${n}` })),
+    },
+    { l: 'Zoom in', i: '＋', c: 'view.zoomin' },
+    { l: 'Zoom out', i: '－', c: 'view.zoomout' },
+  ]),
+  bigGroup('Window', [
+    {
+      l: 'Freeze panes',
+      i: '❄',
+      c: 'view.freezesel',
+      menu: [
+        { l: 'Freeze at selection', i: '⊞', c: 'view.freezesel' },
+        { l: 'Freeze top row', i: '⤒', c: 'view.freezerow' },
+        { l: 'Freeze first column', i: '⇤', c: 'view.freezecol' },
+        { l: 'Unfreeze', i: '⊡', c: 'view.unfreeze' },
+      ],
+    },
+    { l: 'Full screen', i: '⛶', c: 'view.fullscreen' },
+  ]),
+  stacked('Sheets', [
+    [
+      { l: 'New sheet', i: '＋', c: 'sheet.new' },
+      { l: 'Duplicate', i: '⧉', c: 'sheet.dup' },
+      { l: 'Delete', i: '🗑', c: 'sheet.delete' },
+      { l: 'Rename', i: '✎', c: 'sheet.rename' },
+    ],
+    [
+      { l: 'Previous', i: '◀', c: 'sheet.prev' },
+      { l: 'Next', i: '▶', c: 'sheet.next' },
+      { l: 'Move left', i: '⇤', c: 'sheet.moveleft' },
+      { l: 'Move right', i: '⇥', c: 'sheet.moveright' },
+    ],
+    [
+      { l: 'Hide sheet', i: '🙈', c: 'sheet.hide' },
+      { l: 'Unhide all', i: '👁', c: 'sheet.unhide' },
+      {
+        l: 'Tab colour',
+        i: '■',
+        grid: true,
+        menu: [...swatches('sheet.tab', 'Tab'), { l: 'No tab colour', i: '□', c: 'sheet.tab.none' }],
+      },
+    ],
+  ]),
 ];

@@ -61,7 +61,7 @@ with sync_playwright() as p:
     ck('slicer removed with table',pg.locator('.draco-slicer').count()==0)
     # dialog
     js("()=>{const ws=dracoAPI.getActiveWorkbook().getActiveSheet(); ws.getRange('A12:B15').setValues([['Item','Cost'],['a',1],['b',2],['c',3]]); ws.getRange('A12:B15').activate()}"); time.sleep(.4)
-    pg.get_by_role('button',name='Tools',exact=True).click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Tables',exact=True).click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.macros')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Tables',exact=True).click(); time.sleep(.3)
     ck('Tables tab visible',pg.locator('input[aria-label="New table name"]').count()==1)
     pg.fill('input[aria-label="New table name"]','Costs'); pg.select_option('select[aria-label="New table style"]','2'); pg.get_by_role('button',name='Create table').click(); time.sleep(.8)
     ck('dialog created Costs',pg.locator('.dialog .okmsg').count()==1 and js("()=>dracoTables.list().map(t=>t.name)")==['Costs'],pg.locator('.dialog').inner_text()[-200:])

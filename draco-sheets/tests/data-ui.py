@@ -69,7 +69,7 @@ with sync_playwright() as p:
     pg.get_by_role("button", name="Show all rows").click(); pg.wait_for_timeout(400)
     hidden = ev("const snap=wb.save(); const s=Object.values(snap.sheets)[0]; return [30,31,32,33,34].map(r=>(s.rowData?.[r]?.hd===1)?1:0).join('')")
     rec(48, "show all rows restores visibility", hidden == "00000", hidden)
-    pg.get_by_label("Action").select_option("copy"); pg.get_by_role("textbox", name="Copy to").fill("K30"); pg.get_by_label("Criteria range").fill("E30:F32")
+    pg.locator(".dialog").get_by_label("Action").select_option("copy"); pg.get_by_role("textbox", name="Copy to").fill("K30"); pg.get_by_label("Criteria range").fill("E30:F32")
     ev("sh.getRange('E32:F32').setValues([['Ops','']])"); pg.get_by_role("button", name="Apply filter").click(); pg.wait_for_timeout(500)
     got = ev("return sh.getRange('K30:M32').getValues().map(r=>r.join('|')).join(',')"); close()
     rec(48, "advanced filter copy-to: OR rows (Eng & >40) or Ops", got == "Name|Dept|Age,Bob|Ops|45,Cy|Eng|52", got)

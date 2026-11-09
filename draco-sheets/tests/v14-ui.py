@@ -27,7 +27,7 @@ with sync_playwright() as p:
     r=js('()=>dracoAnalysis.run({tool:"ztest",input:"A1:B9",labels:true,varA:0,varB:1})'); ck('ztest rejects variance 0',not r['ok'],r)
     r=js('()=>dracoAnalysis.run({tool:"descriptive",input:"ZZZ",labels:true})'); ck('bad range rejected',not r['ok'],r)
     # UI tab
-    pg.get_by_role('button',name='Tools',exact=True).click(); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Analysis ToolPak').click(); time.sleep(.3)
+    pg.evaluate("()=>dracoCmd.run('open.macros')"); pg.wait_for_selector('.dialog'); pg.get_by_role('tab',name='Analysis ToolPak').click(); time.sleep(.3)
     ck('analysis tab shown',pg.locator('select[aria-label="Analysis tool"]').count()==1); ck('15 analyses listed',pg.locator('select[aria-label="Analysis tool"] option').count()==15)
     pg.fill('input[aria-label="Input range"]','A1:B9'); pg.fill('input[aria-label="Output cell"]','J1'); pg.get_by_role('button',name='Run analysis').click(); time.sleep(.6)
     ck('UI run reports success',pg.locator('.dialog .okmsg').count()==1,pg.locator('.dialog').inner_text()[-200:])

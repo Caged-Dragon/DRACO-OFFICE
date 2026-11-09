@@ -81,11 +81,11 @@ with sync_playwright() as p:
     info=subprocess.run(['pdfinfo','/tmp/draco.pdf'],capture_output=True,text=True).stdout; ck('pdfinfo pages',re.search(r'Pages:\s+(\d+)',info) and int(re.search(r'Pages:\s+(\d+)',info).group(1))==pr2['pages'] or True,info[:200])
     txt=subprocess.run(['pdftotext','-layout','/tmp/draco.pdf','-'],capture_output=True,text=True).stdout; ck('pdf text content','Row 1' in txt and 'Row 120' in txt and 'Name' in txt,txt[:120])
     # UI
-    pg.keyboard.press('Control+p'); pg.wait_for_selector('.dialog'); ck('ctrl+p opens print tab',pg.get_by_label('Orientation').count()==1)
+    pg.keyboard.press('Control+p'); pg.wait_for_selector('.dialog'); ck('ctrl+p opens print tab',pg.locator('.dialog').get_by_label('Orientation').count()==1)
     ck('preview rendered',pg.locator('.printpreview svg').count()==1); n0=int(re.search(r'of (\d+)',pg.locator('.pgno').inner_text()).group(1)); ck('preview page count',n0>=3,pg.locator('.pgno').inner_text())
-    pg.get_by_label('Orientation').select_option('landscape'); time.sleep(.5); n1=int(re.search(r'of (\d+)',pg.locator('.pgno').inner_text()).group(1)); ck('landscape needs more pages',n1>n0,f'{n0} {n1}')
+    pg.locator('.dialog').get_by_label('Orientation').select_option('landscape'); time.sleep(.5); n1=int(re.search(r'of (\d+)',pg.locator('.pgno').inner_text()).group(1)); ck('landscape needs more pages',n1>n0,f'{n0} {n1}')
     pg.get_by_label('Paper size').select_option('a3'); time.sleep(.4); n2=int(re.search(r'of (\d+)',pg.locator('.pgno').inner_text()).group(1)); ck('A3 fewer pages',n2<n1,f'{n1} {n2}')
-    pg.get_by_label('Print area',exact=True).fill('A1:C5'); time.sleep(.4); ck('print area 1 page ui',pg.locator('.pgno').inner_text().strip().endswith('of 1'),pg.locator('.pgno').inner_text()); pg.get_by_role('button',name='Clear',exact=True).click(); time.sleep(.3)
+    pg.get_by_label('Print area',exact=True).fill('A1:C5'); time.sleep(.4); ck('print area 1 page ui',pg.locator('.pgno').inner_text().strip().endswith('of 1'),pg.locator('.pgno').inner_text()); pg.locator('.dialog').get_by_role('button',name='Clear',exact=True).click(); time.sleep(.3)
     pg.get_by_label('Title rows').fill('1'); pg.get_by_label('Footer c').fill('Page &P of &N'); pg.get_by_label('Next page').click(); time.sleep(.3); ck('page nav',pg.locator('.pgno').inner_text().startswith('Page 2'))
     sv=pg.locator('.printpreview svg').inner_html(); ck('preview footer + title row',f'>Page 2 of {n2}<' in sv and '>Name<' in sv,sv[:100])
     pg.get_by_label('Margin t').fill('10.5'); time.sleep(.4); ck('too-big margins reported',pg.locator('.dialog [role=alert]').count()==1); pg.get_by_label('Margin t').fill('0.75')
@@ -93,7 +93,7 @@ with sync_playwright() as p:
     with pg.expect_download() as d: pg.get_by_role('button',name='Download PDF').click()
     dl=d.value; path=dl.path(); ck('ui pdf download',dl.suggested_filename.endswith('.pdf') and open(path,'rb').read(5)==b'%PDF-',dl.suggested_filename)
     # setup persisted after reload
-    close(); reload(); open_files('Print & PDF'); ck('page setup persisted',pg.get_by_label('Orientation').input_value()=='landscape' and pg.get_by_label('Paper size').input_value()=='a3' and pg.get_by_label('Title rows').input_value()=='1',pg.get_by_label('Orientation').input_value()); close()
+    close(); reload(); open_files('Print & PDF'); ck('page setup persisted',pg.locator('.dialog').get_by_label('Orientation').input_value()=='landscape' and pg.get_by_label('Paper size').input_value()=='a3' and pg.get_by_label('Title rows').input_value()=='1',pg.locator('.dialog').get_by_label('Orientation').input_value()); close()
     # ---------- paste ----------
     xl='''<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><style>.x1{font-weight:700;background:#FFFF00}.x2{mso-number-format:"0\\.00%"}</style></head><body><table><tr><td class=x1>Head</td><td class=x1 colspan=2>Span</td></tr><tr><td>Ann</td><td class=x2 x:num="0.256">25.60%</td><td x:num x:fmla="=B2*2">0.51</td></tr></table></body></html>'''
     js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("H1").activate()'); r=js('([h])=>dracoFiles.paste(h,"Head\\tSpan","",{r:9,c:7})'.replace('"",','undefined,'),[xl]) if False else js('([h])=>dracoFiles.paste(h,undefined,{r:9,c:7})',[xl]); time.sleep(1.2); ck('paste ok',r['ok'],str(r))

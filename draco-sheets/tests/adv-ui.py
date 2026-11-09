@@ -15,7 +15,7 @@ def setv(pg,a,v): pg.evaluate('([a,v])=>dracoAPI.getActiveWorkbook().getActiveSh
 def act(pg,a): pg.evaluate('([a])=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).activate()',[a])
 def tools(pg,tab):
     if pg.locator('.dialog').count(): close(pg)
-    pg.get_by_role('button',name='Tools',exact=True).first.click(); pg.wait_for_selector('.dialog')
+    pg.evaluate("()=>dracoCmd.run('open.macros')"); pg.wait_for_selector('.dialog')
     pg.get_by_role('tab',name=tab,exact=True).click(); time.sleep(.3)
 def close(pg):
     if pg.locator('.dialog').count(): pg.locator('.dialog header .icon').click(); time.sleep(.3)

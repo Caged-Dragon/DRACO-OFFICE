@@ -1,33 +1,131 @@
 // Command palette + shortcut tables (v99). Pure: command model, fuzzy search with recents, key-spec matching, shortcut reference.
-export interface Cmd { id: string; title: string; group: string; keys?: string; keywords?: string }
-export function score(c: Cmd, q: string, recent: string[] = []): number {
-  const t = c.title.toLowerCase(); const query = q.trim().toLowerCase(); const r = recent.indexOf(c.id); const rb = r >= 0 ? 8 - Math.min(r, 7) : 0;
-  if (!query) return 1 + rb; if (t === query) return 1000; if (t.startsWith(query)) return 600 + rb;
-  const words = t.split(/[\s/()—-]+/); if (words.some((w) => w.startsWith(query))) return 400 + rb;
-  const qs = query.split(/\s+/).filter(Boolean); const hay = `${t} ${c.keywords ?? ''} ${c.group}`.toLowerCase();
-  if (qs.length > 1 && qs.every((w) => hay.includes(w))) return 300 + rb; if (t.includes(query)) return 250 + rb; if ((c.keywords ?? '').toLowerCase().includes(query)) return 200 + rb;
-  let i = 0; for (const ch of t) if (ch === query[i]) i++; if (i === query.length && query.length >= 2) return 50 + rb; return 0;
+export interface Cmd {
+  id: string;
+  title: string;
+  group: string;
+  keys?: string;
+  keywords?: string;
 }
-export function search(list: Cmd[], q: string, recent: string[] = [], limit = 30): Cmd[] { return list.map((c) => ({ c, s: score(c, q, recent) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s || a.c.title.localeCompare(b.c.title)).slice(0, limit).map((x) => x.c); }
-export const pushRecent = (recent: string[], id: string, max = 8) => [id, ...recent.filter((x) => x !== id)].slice(0, max);
-export interface KeySpec { key: string; ctrl?: boolean; shift?: boolean; alt?: boolean }
+export function score(c: Cmd, q: string, recent: string[] = []): number {
+  const t = c.title.toLowerCase();
+  const query = q.trim().toLowerCase();
+  const r = recent.indexOf(c.id);
+  const rb = r >= 0 ? 8 - Math.min(r, 7) : 0;
+  if (!query) return 1 + rb;
+  if (t === query) return 1000;
+  if (t.startsWith(query)) return 600 + rb;
+  const words = t.split(/[\s/()—-]+/);
+  if (words.some((w) => w.startsWith(query))) return 400 + rb;
+  const qs = query.split(/\s+/).filter(Boolean);
+  const hay = `${t} ${c.keywords ?? ''} ${c.group}`.toLowerCase();
+  if (qs.length > 1 && qs.every((w) => hay.includes(w))) return 300 + rb;
+  if (t.includes(query)) return 250 + rb;
+  if ((c.keywords ?? '').toLowerCase().includes(query)) return 200 + rb;
+  let i = 0;
+  for (const ch of t) if (ch === query[i]) i++;
+  if (i === query.length && query.length >= 2) return 50 + rb;
+  return 0;
+}
+export function search(list: Cmd[], q: string, recent: string[] = [], limit = 30): Cmd[] {
+  return list
+    .map((c) => ({ c, s: score(c, q, recent) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s || a.c.title.localeCompare(b.c.title))
+    .slice(0, limit)
+    .map((x) => x.c);
+}
+export const pushRecent = (recent: string[], id: string, max = 8) =>
+  [id, ...recent.filter((x) => x !== id)].slice(0, max);
+export interface KeySpec {
+  key: string;
+  ctrl?: boolean;
+  shift?: boolean;
+  alt?: boolean;
+}
 /** "Ctrl+Shift+;" -> spec. Ctrl also matches Cmd (mac). */
-export function parseKeys(s: string): KeySpec { const parts = s.split('+').map((x) => x.trim()); const key = parts.pop() ?? ''; const o: KeySpec = { key: key.length === 1 ? key.toLowerCase() : key }; for (const p of parts) { const l = p.toLowerCase(); if (l === 'ctrl' || l === 'cmd') o.ctrl = true; else if (l === 'shift') o.shift = true; else if (l === 'alt') o.alt = true; } return o; }
-export function matches(e: { key: string; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean; code?: string }, spec: KeySpec): boolean {
-  if (!!spec.ctrl !== (e.ctrlKey || e.metaKey) || !!spec.alt !== e.altKey) return false; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-  if (k === spec.key) { if (/^[a-z0-9]$/i.test(spec.key) || spec.key.length > 1) return !!spec.shift === e.shiftKey; return spec.shift === undefined || !!spec.shift === e.shiftKey || true; } // symbols already encode shift
-  if (e.code && /^Digit\d$/.test(e.code) && e.code.slice(5) === spec.key && !!spec.shift === e.shiftKey) return true; return false;
+export function parseKeys(s: string): KeySpec {
+  const parts = s.split('+').map((x) => x.trim());
+  const key = parts.pop() ?? '';
+  const o: KeySpec = { key: key.length === 1 ? key.toLowerCase() : key };
+  for (const p of parts) {
+    const l = p.toLowerCase();
+    if (l === 'ctrl' || l === 'cmd') o.ctrl = true;
+    else if (l === 'shift') o.shift = true;
+    else if (l === 'alt') o.alt = true;
+  }
+  return o;
+}
+export function matches(
+  e: { key: string; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean; code?: string },
+  spec: KeySpec,
+): boolean {
+  if (!!spec.ctrl !== (e.ctrlKey || e.metaKey) || !!spec.alt !== e.altKey) return false;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (k === spec.key) {
+    if (/^[a-z0-9]$/i.test(spec.key) || spec.key.length > 1) return !!spec.shift === e.shiftKey;
+    return spec.shift === undefined || !!spec.shift === e.shiftKey || true;
+  } // symbols already encode shift
+  if (e.code && /^Digit\d$/.test(e.code) && e.code.slice(5) === spec.key && !!spec.shift === e.shiftKey) return true;
+  return false;
 }
 export type Support = 'native' | 'draco' | 'palette';
-export interface ShortcutRow { keys: string; what: string; group: string; support: Support }
+export interface ShortcutRow {
+  keys: string;
+  what: string;
+  group: string;
+  support: Support;
+}
 export const SHORTCUTS: ShortcutRow[] = [
-  { group: 'Move & select', keys: 'Ctrl+Arrow', what: 'Jump to the edge of the data', support: 'native' }, { group: 'Move & select', keys: 'Ctrl+Home', what: 'Go to A1', support: 'native' }, { group: 'Move & select', keys: 'Ctrl+End', what: 'Go to the last used cell', support: 'native' }, { group: 'Move & select', keys: 'Ctrl+A', what: 'Select all', support: 'native' },
-  { group: 'Move & select', keys: 'Ctrl+Space', what: 'Select the column', support: 'native' }, { group: 'Move & select', keys: 'Shift+Space', what: 'Select the row', support: 'native' }, { group: 'Move & select', keys: 'Ctrl+PageDown', what: 'Next sheet', support: 'draco' }, { group: 'Move & select', keys: 'Ctrl+PageUp', what: 'Previous sheet', support: 'draco' },
-  { group: 'Edit', keys: 'F2', what: 'Edit the cell', support: 'native' }, { group: 'Edit', keys: 'Ctrl+Z', what: 'Undo', support: 'native' }, { group: 'Edit', keys: 'Ctrl+Y', what: 'Redo', support: 'native' }, { group: 'Edit', keys: 'Ctrl+C / X / V', what: 'Copy / cut / paste', support: 'native' }, { group: 'Edit', keys: 'Ctrl+D', what: 'Fill down', support: 'draco' }, { group: 'Edit', keys: 'Ctrl+R', what: 'Fill right', support: 'draco' },
-  { group: 'Edit', keys: 'Ctrl+;', what: 'Insert today’s date', support: 'draco' }, { group: 'Edit', keys: 'Ctrl+Shift+;', what: 'Insert the current time', support: 'draco' }, { group: 'Edit', keys: 'Alt+=', what: 'AutoSum', support: 'draco' }, { group: 'Edit', keys: 'Delete', what: 'Clear contents', support: 'native' }, { group: 'Edit', keys: 'Ctrl+K', what: 'Insert link', support: 'native' }, { group: 'Edit', keys: 'Ctrl+F / Ctrl+H', what: 'Find / replace', support: 'native' },
-  { group: 'Format', keys: 'Ctrl+B / I / U', what: 'Bold / italic / underline', support: 'native' }, { group: 'Format', keys: 'Ctrl+5', what: 'Strikethrough', support: 'draco' }, { group: 'Format', keys: 'Ctrl+Shift+~', what: 'General format', support: 'draco' }, { group: 'Format', keys: 'Ctrl+Shift+!', what: 'Number with thousands separator', support: 'draco' }, { group: 'Format', keys: 'Ctrl+Shift+$', what: 'Currency', support: 'draco' }, { group: 'Format', keys: 'Ctrl+Shift+%', what: 'Percent', support: 'draco' }, { group: 'Format', keys: 'Ctrl+Shift+#', what: 'Date', support: 'draco' },
-  { group: 'Rows & columns', keys: 'Ctrl+9', what: 'Hide rows', support: 'draco' }, { group: 'Rows & columns', keys: 'Ctrl+0', what: 'Hide columns', support: 'draco' }, { group: 'Rows & columns', keys: 'Ctrl+Shift+9', what: 'Unhide rows', support: 'draco' }, { group: 'Rows & columns', keys: 'Ctrl+Shift+0', what: 'Unhide columns', support: 'draco' }, { group: 'Rows & columns', keys: 'Ctrl+Shift++', what: 'Insert cells / rows', support: 'palette' }, { group: 'Rows & columns', keys: 'Ctrl+-', what: 'Delete cells / rows', support: 'palette' },
-  { group: 'Data', keys: 'Ctrl+Shift+L', what: 'Turn the filter on or off', support: 'draco' }, { group: 'Workbook', keys: 'Shift+F11', what: 'Insert a new sheet', support: 'draco' }, { group: 'Workbook', keys: 'Ctrl+S', what: 'Save', support: 'draco' }, { group: 'Workbook', keys: 'Ctrl+P', what: 'Print', support: 'draco' }, { group: 'Workbook', keys: 'Ctrl+/', what: 'Command palette (search every command)', support: 'draco' }, { group: 'Workbook', keys: 'Alt+Q', what: 'Command palette (like Excel’s Tell me)', support: 'draco' }, { group: 'Workbook', keys: 'F1', what: 'Shortcut help', support: 'draco' },
+  { group: 'Move & select', keys: 'Ctrl+Arrow', what: 'Jump to the edge of the data', support: 'native' },
+  { group: 'Move & select', keys: 'Ctrl+Home', what: 'Go to A1', support: 'native' },
+  { group: 'Move & select', keys: 'Ctrl+End', what: 'Go to the last used cell', support: 'native' },
+  { group: 'Move & select', keys: 'Ctrl+A', what: 'Select all', support: 'native' },
+  { group: 'Move & select', keys: 'Ctrl+Space', what: 'Select the column', support: 'native' },
+  { group: 'Move & select', keys: 'Shift+Space', what: 'Select the row', support: 'native' },
+  { group: 'Move & select', keys: 'Ctrl+PageDown', what: 'Next sheet', support: 'draco' },
+  { group: 'Move & select', keys: 'Ctrl+PageUp', what: 'Previous sheet', support: 'draco' },
+  { group: 'Edit', keys: 'F2', what: 'Edit the cell', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+Z', what: 'Undo', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+Y', what: 'Redo', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+C / X / V', what: 'Copy / cut / paste', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+D', what: 'Fill down', support: 'draco' },
+  { group: 'Edit', keys: 'Ctrl+R', what: 'Fill right', support: 'draco' },
+  { group: 'Edit', keys: 'Ctrl+;', what: 'Insert today’s date', support: 'draco' },
+  { group: 'Edit', keys: 'Ctrl+Shift+;', what: 'Insert the current time', support: 'draco' },
+  { group: 'Edit', keys: 'Alt+=', what: 'AutoSum', support: 'draco' },
+  { group: 'Edit', keys: 'Delete', what: 'Clear contents', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+K', what: 'Insert link', support: 'native' },
+  { group: 'Edit', keys: 'Ctrl+F / Ctrl+H', what: 'Find / replace', support: 'native' },
+  { group: 'Format', keys: 'Ctrl+B / I / U', what: 'Bold / italic / underline', support: 'native' },
+  { group: 'Format', keys: 'Ctrl+5', what: 'Strikethrough', support: 'draco' },
+  { group: 'Format', keys: 'Ctrl+Shift+~', what: 'General format', support: 'draco' },
+  { group: 'Format', keys: 'Ctrl+Shift+!', what: 'Number with thousands separator', support: 'draco' },
+  { group: 'Format', keys: 'Ctrl+Shift+$', what: 'Currency', support: 'draco' },
+  { group: 'Format', keys: 'Ctrl+Shift+%', what: 'Percent', support: 'draco' },
+  { group: 'Format', keys: 'Ctrl+Shift+#', what: 'Date', support: 'draco' },
+  { group: 'Rows & columns', keys: 'Ctrl+9', what: 'Hide rows', support: 'draco' },
+  { group: 'Rows & columns', keys: 'Ctrl+0', what: 'Hide columns', support: 'draco' },
+  { group: 'Rows & columns', keys: 'Ctrl+Shift+9', what: 'Unhide rows', support: 'draco' },
+  { group: 'Rows & columns', keys: 'Ctrl+Shift+0', what: 'Unhide columns', support: 'draco' },
+  { group: 'Rows & columns', keys: 'Ctrl+Shift++', what: 'Insert cells / rows', support: 'palette' },
+  { group: 'Rows & columns', keys: 'Ctrl+-', what: 'Delete cells / rows', support: 'palette' },
+  { group: 'Data', keys: 'Ctrl+Shift+L', what: 'Turn the filter on or off', support: 'draco' },
+  { group: 'Workbook', keys: 'Shift+F11', what: 'Insert a new sheet', support: 'draco' },
+  { group: 'Workbook', keys: 'Ctrl+S', what: 'Save', support: 'draco' },
+  { group: 'Workbook', keys: 'Ctrl+P', what: 'Print', support: 'draco' },
+  { group: 'Workbook', keys: 'Ctrl+/', what: 'Command palette (search every command)', support: 'draco' },
+  { group: 'Workbook', keys: 'Alt+Q', what: 'Command palette (like Excel’s Tell me)', support: 'draco' },
+  { group: 'Workbook', keys: 'F1', what: 'Shortcut help', support: 'draco' },
 ];
-export const shortcutGroups = (rows = SHORTCUTS) => [...new Set(rows.map((r) => r.group))].map((g) => ({ group: g, rows: rows.filter((r) => r.group === g) }));
-export const keysFor = (id: string): string | undefined => ({ 'edit.filldown': 'Ctrl+D', 'edit.fillright': 'Ctrl+R', 'edit.today': 'Ctrl+;', 'edit.now': 'Ctrl+Shift+;', 'edit.autosum': 'Alt+=', 'fmt.strike': 'Ctrl+5', 'view.palette': 'Ctrl+/' })[id];
+export const shortcutGroups = (rows = SHORTCUTS) =>
+  [...new Set(rows.map((r) => r.group))].map((g) => ({ group: g, rows: rows.filter((r) => r.group === g) }));
+export const keysFor = (id: string): string | undefined =>
+  ({
+    'edit.filldown': 'Ctrl+D',
+    'edit.fillright': 'Ctrl+R',
+    'edit.today': 'Ctrl+;',
+    'edit.now': 'Ctrl+Shift+;',
+    'edit.autosum': 'Alt+=',
+    'fmt.strike': 'Ctrl+5',
+    'view.palette': 'Ctrl+/',
+  })[id];

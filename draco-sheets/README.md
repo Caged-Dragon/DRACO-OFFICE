@@ -49,6 +49,25 @@ New in v0.8.0: **Files** dialog (Ctrl+P opens its print tab) — open .xlsx/.xls
 
 New in v0.9.0: **Review** dialog (top bar, and the phone menu) — **comments** with threaded replies, resolve/reopen, edit/delete, filters, search, CSV export and a marker on every commented cell (anchors follow row/column inserts and deletes); **notes** (plain sticky notes with a list and CSV export); **Share & live** — start a live co-editing session (6-letter code or link, presence cursors with names, host-controlled roles: view / comment / edit) and create a self-contained share link (the workbook is packed into the link; opens as a view-only, comment-only or editable copy); **Changes** — who changed which cell (before/after), filters, CSV, revert selected; **Protect** — lock a sheet (optional password, choose what everyone may still do, ranges that stay editable) and protect the workbook structure.
 
+New in v1.8.0
+
+- Every ribbon tab rebuilt Excel-style: big captioned buttons, stacked lines, split buttons and drop-downs; groups wrap instead of scrolling on desktop.
+- Phones and small tablets keep the full ribbon (tabs and groups scroll sideways, starts collapsed); drawer gains a theme switch; landing nav and hero fixed for 360px.
+- Formulas: Function Library categories (Financial, Logical, Text, Date & Time, Lookup & Reference, Math & Trig, Statistical, More), AutoSum drop-down (Sum/Average/Count/Max/Min), Calculate now. Insert: Symbol picker. View: Formula bar toggle.
+- Code split one-section-per-file: dialogs into parts/ folders, chart renderer into one file per chart type, shared form helpers in src/ui/form.tsx, App hooks extracted.
+
+New in v1.7.1
+
+- Excel-style Home ribbon: stacked lines, split buttons and drop-downs (Paste, Format painter, Underline, Borders, Fill/Font colour swatches, Orientation, Wrap, Merge and centre, Currency, Number format, Insert/Delete/Format cells, Fill, Clear, Sort and filter, Find and select). Univer's duplicate toolbar is hidden.
+
+New in v1.7.0
+
+- New Draco Sheets logo (recoloured purple) everywhere: favicon, apple-touch icon, share image, header, footer. Caged Dragon logo removed.
+- File tab opens a left panel (New, Open, Save, Files, Print, Version history, panels, collaboration, tools, settings) instead of a ribbon strip; no hamburger on desktop.
+- Ribbon is icon-only (names are tooltips) and fits the screen without scrolling.
+- New buttons: clipboard and paste special, format painter, font family/size/colour, fill, borders, vertical align, text rotation, merge across/down, shrink to fit, number formats, decimals, indent, insert/delete cells with shift, row height/column width/autofit, sheet rename/move/tab colour, Find & Replace (Ctrl+F / Ctrl+H), full screen, zoom, headings.
+- Evaluate formula stepper; Formulas and Data buttons open the exact tab.
+
 New in v1.6.1
 
 - Top bar now only has New / Open / Save / Review / Tools / theme / settings / Sign in. PivotTable, Charts, Objects, Queries, Files, Formulas, Data and Styles live in the ribbon (Insert, Data, Formulas, File, Home tabs) like Excel.
@@ -77,7 +96,7 @@ New in v1.4.0: **Multipage product**. Pages: Home, Features, Templates (cards no
 
 Code layout: `src/site/` (pages), `src/ribbon/` (`tabs/<tab>.ts` and `tabs/home/<group>.ts`: one file per tab and per Home group), `src/backend/` (API client), `backend/` (Python service).
 
-New in v1.3.1: **Branding and theme**. The Caged Dragon Studios logo is now the main logo (favicon, share image, site footer and hero); the dragon-spreadsheet logo is the Draco Sheets product logo, recoloured purple. The default theme is gold in light mode and purple in dark mode (Match my device picks between them; the Gold and Purple themes are also in Tools > Templates & themes).
+New in v1.3.1: **Branding and theme**. The purple dragon-spreadsheet logo is the Draco Sheets logo everywhere (favicon, share image, header, footer). The default theme is gold in light mode and purple in dark mode (Match my device picks between them; the Gold and Purple themes are also in Tools > Templates & themes).
 
 New in v1.3.0: **Excel round trip for tables and charts**. Tables are written to .xlsx as real Excel tables (name, style, banded rows, total-row functions, `Table[[#This Row],[Col]]` formulas) and read back from .xlsx into Tools > Tables. Column, bar, line, area, pie, doughnut and scatter charts are written as native Excel charts (validated in LibreOffice). Not yet: reading charts back from .xlsx, other chart types (they stay as cell data), and pivot tables as native Excel pivots.
 

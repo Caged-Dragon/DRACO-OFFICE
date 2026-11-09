@@ -1,4 +1,4 @@
-import { removeDuplicates, flashFill, goalSeek, consolidate, advancedFilter, matchesCriterion, goToSpecial, toRanges, addSubtotals, removeSubtotals, tablePlan, TABLE_STYLES, dataTable1, dataTable2, type Grid } from '../src/dataTools';
+import { removeDuplicates, flashFill, goalSeek, consolidate, advancedFilter, matchesCriterion, goToSpecial, toRanges, addSubtotals, removeSubtotals, tablePlan, TABLE_STYLES, dataTable1, dataTable2, type Grid } from '../src/data/dataTools';
 let fails = 0, passes = 0;
 const eq = (name: string, got: unknown, want: unknown) => { const ok = JSON.stringify(got) === JSON.stringify(want); ok ? passes++ : fails++; if (!ok) console.log('FAIL', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); };
 const near = (name: string, got: number, want: number, tol = 1e-4) => { const ok = Math.abs(got - want) <= tol; ok ? passes++ : fails++; if (!ok) console.log('FAIL', name, 'got', got, 'want', want); };

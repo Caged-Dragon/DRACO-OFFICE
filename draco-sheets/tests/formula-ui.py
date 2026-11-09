@@ -67,7 +67,7 @@ with sync_playwright() as p:
     # v45 Calculation
     pg.evaluate("()=>dracoCmd.run('open.formulas')"); pg.get_by_role("tab", name="Calculation").click()
     pg.get_by_role("button", name="Calculate now").click(); pg.wait_for_timeout(400)
-    rec(45, "Calculate now runs without error", "started" in pg.locator("[role=status]").inner_text())
+    rec(45, "Calculate now runs without error", "started" in pg.locator(".dialog [role=status]").inner_text())
     pg.locator(".dialog header .icon").click()
     r = ev("sh.getRange('A30').setFormula('=A31+1'); sh.getRange('A31').setFormula('=A30+1'); await new Promise(x=>setTimeout(x,1500)); return [String(sh.getRange('A30').getValue()), String(sh.getRange('A31').getValue())];")
     rec(45, "circular reference does not hang the engine (value reported)", r is not None, str(r))

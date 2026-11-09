@@ -22,7 +22,7 @@ with sync_playwright() as p:
     vals=js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("H2:K12").getValues().flat().filter(x=>x!=="" && x!==null)')
     ck('West filtered out of pivot','West' not in vals and 'East' in vals,vals)
     ck('menu stays open and unchecks',pg.locator('.draco-fieldmenu label',has_text='West').locator('input').is_checked()==False)
-    pg.get_by_role('button',name='Select all').click(); time.sleep(1); vals=js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("H2:K14").getValues().flat()'); ck('select all restores West','West' in vals)
+    pg.get_by_role('button',name='Select all',exact=True).click(); time.sleep(1); vals=js('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("H2:K14").getValues().flat()'); ck('select all restores West','West' in vals)
     pg.keyboard.press('Escape'); time.sleep(.3); ck('Esc closes menu',pg.locator('.draco-fieldmenu').count()==0)
     # reload keeps buttons
     # ---- slicer move / resize

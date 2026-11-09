@@ -1,81 +1,582 @@
 // Draco Assist (v100): an offline, rule-based helper — describe what you want in plain words, get formulas; paste a formula, get an
 // explanation; summarise a selection. It is NOT a language model and sends nothing anywhere. Pure.
-export interface Ctx { headers: string[]; dataRows: number; sel?: { a1: string; r0: number; c0: number; r1: number; c1: number } }
-export interface Suggestion { formula: string; why: string }
-const colName = (c: number) => { let s = '', n = c + 1; while (n > 0) { const k = (n - 1) % 26; s = String.fromCharCode(65 + k) + s; n = Math.floor((n - 1) / 26); } return s; };
+export interface Ctx {
+  headers: string[];
+  dataRows: number;
+  sel?: { a1: string; r0: number; c0: number; r1: number; c1: number };
+}
+export interface Suggestion {
+  formula: string;
+  why: string;
+}
+const colName = (c: number) => {
+  let s = '',
+    n = c + 1;
+  while (n > 0) {
+    const k = (n - 1) % 26;
+    s = String.fromCharCode(65 + k) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+};
 const colIdx = (s: string) => [...s.toUpperCase()].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
 /** Turn "column B", "B", "Qty", "B2:B10", "selection" into a range reference. */
 export function resolveRef(token: string, ctx: Ctx): string | null {
-  const t = token.trim().replace(/^the\s+/i, '').replace(/[.?!]+$/, ''); let m: RegExpExecArray | null; const last = Math.max(2, ctx.dataRows + 1);
-  if ((m = /^\$?([A-Za-z]{1,3})\$?(\d+):\$?([A-Za-z]{1,3})\$?(\d+)$/.exec(t))) return `${m[1].toUpperCase()}${m[2]}:${m[3].toUpperCase()}${m[4]}`; if ((m = /^\$?([A-Za-z]{1,3})\$?(\d+)$/.exec(t))) return `${m[1].toUpperCase()}${m[2]}`;
+  const t = token
+    .trim()
+    .replace(/^the\s+/i, '')
+    .replace(/[.?!]+$/, '');
+  let m: RegExpExecArray | null;
+  const last = Math.max(2, ctx.dataRows + 1);
+  if ((m = /^\$?([A-Za-z]{1,3})\$?(\d+):\$?([A-Za-z]{1,3})\$?(\d+)$/.exec(t)))
+    return `${m[1].toUpperCase()}${m[2]}:${m[3].toUpperCase()}${m[4]}`;
+  if ((m = /^\$?([A-Za-z]{1,3})\$?(\d+)$/.exec(t))) return `${m[1].toUpperCase()}${m[2]}`;
   if (/^(selection|selected cells|selected range|this range|these cells)$/i.test(t)) return ctx.sel?.a1 ?? null;
-  if ((m = /^(?:column|col)\s+([A-Za-z]{1,3})$/i.exec(t))) return `${m[1].toUpperCase()}2:${m[1].toUpperCase()}${last}`; if (/^(this column|current column)$/i.test(t) && ctx.sel) return `${colName(ctx.sel.c0)}2:${colName(ctx.sel.c0)}${last}`;
-  if ((m = /^([A-Za-z]{1,2})$/.exec(t)) && colIdx(m[1]) < 60 && ctx.headers.length === 0) return `${m[1].toUpperCase()}2:${m[1].toUpperCase()}${last}`;
-  const name = t.replace(/^(?:column|col|the)\s+/i, '').replace(/^["“']|["”']$/g, '').toLowerCase(); const i = ctx.headers.findIndex((h) => h.toLowerCase() === name) >= 0 ? ctx.headers.findIndex((h) => h.toLowerCase() === name) : ctx.headers.findIndex((h) => h && name.length > 2 && (h.toLowerCase().includes(name) || name.includes(h.toLowerCase())));
-  if (i >= 0) return `${colName(i)}2:${colName(i)}${last}`; if (/^[A-Za-z]{1,2}$/.test(t)) return `${t.toUpperCase()}2:${t.toUpperCase()}${last}`; return null;
+  if ((m = /^(?:column|col)\s+([A-Za-z]{1,3})$/i.exec(t))) return `${m[1].toUpperCase()}2:${m[1].toUpperCase()}${last}`;
+  if (/^(this column|current column)$/i.test(t) && ctx.sel)
+    return `${colName(ctx.sel.c0)}2:${colName(ctx.sel.c0)}${last}`;
+  if ((m = /^([A-Za-z]{1,2})$/.exec(t)) && colIdx(m[1]) < 60 && ctx.headers.length === 0)
+    return `${m[1].toUpperCase()}2:${m[1].toUpperCase()}${last}`;
+  const name = t
+    .replace(/^(?:column|col|the)\s+/i, '')
+    .replace(/^["“']|["”']$/g, '')
+    .toLowerCase();
+  const i =
+    ctx.headers.findIndex((h) => h.toLowerCase() === name) >= 0
+      ? ctx.headers.findIndex((h) => h.toLowerCase() === name)
+      : ctx.headers.findIndex(
+          (h) => h && name.length > 2 && (h.toLowerCase().includes(name) || name.includes(h.toLowerCase())),
+        );
+  if (i >= 0) return `${colName(i)}2:${colName(i)}${last}`;
+  if (/^[A-Za-z]{1,2}$/.test(t)) return `${t.toUpperCase()}2:${t.toUpperCase()}${last}`;
+  return null;
 }
 const first = (r: string) => r.split(':')[0];
 type Rule = { re: RegExp; make: (m: RegExpExecArray, c: Ctx) => Suggestion[] | null };
 const R = (s: string | null) => s;
-const agg = (fn: string, word: string): Rule => ({ re: new RegExp(`\\b(?:${word})\\b(?:\\s+(?:of|in|for|from))?\\s+(.+)$`, 'i'), make: (m, c) => { const r = R(resolveRef(m[1], c)); return r ? [{ formula: `=${fn}(${r})`, why: `${fn} of ${r}` }] : null; } });
+const agg = (fn: string, word: string): Rule => ({
+  re: new RegExp(`\\b(?:${word})\\b(?:\\s+(?:of|in|for|from))?\\s+(.+)$`, 'i'),
+  make: (m, c) => {
+    const r = R(resolveRef(m[1], c));
+    return r ? [{ formula: `=${fn}(${r})`, why: `${fn} of ${r}` }] : null;
+  },
+});
 const RULES: Rule[] = [
-  { re: /\bcount\b.*\b(?:non[- ]?empty|filled|not empty|entries|values|items)\b.*?(?:in|of)?\s+(.+)$/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=COUNTA(${r})`, why: 'Counts cells that are not empty' }] : null; } },
-  { re: /\b(?:count|how many)\b.*\b(?:blank|empty)\b.*?(?:in|of)?\s+(.+)$/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=COUNTBLANK(${r})`, why: 'Counts empty cells' }] : null; } },
-  { re: /\b(?:count|how many)\b\s+(.+?)\s+(?:equals?|equal to|is|=)\s+["“']?([^"”']+?)["”']?$/i, make: (m, c) => { const r = resolveRef(m[1], c); const crit = m[2]; return r ? [{ formula: `=COUNTIF(${r},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`})`, why: `Counts cells equal to ${crit}` }] : null; } },
-  { re: /\b(?:count|how many)\b\s+(.+?)\s+(?:where|that are|equal(?:s)? to|=|is)\s+(.+?)\s+(?:equals?|is|=|are)\s+["“']?([^"”']+?)["”']?$/i, make: (m, c) => { const r = resolveRef(m[1], c) ?? resolveRef(m[2], c); const crit = m[3]; return r ? [{ formula: `=COUNTIF(${r},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`})`, why: `Counts cells equal to ${crit}` }] : null; } },
-  { re: /\bsum\b\s+(.+?)\s+(?:where|when|for)\s+(.+?)\s+(?:equals?|is|=)\s+["“']?([^"”']+?)["”']?$/i, make: (m, c) => { const s = resolveRef(m[1], c), k = resolveRef(m[2], c); const crit = m[3]; return s && k ? [{ formula: `=SUMIF(${k},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`},${s})`, why: `Adds ${m[1]} where ${m[2]} equals ${crit}` }] : null; } },
-  { re: /\b(?:count|how many)\b\s+(.+?)\s+(?:greater than|more than|above|over|>)\s+(-?\d+(?:\.\d+)?)/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=COUNTIF(${r},">${m[2]}")`, why: `Counts values above ${m[2]}` }] : null; } },
-  { re: /\b(?:count|how many)\b\s+(.+?)\s+(?:less than|fewer than|below|under|<)\s+(-?\d+(?:\.\d+)?)/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=COUNTIF(${r},"<${m[2]}")`, why: `Counts values below ${m[2]}` }] : null; } },
-  { re: /\b(?:percent|percentage|share|%)\b.*\b(?:of )?total\b(?:\s+(?:of|for|in))?\s*(.*)$/i, make: (m, c) => { const r = resolveRef(m[1] || 'this column', c) ?? (c.sel ? `${colName(c.sel.c0)}2:${colName(c.sel.c0)}${Math.max(2, c.dataRows + 1)}` : null); if (!r) return null; const a = first(r), [x, y] = r.split(':'); const col = x.replace(/\d+/g, ''); const row = x.replace(/\D+/g, ''); return [{ formula: `=${col}${row}/SUM(${col}$${row}:${y.replace(/^([A-Z]+)/, '$1$')})`, why: `Each value as a share of the column total — fill it down. Format as %.` }].map((s) => ({ ...s, formula: s.formula.replace(`${a}`, a) })); } },
-  { re: /\brunning (?:total|sum)\b(?:\s+(?:of|for|in))?\s*(.*)$/i, make: (m, c) => { const r = resolveRef(m[1] || 'this column', c); if (!r) return null; const f = first(r); const col = f.replace(/\d+/g, ''), row = f.replace(/\D+/g, ''); return [{ formula: `=SUM(${col}$${row}:${col}${row})`, why: 'Add up from the first row to this one — fill it down' }]; } },
-  { re: /\bround\b\s+(.+?)\s+to\s+(\d+)\s+(?:decimal|digit|place)/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=ROUND(${first(r)},${m[2]})`, why: `Rounds to ${m[2]} decimal places` }] : null; } },
-  { re: /\bif\b\s+(.+?)\s*(>=|<=|>|<|=|<>|!=|greater than|less than|equals?)\s*(-?\d+(?:\.\d+)?|["“'][^"”']*["”'])\s*,?\s*(?:then\s+)?["“']?([^"”',]+?)["”']?\s*,?\s*(?:else|otherwise)\s+["“']?([^"”']+?)["”']?$/i, make: (m, c) => { const r = resolveRef(m[1], c); if (!r) return null; const op = ({ 'greater than': '>', 'less than': '<', equal: '=', equals: '=', '!=': '<>' } as Record<string, string>)[m[2].toLowerCase()] ?? m[2]; const lit = (x: string) => (/^-?\d+(\.\d+)?$/.test(x.trim()) ? x.trim() : `"${x.trim().replace(/^["“']|["”']$/g, '')}"`); return [{ formula: `=IF(${first(r)}${op}${lit(m[3])},${lit(m[4])},${lit(m[5])})`, why: 'Picks one of two results depending on a test' }]; } },
-  { re: /\b(?:days|number of days)\s+between\s+(.+?)\s+and\s+(.+)$/i, make: (m, c) => { const a = resolveRef(m[1], c), b = resolveRef(m[2], c); return a && b ? [{ formula: `=DAYS(${first(b)},${first(a)})`, why: 'Days from the first date to the second' }, { formula: `=${first(b)}-${first(a)}`, why: 'Same thing by subtraction (format as a number)' }] : null; } },
-  { re: /\b(year|month|day|weekday)\s+(?:of|from)\s+(.+)$/i, make: (m, c) => { const r = resolveRef(m[2], c); const fn = m[1].toUpperCase(); return r ? [{ formula: `=${fn}(${first(r)})`, why: `${m[1]} part of a date` }] : null; } },
-  { re: /\b(upper ?case|lower ?case|proper ?case|capitali[sz]e|trim|length)\b(?:\s+(?:of|for))?\s+(.+)$/i, make: (m, c) => { const r = resolveRef(m[2], c); const k = m[1].toLowerCase().replace(' ', ''); const fn = k.startsWith('upper') ? 'UPPER' : k.startsWith('lower') ? 'LOWER' : k === 'trim' ? 'TRIM' : k === 'length' ? 'LEN' : 'PROPER'; return r ? [{ formula: `=${fn}(${first(r)})`, why: `${fn} of the text` }] : null; } },
-  { re: /\b(?:join|combine|concatenate|merge)\s+(.+?)\s+and\s+(.+?)(?:\s+with\s+(?:a\s+)?(space|comma|dash|hyphen|nothing))?$/i, make: (m, c) => { const a = resolveRef(m[1], c), b = resolveRef(m[2], c); if (!a || !b) return null; const sep = ({ space: ' ', comma: ', ', dash: ' - ', hyphen: '-', nothing: '' } as Record<string, string>)[(m[3] ?? 'space').toLowerCase()]; return [{ formula: `=${first(a)}&"${sep}"&${first(b)}`, why: 'Joins the two cells' }, { formula: `=TEXTJOIN("${sep}",TRUE,${first(a)},${first(b)})`, why: 'Same, skipping blanks' }]; } },
-  { re: /\b(?:look ?up|find|vlookup|xlookup)\b\s+(.+?)\s+in\s+(.+?)(?:\s+(?:and\s+)?(?:return|get|give)\s+(.+))?$/i, make: (m, c) => { const key = resolveRef(m[1], c); const tbl = resolveRef(m[2], c); if (!tbl) return null; const kf = key ? first(key) : `"${m[1].replace(/^["“']|["”']$/g, '')}"`; const [x, y] = tbl.split(':'); const keyCol = x.replace(/\d+/g, ''); const lastRow = y?.replace(/[A-Z]+/, ''); const ret = m[3] ? resolveRef(m[3], c) : null; const retCol = ret ? first(ret).replace(/\d+/g, '') : String.fromCharCode(keyCol.charCodeAt(0) + 1); return [{ formula: `=XLOOKUP(${kf},${keyCol}2:${keyCol}${lastRow},${retCol}2:${retCol}${lastRow},"Not found")`, why: 'Finds the key in one column and returns the matching value from another' }, { formula: `=VLOOKUP(${kf},${tbl},2,FALSE)`, why: 'Older style; returns the 2nd column of the table' }]; } },
-  { re: /\bunique\b(?:\s+values)?\s+(?:in|of|from)\s+(.+)$/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=UNIQUE(${r})`, why: 'Lists each value once' }] : null; } },
-  { re: /\bsort\b\s+(.+?)(?:\s+(descending|desc|z to a|largest first))?$/i, make: (m, c) => { const r = resolveRef(m[1], c); return r ? [{ formula: `=SORT(${r},1,${m[2] ? -1 : 1})`, why: m[2] ? 'Sorted high to low' : 'Sorted low to high' }] : null; } },
-  { re: /\bfilter\b\s+(.+?)\s+where\s+(.+?)\s*(>=|<=|>|<|=|greater than|less than|equals?)\s*(-?\d+(?:\.\d+)?|\S+)$/i, make: (m, c) => { const a = resolveRef(m[1], c), b = resolveRef(m[2], c); if (!a || !b) return null; const op = ({ 'greater than': '>', 'less than': '<', equal: '=', equals: '=' } as Record<string, string>)[m[3].toLowerCase()] ?? m[3]; const v = /^-?\d+(\.\d+)?$/.test(m[4]) ? m[4] : `"${m[4]}"`; return [{ formula: `=FILTER(${a},${b}${op}${v},"None")`, why: 'Keeps only matching rows' }]; } },
-  { re: /\b(today|current date|todays date)\b/i, make: () => [{ formula: '=TODAY()', why: 'Today’s date, updates every day' }] }, { re: /\b(now|current time)\b/i, make: () => [{ formula: '=NOW()', why: 'Date and time right now' }] },
-  agg('SUM', 'sum|total|add up|add'), agg('AVERAGE', 'average|mean|avg'), agg('MAX', 'max|maximum|highest|largest|biggest|top'), agg('MIN', 'min|minimum|lowest|smallest'), agg('MEDIAN', 'median'), agg('COUNT', 'count'), agg('STDEV', 'standard deviation|stdev'), agg('PRODUCT', 'product|multiply'),
+  {
+    re: /\bcount\b.*\b(?:non[- ]?empty|filled|not empty|entries|values|items)\b.*?(?:in|of)?\s+(.+)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=COUNTA(${r})`, why: 'Counts cells that are not empty' }] : null;
+    },
+  },
+  {
+    re: /\b(?:count|how many)\b.*\b(?:blank|empty)\b.*?(?:in|of)?\s+(.+)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=COUNTBLANK(${r})`, why: 'Counts empty cells' }] : null;
+    },
+  },
+  {
+    re: /\b(?:count|how many)\b\s+(.+?)\s+(?:equals?|equal to|is|=)\s+["“']?([^"”']+?)["”']?$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      const crit = m[2];
+      return r
+        ? [
+            {
+              formula: `=COUNTIF(${r},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`})`,
+              why: `Counts cells equal to ${crit}`,
+            },
+          ]
+        : null;
+    },
+  },
+  {
+    re: /\b(?:count|how many)\b\s+(.+?)\s+(?:where|that are|equal(?:s)? to|=|is)\s+(.+?)\s+(?:equals?|is|=|are)\s+["“']?([^"”']+?)["”']?$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c) ?? resolveRef(m[2], c);
+      const crit = m[3];
+      return r
+        ? [
+            {
+              formula: `=COUNTIF(${r},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`})`,
+              why: `Counts cells equal to ${crit}`,
+            },
+          ]
+        : null;
+    },
+  },
+  {
+    re: /\bsum\b\s+(.+?)\s+(?:where|when|for)\s+(.+?)\s+(?:equals?|is|=)\s+["“']?([^"”']+?)["”']?$/i,
+    make: (m, c) => {
+      const s = resolveRef(m[1], c),
+        k = resolveRef(m[2], c);
+      const crit = m[3];
+      return s && k
+        ? [
+            {
+              formula: `=SUMIF(${k},${/^-?\d+(\.\d+)?$/.test(crit) ? crit : `"${crit}"`},${s})`,
+              why: `Adds ${m[1]} where ${m[2]} equals ${crit}`,
+            },
+          ]
+        : null;
+    },
+  },
+  {
+    re: /\b(?:count|how many)\b\s+(.+?)\s+(?:greater than|more than|above|over|>)\s+(-?\d+(?:\.\d+)?)/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=COUNTIF(${r},">${m[2]}")`, why: `Counts values above ${m[2]}` }] : null;
+    },
+  },
+  {
+    re: /\b(?:count|how many)\b\s+(.+?)\s+(?:less than|fewer than|below|under|<)\s+(-?\d+(?:\.\d+)?)/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=COUNTIF(${r},"<${m[2]}")`, why: `Counts values below ${m[2]}` }] : null;
+    },
+  },
+  {
+    re: /\b(?:percent|percentage|share|%)\b.*\b(?:of )?total\b(?:\s+(?:of|for|in))?\s*(.*)$/i,
+    make: (m, c) => {
+      const r =
+        resolveRef(m[1] || 'this column', c) ??
+        (c.sel ? `${colName(c.sel.c0)}2:${colName(c.sel.c0)}${Math.max(2, c.dataRows + 1)}` : null);
+      if (!r) return null;
+      const a = first(r),
+        [x, y] = r.split(':');
+      const col = x.replace(/\d+/g, '');
+      const row = x.replace(/\D+/g, '');
+      return [
+        {
+          formula: `=${col}${row}/SUM(${col}$${row}:${y.replace(/^([A-Z]+)/, '$1$')})`,
+          why: `Each value as a share of the column total — fill it down. Format as %.`,
+        },
+      ].map((s) => ({ ...s, formula: s.formula.replace(`${a}`, a) }));
+    },
+  },
+  {
+    re: /\brunning (?:total|sum)\b(?:\s+(?:of|for|in))?\s*(.*)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1] || 'this column', c);
+      if (!r) return null;
+      const f = first(r);
+      const col = f.replace(/\d+/g, ''),
+        row = f.replace(/\D+/g, '');
+      return [
+        { formula: `=SUM(${col}$${row}:${col}${row})`, why: 'Add up from the first row to this one — fill it down' },
+      ];
+    },
+  },
+  {
+    re: /\bround\b\s+(.+?)\s+to\s+(\d+)\s+(?:decimal|digit|place)/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=ROUND(${first(r)},${m[2]})`, why: `Rounds to ${m[2]} decimal places` }] : null;
+    },
+  },
+  {
+    re: /\bif\b\s+(.+?)\s*(>=|<=|>|<|=|<>|!=|greater than|less than|equals?)\s*(-?\d+(?:\.\d+)?|["“'][^"”']*["”'])\s*,?\s*(?:then\s+)?["“']?([^"”',]+?)["”']?\s*,?\s*(?:else|otherwise)\s+["“']?([^"”']+?)["”']?$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      if (!r) return null;
+      const op =
+        ({ 'greater than': '>', 'less than': '<', equal: '=', equals: '=', '!=': '<>' } as Record<string, string>)[
+          m[2].toLowerCase()
+        ] ?? m[2];
+      const lit = (x: string) =>
+        /^-?\d+(\.\d+)?$/.test(x.trim()) ? x.trim() : `"${x.trim().replace(/^["“']|["”']$/g, '')}"`;
+      return [
+        {
+          formula: `=IF(${first(r)}${op}${lit(m[3])},${lit(m[4])},${lit(m[5])})`,
+          why: 'Picks one of two results depending on a test',
+        },
+      ];
+    },
+  },
+  {
+    re: /\b(?:days|number of days)\s+between\s+(.+?)\s+and\s+(.+)$/i,
+    make: (m, c) => {
+      const a = resolveRef(m[1], c),
+        b = resolveRef(m[2], c);
+      return a && b
+        ? [
+            { formula: `=DAYS(${first(b)},${first(a)})`, why: 'Days from the first date to the second' },
+            { formula: `=${first(b)}-${first(a)}`, why: 'Same thing by subtraction (format as a number)' },
+          ]
+        : null;
+    },
+  },
+  {
+    re: /\b(year|month|day|weekday)\s+(?:of|from)\s+(.+)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[2], c);
+      const fn = m[1].toUpperCase();
+      return r ? [{ formula: `=${fn}(${first(r)})`, why: `${m[1]} part of a date` }] : null;
+    },
+  },
+  {
+    re: /\b(upper ?case|lower ?case|proper ?case|capitali[sz]e|trim|length)\b(?:\s+(?:of|for))?\s+(.+)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[2], c);
+      const k = m[1].toLowerCase().replace(' ', '');
+      const fn = k.startsWith('upper')
+        ? 'UPPER'
+        : k.startsWith('lower')
+          ? 'LOWER'
+          : k === 'trim'
+            ? 'TRIM'
+            : k === 'length'
+              ? 'LEN'
+              : 'PROPER';
+      return r ? [{ formula: `=${fn}(${first(r)})`, why: `${fn} of the text` }] : null;
+    },
+  },
+  {
+    re: /\b(?:join|combine|concatenate|merge)\s+(.+?)\s+and\s+(.+?)(?:\s+with\s+(?:a\s+)?(space|comma|dash|hyphen|nothing))?$/i,
+    make: (m, c) => {
+      const a = resolveRef(m[1], c),
+        b = resolveRef(m[2], c);
+      if (!a || !b) return null;
+      const sep = ({ space: ' ', comma: ', ', dash: ' - ', hyphen: '-', nothing: '' } as Record<string, string>)[
+        (m[3] ?? 'space').toLowerCase()
+      ];
+      return [
+        { formula: `=${first(a)}&"${sep}"&${first(b)}`, why: 'Joins the two cells' },
+        { formula: `=TEXTJOIN("${sep}",TRUE,${first(a)},${first(b)})`, why: 'Same, skipping blanks' },
+      ];
+    },
+  },
+  {
+    re: /\b(?:look ?up|find|vlookup|xlookup)\b\s+(.+?)\s+in\s+(.+?)(?:\s+(?:and\s+)?(?:return|get|give)\s+(.+))?$/i,
+    make: (m, c) => {
+      const key = resolveRef(m[1], c);
+      const tbl = resolveRef(m[2], c);
+      if (!tbl) return null;
+      const kf = key ? first(key) : `"${m[1].replace(/^["“']|["”']$/g, '')}"`;
+      const [x, y] = tbl.split(':');
+      const keyCol = x.replace(/\d+/g, '');
+      const lastRow = y?.replace(/[A-Z]+/, '');
+      const ret = m[3] ? resolveRef(m[3], c) : null;
+      const retCol = ret ? first(ret).replace(/\d+/g, '') : String.fromCharCode(keyCol.charCodeAt(0) + 1);
+      return [
+        {
+          formula: `=XLOOKUP(${kf},${keyCol}2:${keyCol}${lastRow},${retCol}2:${retCol}${lastRow},"Not found")`,
+          why: 'Finds the key in one column and returns the matching value from another',
+        },
+        { formula: `=VLOOKUP(${kf},${tbl},2,FALSE)`, why: 'Older style; returns the 2nd column of the table' },
+      ];
+    },
+  },
+  {
+    re: /\bunique\b(?:\s+values)?\s+(?:in|of|from)\s+(.+)$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r ? [{ formula: `=UNIQUE(${r})`, why: 'Lists each value once' }] : null;
+    },
+  },
+  {
+    re: /\bsort\b\s+(.+?)(?:\s+(descending|desc|z to a|largest first))?$/i,
+    make: (m, c) => {
+      const r = resolveRef(m[1], c);
+      return r
+        ? [{ formula: `=SORT(${r},1,${m[2] ? -1 : 1})`, why: m[2] ? 'Sorted high to low' : 'Sorted low to high' }]
+        : null;
+    },
+  },
+  {
+    re: /\bfilter\b\s+(.+?)\s+where\s+(.+?)\s*(>=|<=|>|<|=|greater than|less than|equals?)\s*(-?\d+(?:\.\d+)?|\S+)$/i,
+    make: (m, c) => {
+      const a = resolveRef(m[1], c),
+        b = resolveRef(m[2], c);
+      if (!a || !b) return null;
+      const op =
+        ({ 'greater than': '>', 'less than': '<', equal: '=', equals: '=' } as Record<string, string>)[
+          m[3].toLowerCase()
+        ] ?? m[3];
+      const v = /^-?\d+(\.\d+)?$/.test(m[4]) ? m[4] : `"${m[4]}"`;
+      return [{ formula: `=FILTER(${a},${b}${op}${v},"None")`, why: 'Keeps only matching rows' }];
+    },
+  },
+  {
+    re: /\b(today|current date|todays date)\b/i,
+    make: () => [{ formula: '=TODAY()', why: 'Today’s date, updates every day' }],
+  },
+  { re: /\b(now|current time)\b/i, make: () => [{ formula: '=NOW()', why: 'Date and time right now' }] },
+  agg('SUM', 'sum|total|add up|add'),
+  agg('AVERAGE', 'average|mean|avg'),
+  agg('MAX', 'max|maximum|highest|largest|biggest|top'),
+  agg('MIN', 'min|minimum|lowest|smallest'),
+  agg('MEDIAN', 'median'),
+  agg('COUNT', 'count'),
+  agg('STDEV', 'standard deviation|stdev'),
+  agg('PRODUCT', 'product|multiply'),
 ];
 // the alternation words need to be real regex alternations
-for (const r of RULES) { /* compiled above */ void r; }
+for (const r of RULES) {
+  /* compiled above */ void r;
+}
 export function suggest(text: string, ctx: Ctx): Suggestion[] {
-  const t = text.trim(); if (!t) return []; const out: Suggestion[] = []; const seen = new Set<string>();
-  for (const rule of RULES) { const m = rule.re.exec(t); if (!m) continue; const s = rule.make(m, ctx); if (s) for (const x of s) if (!seen.has(x.formula)) { seen.add(x.formula); out.push(x); } if (out.length >= 3) break; }
+  const t = text.trim();
+  if (!t) return [];
+  const out: Suggestion[] = [];
+  const seen = new Set<string>();
+  for (const rule of RULES) {
+    const m = rule.re.exec(t);
+    if (!m) continue;
+    const s = rule.make(m, ctx);
+    if (s)
+      for (const x of s)
+        if (!seen.has(x.formula)) {
+          seen.add(x.formula);
+          out.push(x);
+        }
+    if (out.length >= 3) break;
+  }
   return out.slice(0, 3);
 }
-export const FUNCS: Record<string, string> = { SUM: 'adds the numbers', AVERAGE: 'finds the average', COUNT: 'counts the numbers', COUNTA: 'counts the non-empty cells', COUNTBLANK: 'counts the empty cells', COUNTIF: 'counts cells that meet a condition', COUNTIFS: 'counts cells that meet several conditions', SUMIF: 'adds the cells that meet a condition', SUMIFS: 'adds the cells that meet several conditions', AVERAGEIF: 'averages the cells that meet a condition', MAX: 'finds the largest value', MIN: 'finds the smallest value', MEDIAN: 'finds the middle value', ROUND: 'rounds to a number of decimal places', ROUNDUP: 'rounds up', ROUNDDOWN: 'rounds down', ABS: 'removes the minus sign', INT: 'drops the decimals', MOD: 'gives the remainder after dividing', IF: 'picks one result if a test is true and another if it is false', IFS: 'checks several tests in order', IFERROR: 'shows a fallback when the formula would be an error', AND: 'is true only if every test is true', OR: 'is true if any test is true', NOT: 'flips true and false', VLOOKUP: 'looks a value up in the first column of a table and returns a value from another column', HLOOKUP: 'looks a value up in the first row of a table', XLOOKUP: 'finds a value in one range and returns the match from another', INDEX: 'returns the cell at a position in a range', MATCH: 'finds the position of a value in a range', LEFT: 'takes the first characters of text', RIGHT: 'takes the last characters of text', MID: 'takes characters from the middle of text', LEN: 'counts the characters', UPPER: 'makes text capitals', LOWER: 'makes text lower case', PROPER: 'capitalises each word', TRIM: 'removes extra spaces', CONCAT: 'joins text', CONCATENATE: 'joins text', TEXTJOIN: 'joins text with a separator', TEXT: 'formats a number or date as text', VALUE: 'turns text into a number', TODAY: 'gives today’s date', NOW: 'gives the current date and time', DATE: 'builds a date from year, month and day', YEAR: 'takes the year from a date', MONTH: 'takes the month from a date', DAY: 'takes the day from a date', WEEKDAY: 'gives the day of the week as a number', DAYS: 'counts the days between two dates', EDATE: 'moves a date by whole months', EOMONTH: 'gives the last day of a month', NETWORKDAYS: 'counts working days between two dates', PMT: 'works out a loan payment', FV: 'works out a future value', PV: 'works out a present value', RATE: 'works out an interest rate', SUMPRODUCT: 'multiplies ranges together and adds the results', UNIQUE: 'lists each value once', SORT: 'sorts a range', FILTER: 'keeps only the rows that match', SEQUENCE: 'makes a list of numbers', RAND: 'gives a random number', RANDBETWEEN: 'gives a random whole number in a range', LET: 'names a value inside a formula', LAMBDA: 'defines a custom function', TRANSPOSE: 'swaps rows and columns', OFFSET: 'points at a range moved from a starting cell', INDIRECT: 'turns text into a cell reference', ISBLANK: 'tests whether a cell is empty', ISNUMBER: 'tests whether a value is a number', ISTEXT: 'tests whether a value is text', ISERROR: 'tests whether a value is an error', SUBSTITUTE: 'replaces text', FIND: 'finds the position of text (case matters)', SEARCH: 'finds the position of text', REPT: 'repeats text', STDEV: 'measures how spread out numbers are', LARGE: 'finds the k-th largest value', SMALL: 'finds the k-th smallest value', RANK: 'ranks a value within a list', CHOOSE: 'picks a value by position' };
-export interface Call { name: string; text: string; depth: number; args: string[] }
+export const FUNCS: Record<string, string> = {
+  SUM: 'adds the numbers',
+  AVERAGE: 'finds the average',
+  COUNT: 'counts the numbers',
+  COUNTA: 'counts the non-empty cells',
+  COUNTBLANK: 'counts the empty cells',
+  COUNTIF: 'counts cells that meet a condition',
+  COUNTIFS: 'counts cells that meet several conditions',
+  SUMIF: 'adds the cells that meet a condition',
+  SUMIFS: 'adds the cells that meet several conditions',
+  AVERAGEIF: 'averages the cells that meet a condition',
+  MAX: 'finds the largest value',
+  MIN: 'finds the smallest value',
+  MEDIAN: 'finds the middle value',
+  ROUND: 'rounds to a number of decimal places',
+  ROUNDUP: 'rounds up',
+  ROUNDDOWN: 'rounds down',
+  ABS: 'removes the minus sign',
+  INT: 'drops the decimals',
+  MOD: 'gives the remainder after dividing',
+  IF: 'picks one result if a test is true and another if it is false',
+  IFS: 'checks several tests in order',
+  IFERROR: 'shows a fallback when the formula would be an error',
+  AND: 'is true only if every test is true',
+  OR: 'is true if any test is true',
+  NOT: 'flips true and false',
+  VLOOKUP: 'looks a value up in the first column of a table and returns a value from another column',
+  HLOOKUP: 'looks a value up in the first row of a table',
+  XLOOKUP: 'finds a value in one range and returns the match from another',
+  INDEX: 'returns the cell at a position in a range',
+  MATCH: 'finds the position of a value in a range',
+  LEFT: 'takes the first characters of text',
+  RIGHT: 'takes the last characters of text',
+  MID: 'takes characters from the middle of text',
+  LEN: 'counts the characters',
+  UPPER: 'makes text capitals',
+  LOWER: 'makes text lower case',
+  PROPER: 'capitalises each word',
+  TRIM: 'removes extra spaces',
+  CONCAT: 'joins text',
+  CONCATENATE: 'joins text',
+  TEXTJOIN: 'joins text with a separator',
+  TEXT: 'formats a number or date as text',
+  VALUE: 'turns text into a number',
+  TODAY: 'gives today’s date',
+  NOW: 'gives the current date and time',
+  DATE: 'builds a date from year, month and day',
+  YEAR: 'takes the year from a date',
+  MONTH: 'takes the month from a date',
+  DAY: 'takes the day from a date',
+  WEEKDAY: 'gives the day of the week as a number',
+  DAYS: 'counts the days between two dates',
+  EDATE: 'moves a date by whole months',
+  EOMONTH: 'gives the last day of a month',
+  NETWORKDAYS: 'counts working days between two dates',
+  PMT: 'works out a loan payment',
+  FV: 'works out a future value',
+  PV: 'works out a present value',
+  RATE: 'works out an interest rate',
+  SUMPRODUCT: 'multiplies ranges together and adds the results',
+  UNIQUE: 'lists each value once',
+  SORT: 'sorts a range',
+  FILTER: 'keeps only the rows that match',
+  SEQUENCE: 'makes a list of numbers',
+  RAND: 'gives a random number',
+  RANDBETWEEN: 'gives a random whole number in a range',
+  LET: 'names a value inside a formula',
+  LAMBDA: 'defines a custom function',
+  TRANSPOSE: 'swaps rows and columns',
+  OFFSET: 'points at a range moved from a starting cell',
+  INDIRECT: 'turns text into a cell reference',
+  ISBLANK: 'tests whether a cell is empty',
+  ISNUMBER: 'tests whether a value is a number',
+  ISTEXT: 'tests whether a value is text',
+  ISERROR: 'tests whether a value is an error',
+  SUBSTITUTE: 'replaces text',
+  FIND: 'finds the position of text (case matters)',
+  SEARCH: 'finds the position of text',
+  REPT: 'repeats text',
+  STDEV: 'measures how spread out numbers are',
+  LARGE: 'finds the k-th largest value',
+  SMALL: 'finds the k-th smallest value',
+  RANK: 'ranks a value within a list',
+  CHOOSE: 'picks a value by position',
+};
+export interface Call {
+  name: string;
+  text: string;
+  depth: number;
+  args: string[];
+}
 export function parseCalls(formula: string): Call[] {
-  const f = formula.replace(/^=/, ''); const out: Call[] = []; const stack: Array<{ name: string; start: number; depth: number; args: string[]; cur: number }> = []; let q = false; let nameStart = -1; let argStart = 0;
+  const f = formula.replace(/^=/, '');
+  const out: Call[] = [];
+  const stack: Array<{ name: string; start: number; depth: number; args: string[]; cur: number }> = [];
+  let q = false;
+  let nameStart = -1;
+  let argStart = 0;
   for (let i = 0; i < f.length; i++) {
-    const ch = f[i]; if (ch === '"') { q = !q; continue; } if (q) continue;
-    if (/[A-Za-z_.0-9]/.test(ch)) { if (nameStart < 0) nameStart = i; continue; }
-    if (ch === '(') { const name = nameStart >= 0 ? f.slice(nameStart, i).toUpperCase() : ''; stack.push({ name, start: nameStart >= 0 ? nameStart : i, depth: stack.length, args: [], cur: i + 1 }); nameStart = -1; continue; }
-    if (ch === ',' || ch === ';') { const top = stack[stack.length - 1]; if (top) { top.args.push(f.slice(top.cur, i).trim()); top.cur = i + 1; } nameStart = -1; continue; }
-    if (ch === ')') { const top = stack.pop(); if (top) { const last = f.slice(top.cur, i).trim(); if (last !== '' || top.args.length) top.args.push(last); if (top.name) out.push({ name: top.name, text: f.slice(top.start, i + 1), depth: top.depth, args: top.args }); } nameStart = -1; continue; }
-    nameStart = -1; void argStart;
+    const ch = f[i];
+    if (ch === '"') {
+      q = !q;
+      continue;
+    }
+    if (q) continue;
+    if (/[A-Za-z_.0-9]/.test(ch)) {
+      if (nameStart < 0) nameStart = i;
+      continue;
+    }
+    if (ch === '(') {
+      const name = nameStart >= 0 ? f.slice(nameStart, i).toUpperCase() : '';
+      stack.push({ name, start: nameStart >= 0 ? nameStart : i, depth: stack.length, args: [], cur: i + 1 });
+      nameStart = -1;
+      continue;
+    }
+    if (ch === ',' || ch === ';') {
+      const top = stack[stack.length - 1];
+      if (top) {
+        top.args.push(f.slice(top.cur, i).trim());
+        top.cur = i + 1;
+      }
+      nameStart = -1;
+      continue;
+    }
+    if (ch === ')') {
+      const top = stack.pop();
+      if (top) {
+        const last = f.slice(top.cur, i).trim();
+        if (last !== '' || top.args.length) top.args.push(last);
+        if (top.name) out.push({ name: top.name, text: f.slice(top.start, i + 1), depth: top.depth, args: top.args });
+      }
+      nameStart = -1;
+      continue;
+    }
+    nameStart = -1;
+    void argStart;
   }
   return out.sort((a, b) => a.depth - b.depth || f.indexOf(a.text) - f.indexOf(b.text));
 }
 export function explain(formula: string): string[] {
-  const calls = parseCalls(formula); if (!calls.length) { const f = formula.replace(/^=/, '').trim(); return f ? [`This formula calculates ${f} — there are no functions in it.`] : ['Type a formula starting with =']; }
-  const lines: string[] = []; const top = calls[0]; lines.push(`The formula ${FUNCS[top.name] ? `${FUNCS[top.name]}` : `uses ${top.name}`}${top.args.length ? `, working on ${top.args.slice(0, 3).map((a) => (a.length > 24 ? a.slice(0, 22) + '…' : a)).join(', ')}` : ''}.`);
-  const seen = new Set<string>(); for (const c of calls) { if (seen.has(c.name) && c !== top) continue; seen.add(c.name); const d = FUNCS[c.name]; lines.push(`• ${c.name}${c.args.length ? `(${c.args.map((a) => (a.length > 18 ? a.slice(0, 16) + '…' : a)).join(', ')})` : '()'} — ${d ?? 'a function Draco Assist doesn’t have a description for yet'}`); }
-  if (/\$[A-Z]|[A-Z]\$\d/.test(formula)) lines.push('• Dollar signs ($) lock part of a reference so it stays put when you copy the formula.'); return lines.slice(0, 12);
+  const calls = parseCalls(formula);
+  if (!calls.length) {
+    const f = formula.replace(/^=/, '').trim();
+    return f ? [`This formula calculates ${f} — there are no functions in it.`] : ['Type a formula starting with ='];
+  }
+  const lines: string[] = [];
+  const top = calls[0];
+  lines.push(
+    `The formula ${FUNCS[top.name] ? `${FUNCS[top.name]}` : `uses ${top.name}`}${
+      top.args.length
+        ? `, working on ${top.args
+            .slice(0, 3)
+            .map((a) => (a.length > 24 ? a.slice(0, 22) + '…' : a))
+            .join(', ')}`
+        : ''
+    }.`,
+  );
+  const seen = new Set<string>();
+  for (const c of calls) {
+    if (seen.has(c.name) && c !== top) continue;
+    seen.add(c.name);
+    const d = FUNCS[c.name];
+    lines.push(
+      `• ${c.name}${c.args.length ? `(${c.args.map((a) => (a.length > 18 ? a.slice(0, 16) + '…' : a)).join(', ')})` : '()'} — ${d ?? 'a function Draco Assist doesn’t have a description for yet'}`,
+    );
+  }
+  if (/\$[A-Z]|[A-Z]\$\d/.test(formula))
+    lines.push('• Dollar signs ($) lock part of a reference so it stays put when you copy the formula.');
+  return lines.slice(0, 12);
 }
-export interface DataSummary { cells: number; filled: number; blanks: number; numbers: number; text: number; sum: number; avg: number | null; min: number | null; max: number | null; distinct: number; top: Array<[string, number]>; duplicates: number }
+export interface DataSummary {
+  cells: number;
+  filled: number;
+  blanks: number;
+  numbers: number;
+  text: number;
+  sum: number;
+  avg: number | null;
+  min: number | null;
+  max: number | null;
+  distinct: number;
+  top: Array<[string, number]>;
+  duplicates: number;
+}
 export function summarize(values: unknown[][]): DataSummary {
-  let filled = 0, numbers = 0, text = 0, sum = 0, min = Infinity, max = -Infinity; const counts = new Map<string, number>(); let cells = 0;
-  for (const row of values) for (const v of row) { cells++; if (v === null || v === undefined || v === '') continue; filled++; if (typeof v === 'number') { numbers++; sum += v; min = Math.min(min, v); max = Math.max(max, v); } else text++; const k = String(v); counts.set(k, (counts.get(k) ?? 0) + 1); }
-  const top = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).filter((x) => x[1] > 1); return { cells, filled, blanks: cells - filled, numbers, text, sum, avg: numbers ? sum / numbers : null, min: numbers ? min : null, max: numbers ? max : null, distinct: counts.size, top, duplicates: [...counts.values()].filter((n) => n > 1).reduce((a, n) => a + n - 1, 0) };
+  let filled = 0,
+    numbers = 0,
+    text = 0,
+    sum = 0,
+    min = Infinity,
+    max = -Infinity;
+  const counts = new Map<string, number>();
+  let cells = 0;
+  for (const row of values)
+    for (const v of row) {
+      cells++;
+      if (v === null || v === undefined || v === '') continue;
+      filled++;
+      if (typeof v === 'number') {
+        numbers++;
+        sum += v;
+        min = Math.min(min, v);
+        max = Math.max(max, v);
+      } else text++;
+      const k = String(v);
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+  const top = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 3)
+    .filter((x) => x[1] > 1);
+  return {
+    cells,
+    filled,
+    blanks: cells - filled,
+    numbers,
+    text,
+    sum,
+    avg: numbers ? sum / numbers : null,
+    min: numbers ? min : null,
+    max: numbers ? max : null,
+    distinct: counts.size,
+    top,
+    duplicates: [...counts.values()].filter((n) => n > 1).reduce((a, n) => a + n - 1, 0),
+  };
 }
 export function describeSummary(s: DataSummary): string[] {
-  if (!s.cells) return ['Select some cells first.']; const f = (n: number) => (Math.abs(n) >= 1000 || Number.isInteger(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : n.toFixed(2)); const out = [`${s.cells.toLocaleString('en-US')} cells: ${s.filled} filled, ${s.blanks} blank.`];
-  if (s.numbers) out.push(`${s.numbers} number${s.numbers === 1 ? '' : 's'}: total ${f(s.sum)}, average ${f(s.avg!)}, from ${f(s.min!)} to ${f(s.max!)}.`); if (s.text) out.push(`${s.text} text value${s.text === 1 ? '' : 's'}.`); out.push(`${s.distinct} different value${s.distinct === 1 ? '' : 's'}${s.duplicates ? `, ${s.duplicates} repeated` : ', no repeats'}.`);
-  if (s.top.length) out.push(`Most common: ${s.top.map(([k, n]) => `“${k.length > 20 ? k.slice(0, 18) + '…' : k}” ×${n}`).join(', ')}.`); return out;
+  if (!s.cells) return ['Select some cells first.'];
+  const f = (n: number) =>
+    Math.abs(n) >= 1000 || Number.isInteger(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : n.toFixed(2);
+  const out = [`${s.cells.toLocaleString('en-US')} cells: ${s.filled} filled, ${s.blanks} blank.`];
+  if (s.numbers)
+    out.push(
+      `${s.numbers} number${s.numbers === 1 ? '' : 's'}: total ${f(s.sum)}, average ${f(s.avg!)}, from ${f(s.min!)} to ${f(s.max!)}.`,
+    );
+  if (s.text) out.push(`${s.text} text value${s.text === 1 ? '' : 's'}.`);
+  out.push(
+    `${s.distinct} different value${s.distinct === 1 ? '' : 's'}${s.duplicates ? `, ${s.duplicates} repeated` : ', no repeats'}.`,
+  );
+  if (s.top.length)
+    out.push(
+      `Most common: ${s.top.map(([k, n]) => `“${k.length > 20 ? k.slice(0, 18) + '…' : k}” ×${n}`).join(', ')}.`,
+    );
+  return out;
 }

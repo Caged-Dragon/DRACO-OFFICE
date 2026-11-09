@@ -30,7 +30,7 @@ with sync_playwright() as p:
     pg.get_by_role('button',name='Zoom in').first.click(); time.sleep(.5)
     z1=pg.evaluate("()=>dracoAPI.getActiveWorkbook().getActiveSheet().getZoom?.()")
     ck('zoom in raises ratio',z1 is not None and z0 is not None and z1>z0,(z0,z1))
-    pg.get_by_role('button',name='200%',exact=True).first.click(); time.sleep(.5)
+    pg.get_by_role('button',name='Zoom options',exact=True).first.click(); pg.get_by_role('menuitem',name='200%',exact=True).click(); time.sleep(.5)
     ck('zoom 200',pg.evaluate("()=>dracoAPI.getActiveWorkbook().getActiveSheet().getZoom?.()")==2)
     pg.get_by_role('button',name='Headings').first.click(); time.sleep(.5)
     pg.get_by_role('button',name='Headings').first.click(); time.sleep(.5)

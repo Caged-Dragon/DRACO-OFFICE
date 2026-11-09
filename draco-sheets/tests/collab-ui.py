@@ -14,7 +14,9 @@ def fg(pg): pg.evaluate('()=>document.querySelector("[contenteditable=true]")?.f
 def val(pg,a): return pg.evaluate('([a])=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).getValue()',[a])
 def setv(pg,a,v): pg.evaluate('([a,v])=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange(a).setValue(v)',[a,v])
 def opendlg(pg,btn,tab=None):
-    pg.get_by_role('button',name=btn,exact=True).first.click(); pg.wait_for_selector('.dialog')
+    if btn=='Review': pg.evaluate("()=>dracoCmd.run('open.comments')")
+    else: pg.get_by_role('button',name=btn,exact=True).first.click()
+    pg.wait_for_selector('.dialog')
     if tab: pg.get_by_role('tab',name=tab).click()
 def close(pg):
     if pg.locator('.dialog').count(): pg.locator('.dialog header .icon').click(); time.sleep(.2)
@@ -45,7 +47,7 @@ with sync_playwright() as p:
     # ---- notes
     pg.evaluate('()=>dracoAPI.getActiveWorkbook().getActiveSheet().getRange("B2").activate()'); opendlg(pg,'Review','Notes'); pg.get_by_label('Note text').fill('Check supplier'); pg.get_by_role('button',name='Save note').click(); time.sleep(.4)
     n=pg.evaluate('()=>dracoCollab.notes()'); ck('note saved',len(n)==1 and n[0]['text']=='Check supplier',n); ck('note listed in dialog','Check supplier' in pg.locator('.dialog').inner_text())
-    ck('notes csv',pg.evaluate('()=>dracoCollab.notesCsv()').startswith('Sheet,Cell,Note')); pg.get_by_role('button',name='Delete',exact=True).first.click(); time.sleep(.3); ck('note deleted',pg.evaluate('()=>dracoCollab.notes().length')==0); close(pg)
+    ck('notes csv',pg.evaluate('()=>dracoCollab.notesCsv()').startswith('Sheet,Cell,Note')); pg.locator('.dialog').get_by_role('button',name='Delete',exact=True).first.click(); time.sleep(.3); ck('note deleted',pg.evaluate('()=>dracoCollab.notes().length')==0); close(pg)
     # ---- change log
     pg.evaluate('()=>dracoCollab.clearLog()'); setv(pg,'B2',10); time.sleep(.3); setv(pg,'C2','=B2*2'); time.sleep(.3)
     lg=pg.evaluate('()=>dracoCollab.log().map(c=>[c.r,c.c,c.before,c.after,c.user])'); ck('log captured',any(x[:4]==[1,1,'5','10'] for x in lg) or any(x[3]=='10' for x in lg),lg)
