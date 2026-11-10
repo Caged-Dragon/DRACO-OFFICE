@@ -1,6 +1,6 @@
 # Draco Slides
 
-Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.20.0**.
+Presentation editor in the Draco Office monorepo (`C:\CAGED_DRAGON\DRACO_OFFICE\draco-slides`). Current release: **v0.21.0**.
 
 ## Run (Windows CMD)
 ```cmd
@@ -26,3 +26,6 @@ See `CHANGELOG.md` for what exists and what does not. No PowerPoint compatibilit
 
 ## Developing and testing
 See `docs/development/getting-started.md` and `docs/development/testing.md`. Before a release run `npm run verify` (and `npm run e2e` when a browser is available).
+
+## Branding
+The product logo is `public/logo.png` (512 x 512 master). It is used as the browser favicon (`favicon.ico`, `favicon-16.png`, `favicon-32.png`), the iPhone/iPad home-screen icon, the PWA icons in `public/icons/`, the desktop window and installer icon (`build/icon.png`), and inside the app (`src/assets/logo.png`, shown in the top bar and on Home). To change it, replace `public/logo.png` with a square PNG of at least 512 px and run `python scripts/generate-icons.py` (needs `pip install pillow`).

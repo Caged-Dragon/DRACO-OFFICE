@@ -20,6 +20,8 @@ export interface SnapOptions {
   grid: number | null;
   /** How close (slide pixels) an edge must be before it snaps. */
   threshold: number;
+  /** Smallest size a resize snap may leave (20 x 20 by default). */
+  minSize?: { width: number; height: number };
 }
 
 export interface SnapResult {
@@ -125,7 +127,7 @@ export function snapResize(rect: Rect, handle: HandleId, o: SnapOptions): SnapRe
     const snap = bestSnap([edge], targets("x", o), [edge], o);
     if (snap) {
       const nextWidth = east ? width + snap.delta : width - snap.delta;
-      if (nextWidth >= MIN_OBJECT_SIZE) {
+      if (nextWidth >= (o.minSize?.width ?? MIN_OBJECT_SIZE)) {
         if (!east) x += snap.delta;
         width = nextWidth;
       }
@@ -137,7 +139,7 @@ export function snapResize(rect: Rect, handle: HandleId, o: SnapOptions): SnapRe
     const snap = bestSnap([edge], targets("y", o), [edge], o);
     if (snap) {
       const nextHeight = south ? height + snap.delta : height - snap.delta;
-      if (nextHeight >= MIN_OBJECT_SIZE) {
+      if (nextHeight >= (o.minSize?.height ?? MIN_OBJECT_SIZE)) {
         if (!south) y += snap.delta;
         height = nextHeight;
       }

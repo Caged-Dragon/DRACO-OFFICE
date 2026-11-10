@@ -45,7 +45,7 @@ export function resizeRect(origin: Rect, handle: HandleId, dx: number, dy: numbe
   const k = opts.fromCenter ? 2 : 1;
   let width = sx === 0 ? origin.width : Math.max(minW, origin.width + sx * dx * k);
   let height = sy === 0 ? origin.height : Math.max(minH, origin.height + sy * dy * k);
-  if (opts.keepAspect && sx !== 0 && sy !== 0) {
+  if (opts.keepAspect && sx !== 0 && sy !== 0 && origin.width > 0 && origin.height > 0) {
     const scale = Math.max(width / origin.width, height / origin.height, minW / origin.width, minH / origin.height);
     width = origin.width * scale;
     height = origin.height * scale;
@@ -68,13 +68,19 @@ export function lockAxis(dx: number, dy: number): [number, number] {
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
-/** Enforces size limits and keeps part of the object on the slide. Values are rounded to 2 decimals. */
-export function constrainRect(r: Rect, slide: Size): Rect {
-  const width = clamp(r.width, MIN_OBJECT_SIZE, MAX_OBJECT_SIZE);
-  const height = clamp(r.height, MIN_OBJECT_SIZE, MAX_OBJECT_SIZE);
+/**
+ * Enforces size limits and keeps part of the object on the slide. Values are rounded to two decimals. `min` is the
+ * smallest allowed size (20 x 20 by default; flat lines allow 0). An object thinner than MIN_VISIBLE on an axis only
+ * needs to stay entirely on the slide along that axis.
+ */
+export function constrainRect(r: Rect, slide: Size, min: { width: number; height: number } = { width: MIN_OBJECT_SIZE, height: MIN_OBJECT_SIZE }): Rect {
+  const width = clamp(r.width, min.width, MAX_OBJECT_SIZE);
+  const height = clamp(r.height, min.height, MAX_OBJECT_SIZE);
+  const visW = Math.min(MIN_VISIBLE, width);
+  const visH = Math.min(MIN_VISIBLE, height);
   return {
-    x: round2(clamp(r.x, MIN_VISIBLE - width, slide.width - MIN_VISIBLE)),
-    y: round2(clamp(r.y, MIN_VISIBLE - height, slide.height - MIN_VISIBLE)),
+    x: round2(clamp(r.x, visW - width, slide.width - visW)),
+    y: round2(clamp(r.y, visH - height, slide.height - visH)),
     width: round2(width),
     height: round2(height),
   };

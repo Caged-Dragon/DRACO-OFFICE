@@ -1,10 +1,11 @@
-import { createSlide, createTextBox, duplicateSlide, newId, nextObjectName, nextSlideName } from "../core/document-model/factory";
+import { createShape, createSlide, createTextBox, duplicateSlide, newId, nextObjectName, nextSlideName } from "../core/document-model/factory";
 import { sanitizeTextFormatPatch } from "../core/document-model/fonts";
 import { applyBoxPatch, boxEqual, sanitizeBoxPatch, type BoxPatch } from "../core/document-model/box";
 import { expandSelection, groupObjects, normalizeGroups, ungroupObjects } from "../core/document-model/groups";
+import { MIN_LINE_LENGTH, SHAPE_INFO, SHAPE_KINDS, minSize } from "../core/document-model/shapes";
 import { shiftLevels } from "../core/document-model/lists";
 import { applyParagraphPatch, paragraphEqual, sanitizeParagraphPatch } from "../core/document-model/paragraph";
-import type { ParagraphFormat, Presentation, Slide, TextFormat } from "../core/document-model/types";
+import type { ParagraphFormat, Presentation, ShapeKind, Slide, TextFormat } from "../core/document-model/types";
 import { MAX_OBJECT_SIZE, MIN_OBJECT_SIZE, constrainRect, isFiniteRect, rectsEqual, type Rect } from "../core/geometry/rect";
 
 export interface EditorState {
@@ -29,6 +30,7 @@ export type EditorAction =
   | { type: "updateProperties"; title: string; author: string; description: string }
   | { type: "setObjectText"; slideId: string; objectId: string; text: string }
   | { type: "addTextBox" }
+  | { type: "addShape"; shape: ShapeKind }
   | { type: "selectObject"; objectId: string | null }
   | { type: "selectObjects"; objectIds: string[]; /** Selecting a group member selects the whole group (default true). */ expand?: boolean }
   | { type: "toggleObjectSelection"; objectId: string }
@@ -186,6 +188,25 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const next = withCurrentSlide(state, (s) => ({ ...s, objects: [...s.objects, box] }));
       return next ? { presentation: next, currentSlideId: state.currentSlideId, ...selection([box.id]), editingObjectId: null } : state;
     }
+    case "addShape": {
+      const slide = presentation.slides.find((s) => s.id === state.currentSlideId);
+      if (!slide || !SHAPE_KINDS.includes(action.shape)) return state;
+      const info = SHAPE_INFO[action.shape];
+      let x = (presentation.width - info.width) / 2;
+      let y = (presentation.height - info.height) / 2;
+      // Cascade so a new shape never sits exactly on top of an existing one.
+      for (let i = 0; i < 20 && slide.objects.some((o) => o.x === x && o.y === y); i++) {
+        x += 24;
+        y += 24;
+      }
+      const shape = createShape(
+        action.shape,
+        nextObjectName(slide.objects, info.label),
+        constrainRect({ x, y, width: info.width, height: info.height }, presentation, minSize({ shape: action.shape })),
+      );
+      const next = withCurrentSlide(state, (s) => ({ ...s, objects: [...s.objects, shape] }));
+      return next ? { presentation: next, currentSlideId: state.currentSlideId, ...selection([shape.id]), editingObjectId: null } : state;
+    }
     case "selectObject":
       return reduceSelection(state, action.objectId === null ? [] : [action.objectId], true);
     case "selectObjects":
@@ -209,7 +230,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const next = withCurrentSlide(state, (slide) => {
         const obj = slide.objects.find((o) => o.id === action.objectId);
         if (!obj || obj.locked) return slide;
-        const rect = constrainRect(action.rect, presentation);
+        const rect = constrainRect(action.rect, presentation, minSize(obj));
+        if (obj.shape === "line" && Math.hypot(rect.width, rect.height) < MIN_LINE_LENGTH) return slide; // never shrink a line to nothing
         if (rectsEqual(rect, obj)) return slide;
         return { ...slide, objects: slide.objects.map((o) => (o === obj ? { ...o, ...rect } : o)) };
       });
@@ -223,7 +245,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       for (const [id, r] of entries) {
         const obj = slide.objects.find((o) => o.id === id);
         if (!obj || !obj.visible || obj.locked || !isFiniteRect(r)) return state;
-        if (r.width < MIN_OBJECT_SIZE - 1e-6 || r.height < MIN_OBJECT_SIZE - 1e-6 || r.width > MAX_OBJECT_SIZE || r.height > MAX_OBJECT_SIZE) return state;
+        const min = minSize(obj);
+        if (obj.shape === "line" && Math.hypot(r.width, r.height) < MIN_LINE_LENGTH) return state;
+        if (r.width < min.width - 1e-6 || r.height < min.height - 1e-6 || r.width > MAX_OBJECT_SIZE || r.height > MAX_OBJECT_SIZE) return state;
         if (Math.abs(r.x) > 1e5 || Math.abs(r.y) > 1e5) return state;
       }
       const round = (v: number) => Math.round(v * 100) / 100;
@@ -340,7 +364,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "startEditing": {
       const slide = presentation.slides.find((s) => s.id === state.currentSlideId);
       const obj = slide?.objects.find((o) => o.id === action.objectId);
-      if (!obj || !obj.visible || obj.type !== "text") return state;
+      if (!obj || !obj.visible || obj.type !== "text" || obj.shape === "line") return state; // lines carry no text
       if (state.editingObjectId === obj.id && state.selectedObjectId === obj.id) return state;
       return { ...state, ...selection([obj.id]), editingObjectId: obj.id };
     }

@@ -1,3 +1,4 @@
+import { MAX_STROKE_WIDTH, SHAPE_KINDS } from "../document-model/shapes";
 import { OVERFLOW_MODES, VERTICAL_ALIGNS, isValidMargins } from "../document-model/box";
 import { FONT_FAMILY_NAMES, normalizeColor } from "../document-model/fonts";
 import { ALIGNMENTS, DIRECTIONS, LIST_STYLES, MAX_INDENT_LEVEL, MAX_LINE_SPACING, MIN_LINE_SPACING } from "../document-model/paragraph";
@@ -88,9 +89,17 @@ export function validatePresentation(value: unknown): ValidationResult {
         if (o.type !== "text") {
           fail(`${ow}: unknown object type ${String(o.type)}`);
         } else {
-          if (o.role !== "title" && o.role !== "body" && o.role !== "textbox") {
-            fail(`${ow}: role must be title, body or textbox`);
+          if (o.role !== "title" && o.role !== "body" && o.role !== "textbox" && o.role !== "shape") {
+            fail(`${ow}: role must be title, body, textbox or shape`);
           }
+          if (!SHAPE_KINDS.includes(o.shape as never)) fail(`${ow}: shape must be rectangle, roundRect, ellipse or line`);
+          for (const key of ["fill", "stroke"] as const) {
+            if (o[key] !== null && normalizeColor(o[key]) === null) fail(`${ow}: ${key} must be null or a hex colour`);
+          }
+          if (!isNum(o.strokeWidth) || o.strokeWidth < 0 || o.strokeWidth > MAX_STROKE_WIDTH) {
+            fail(`${ow}: strokeWidth must be between 0 and ${MAX_STROKE_WIDTH}`);
+          }
+          if (typeof o.flipV !== "boolean") fail(`${ow}: flipV must be true or false`);
           if (!isStr(o.text)) fail(`${ow}: text must be text`);
           if (!isNum(o.fontSize) || o.fontSize <= 0 || o.fontSize > 1000) {
             fail(`${ow}: fontSize must be above zero and at most 1000`);

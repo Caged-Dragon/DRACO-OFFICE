@@ -74,10 +74,21 @@ export function scaleRect(r: Rect, from: Rect, to: Rect): Rect {
   return { x: to.x + (r.x - from.x) * sx, y: to.y + (r.y - from.y) * sy, width: r.width * sx, height: r.height * sy };
 }
 
-/** The smallest bounding width and height at which every member still has at least the minimum size. */
-export function minBoundsSize(rects: Rect[], bounds: Rect, min = MIN_OBJECT_SIZE): { width: number; height: number } {
+/**
+ * The smallest bounding width and height at which every member still has at least its minimum size
+ * (20 by default; a flat line may be 0).
+ */
+export function minBoundsSize(
+  rects: Rect[],
+  bounds: Rect,
+  mins?: { width: number; height: number }[],
+): { width: number; height: number } {
+  const need = (i: number, axis: "width" | "height") => {
+    const min = mins?.[i]?.[axis] ?? MIN_OBJECT_SIZE;
+    return rects[i][axis] > 0 ? (min / rects[i][axis]) * bounds[axis] : 0;
+  };
   return {
-    width: Math.max(min, ...rects.map((r) => (r.width > 0 ? (min / r.width) * bounds.width : 0))),
-    height: Math.max(min, ...rects.map((r) => (r.height > 0 ? (min / r.height) * bounds.height : 0))),
+    width: Math.max(0, ...rects.map((_, i) => need(i, "width"))),
+    height: Math.max(0, ...rects.map((_, i) => need(i, "height"))),
   };
 }

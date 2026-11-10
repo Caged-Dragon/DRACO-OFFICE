@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createPresentation } from "../../src/core/document-model/factory";
+import { createPresentation, createShape } from "../../src/core/document-model/factory";
 import { MAX_OBJECTS_PER_SLIDE, MAX_SLIDES } from "../../src/core/document-model/types";
 import {
   FILE_EXTENSION,
@@ -53,7 +53,7 @@ describe("serialize / deserialize", () => {
       slides: [{ id: "s", name: "S", objects: [{ id: "o", type: "text", role: "title", x: 0, y: 0, width: 5, height: 5, text: "T", fontSize: 30 }] }],
     };
     const r = deserializePresentation(wrap(v1));
-    expect(r.ok && r.presentation.schemaVersion).toBe(8);
+    expect(r.ok && r.presentation.schemaVersion).toBe(9);
   });
 
   it("reports damaged content with the first problems", () => {
@@ -122,6 +122,22 @@ describe("formatting in files", () => {
     dirty.slides[0].objects[1].margins.evil = "x";
     const clean = deserializePresentation(wrap(dirty));
     expect(clean.ok && Object.keys(clean.presentation.slides[0].objects[1].margins).sort()).toEqual(["bottom", "left", "right", "top"]);
+  });
+
+  it("keeps shapes through a round trip and normalizes their colors", () => {
+    const p = createPresentation("Shapes");
+    p.slides[0].objects.push(
+      createShape("ellipse", "Oval 1", { x: 10, y: 10, width: 200, height: 140 }),
+      createShape("line", "Line 1", { x: 10, y: 300, width: 240, height: 0 }),
+    );
+    Object.assign(p.slides[0].objects[2], { fill: null, strokeWidth: 0 });
+    Object.assign(p.slides[0].objects[3], { flipV: true });
+    const r = deserializePresentation(serializePresentation(p, "test"));
+    expect(r.ok && r.presentation).toEqual(p);
+    const dirty = JSON.parse(JSON.stringify(p));
+    dirty.slides[0].objects[2].stroke = "#ABCDEF";
+    const clean = deserializePresentation(wrap(dirty));
+    expect(clean.ok && clean.presentation.slides[0].objects[2].stroke).toBe("#abcdef");
   });
 
   it("keeps groups and locks through a round trip", () => {

@@ -18,6 +18,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: "#12232b",
     title: "Draco Slides",
+    icon: path.join(__dirname, "..", "build", "icon.png"),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
   win.setMenuBarVisibility(false);

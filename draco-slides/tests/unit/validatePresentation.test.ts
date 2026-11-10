@@ -62,7 +62,7 @@ describe("validatePresentation", () => {
     p.slides[0].objects[0].role = "textbox";
     expect(validatePresentation(p).ok).toBe(true);
     (p.slides[0].objects[0] as { role: string }).role = "banner";
-    expect(errorsOf(p).join()).toContain("role must be title, body or textbox");
+    expect(errorsOf(p).join()).toContain("role must be title, body, textbox or shape");
   });
 
   it("does not modify its input", () => {
@@ -146,6 +146,22 @@ describe("validatePresentation", () => {
     expect(mutate((o) => (o.groupId = 5))).toContain("groupId must be null or an id");
     expect(mutate((o) => delete o.groupId)).toContain("groupId must be null or an id");
     expect(mutate((o) => Object.assign(o, { groupId: "g1", locked: true }))).toBe("");
+  });
+
+  it("validates shapes", () => {
+    const mutate = (fn: (o: Record<string, unknown>) => void) => {
+      const p = clone(createPresentation());
+      fn(p.slides[0].objects[1] as unknown as Record<string, unknown>);
+      return errorsOf(p).join();
+    };
+    expect(mutate((o) => (o.shape = "triangle"))).toContain("shape must be rectangle, roundRect, ellipse or line");
+    expect(mutate((o) => delete o.shape)).toContain("shape must be");
+    expect(mutate((o) => (o.fill = "blue"))).toContain("fill must be null or a hex colour");
+    expect(mutate((o) => (o.stroke = 5))).toContain("stroke must be null or a hex colour");
+    expect(mutate((o) => (o.strokeWidth = -1))).toContain("strokeWidth must be between 0 and 100");
+    expect(mutate((o) => (o.strokeWidth = 101))).toContain("strokeWidth");
+    expect(mutate((o) => (o.flipV = "yes"))).toContain("flipV must be true or false");
+    expect(mutate((o) => Object.assign(o, { role: "shape", shape: "ellipse", fill: "#ABCDEF", stroke: null, strokeWidth: 0, flipV: true }))).toBe("");
   });
 });
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.21.0 (Roadmap Version 21)
+- Shapes: Insert > Shapes adds a Rectangle, Rounded rectangle, Oval or Line in the middle of the slide. They move, resize, group, lock, snap, undo and autosave like other objects.
+- Every object is now a shape that can hold text: closed shapes take text typed in place (white, centered by default) and are listed in the Text panel; lines carry no text and are excluded from text commands.
+- Lines may be flat on one axis (height 0 or width 0) but never shorter than 10 px; flat lines get a 12 px click area. Minimum size rules are per object kind (20 x 20, or flat for lines) throughout resizing, nudging, snapping and the Position fields.
+- Document schema 9 (`shape`, `fill`, `stroke`, `strokeWidth`, `flipV`, role `shape`) with automatic migration from schemas 1 to 8; existing objects become unfilled rectangles.
+- The shape stays visible while its text is edited (only the text lines are hidden).
+- Limits: no drawing by dragging, fill/outline controls, rotation or flipping yet (V0.23.0 to V0.25.0).
+
+## Unreleased (branding, on top of 0.20.0)
+- Draco Slides logo added to the codebase (`public/logo.png`) and used as the favicon, PWA and home-screen icons, desktop window/installer icon, and in the top bar and Home screen. Replaces the generated placeholder icon and `favicon.svg`.
+- `scripts/generate-icons.py` regenerates every icon size from the master logo; tests check that all icon files exist, have the right sizes and are referenced correctly.
+
 ## 0.20.0 (Roadmap Version 20: end of Phase 2)
 - Undo and Redo for every document change, with buttons, Ctrl/Cmd+Z, Ctrl/Cmd+Y and Ctrl/Cmd+Shift+Z, tooltips naming the change, and screen-reader announcements. 100 steps per session.
 - History layer (`state/history.ts`) around the editor reducer: snapshots with slide and selection; selection, navigation and view changes are not recorded.

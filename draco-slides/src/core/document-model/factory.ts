@@ -1,8 +1,9 @@
 import { defaultTextFormat } from "./fonts";
 import { defaultBoxFormat } from "./box";
 import { defaultParagraphFormat } from "./paragraph";
+import { defaultShapeStyle, newShapeStyle } from "./shapes";
 import { DEFAULT_SLIDE_SIZE, SLIDE_SIZES, type SlideSizeId } from "./sizes";
-import { DOCUMENT_SCHEMA_VERSION, type Presentation, type Slide, type SlideObject, type TextObject } from "./types";
+import { DOCUMENT_SCHEMA_VERSION, type Presentation, type Slide, type ShapeKind, type SlideObject, type TextObject } from "./types";
 
 export function newId(): string {
   return crypto.randomUUID();
@@ -13,8 +14,8 @@ export function createSlide(name = "Untitled slide", title = "Click to add title
     id: newId(),
     name,
     objects: [
-      { id: newId(), type: "text", role: "title", name: "Title", x: 80, y: 60, width: 800, height: 100, rotation: 0, visible: true, groupId: null, locked: false, text: title, ...defaultTextFormat("title"), ...defaultParagraphFormat(), ...defaultBoxFormat() },
-      { id: newId(), type: "text", role: "body", name: "Body", x: 80, y: 200, width: 800, height: 260, rotation: 0, visible: true, groupId: null, locked: false, text: "Click to add text", ...defaultTextFormat("body"), ...defaultParagraphFormat(), ...defaultBoxFormat() },
+      { id: newId(), type: "text", role: "title", name: "Title", x: 80, y: 60, width: 800, height: 100, rotation: 0, visible: true, groupId: null, locked: false, text: title, ...defaultTextFormat("title"), ...defaultParagraphFormat(), ...defaultBoxFormat(), ...defaultShapeStyle() },
+      { id: newId(), type: "text", role: "body", name: "Body", x: 80, y: 200, width: 800, height: 260, rotation: 0, visible: true, groupId: null, locked: false, text: "Click to add text", ...defaultTextFormat("body"), ...defaultParagraphFormat(), ...defaultBoxFormat(), ...defaultShapeStyle() },
     ],
   };
 }
@@ -28,7 +29,32 @@ export function nextObjectName(objects: SlideObject[], base: string): string {
 }
 
 export function createTextBox(name: string, rect: { x: number; y: number; width: number; height: number }): TextObject {
-  return { id: newId(), type: "text", role: "textbox", name, ...rect, rotation: 0, visible: true, groupId: null, locked: false, text: "Text box", ...defaultTextFormat("textbox"), ...defaultParagraphFormat(), ...defaultBoxFormat() };
+  return { id: newId(), type: "text", role: "textbox", name, ...rect, rotation: 0, visible: true, groupId: null, locked: false, text: "Text box", ...defaultTextFormat("textbox"), ...defaultParagraphFormat(), ...defaultBoxFormat(), ...defaultShapeStyle() };
+}
+
+/** A drawn shape: filled and outlined, with centered white text for the closed shapes, nothing but an outline for a line. */
+export function createShape(kind: ShapeKind, name: string, rect: { x: number; y: number; width: number; height: number }): TextObject {
+  const line = kind === "line";
+  return {
+    id: newId(),
+    type: "text",
+    role: "shape",
+    name,
+    ...rect,
+    rotation: 0,
+    visible: true,
+    groupId: null,
+    locked: false,
+    text: "",
+    ...defaultTextFormat("textbox"),
+    color: "#ffffff",
+    ...defaultParagraphFormat(),
+    align: "center",
+    ...defaultBoxFormat(),
+    verticalAlign: line ? "top" : "middle",
+    overflow: line ? "visible" : "hidden",
+    ...newShapeStyle(kind),
+  };
 }
 
 /** Smallest "Slide N" (N above the slide count) that no slide already uses. */

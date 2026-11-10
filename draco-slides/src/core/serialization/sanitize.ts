@@ -52,6 +52,11 @@ export function sanitizePresentation(p: Presentation): Presentation {
         margins: { top: o.margins.top, right: o.margins.right, bottom: o.margins.bottom, left: o.margins.left },
         verticalAlign: o.verticalAlign,
         overflow: o.overflow,
+        shape: o.shape,
+        fill: o.fill === null ? null : (normalizeColor(o.fill) ?? null),
+        stroke: o.stroke === null ? null : (normalizeColor(o.stroke) ?? null),
+        strokeWidth: o.strokeWidth,
+        flipV: o.flipV,
       })),
     })),
   };

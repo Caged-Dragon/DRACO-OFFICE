@@ -5,6 +5,7 @@ import type { BoxPatch } from "../../core/document-model/box";
 import { boundsOf, isWholeGroup, rectOf } from "../../core/document-model/groups";
 import { paragraphPatch } from "../../core/document-model/paragraph";
 import type { Alignment, ParagraphFormat, Presentation, TextFormat } from "../../core/document-model/types";
+import { minSize } from "../../core/document-model/shapes";
 import { formatPatch } from "../../core/document-model/fonts";
 import type { Point } from "../../core/geometry/viewport";
 import { fileNameFor, serializePresentation } from "../../core/serialization/serialize";
@@ -81,7 +82,8 @@ export function Editor({ initial }: Props) {
     else dispatch({ type: "deleteSelection" });
   };
 
-  const textObject = selectedObject?.type === "text" ? selectedObject : null;
+  // Lines carry no text, so text commands are off for them.
+  const textObject = selectedObject?.type === "text" && selectedObject.shape !== "line" ? selectedObject : null;
   const formatSelected = (patch: Partial<Record<keyof TextFormat, unknown>>) => {
     if (textObject) dispatch({ type: "setTextFormat", objectId: textObject.id, patch });
   };
@@ -343,13 +345,15 @@ export function Editor({ initial }: Props) {
         onUngroup={() => dispatch({ type: "ungroupSelection" })}
         onToggleLock={() => dispatch({ type: "setObjectsLocked", locked: !allLocked })}
         onSelectAll={() => dispatch({ type: "selectAllObjects" })}
-        canEditText={selectedObject?.type === "text"}
+        canEditText={textObject !== null}
         onEditText={() => selectedObject && startEditing(selectedObject.id, null)}
         format={textObject}
         onFormat={formatSelected}
         onParagraph={paragraphSelected}
         onListLevel={changeListLevel}
         onBox={boxSelected}
+        onAddShape={(shape) => dispatch({ type: "addShape", shape })}
+        positionMin={selectedObject ? minSize(selectedObject) : { width: 20, height: 20 }}
         position={selectedObject && !selectedObject.locked ? { x: selectedObject.x, y: selectedObject.y, width: selectedObject.width, height: selectedObject.height } : null}
         slideSize={{ width: presentation.width, height: presentation.height }}
         viewOptions={settings}
@@ -436,7 +440,7 @@ export function Editor({ initial }: Props) {
           </div>
           {showTextPanel && (
             <div className="editor__text">
-              {slide.objects.map((o) => (
+              {slide.objects.filter((o) => o.shape !== "line").map((o) => (
                 <label key={o.id} className={selectedObjectIds.includes(o.id) ? "editor__field--selected" : undefined}>
                   <span className="muted">{o.role === "title" ? "Title" : o.role === "body" ? "Body text" : o.name}</span>
                   <textarea

@@ -2,7 +2,9 @@ import { useState, type KeyboardEvent, type MouseEvent } from "react";
 import { NumberField } from "../../components/common/NumberField";
 import { MAX_MARGIN, marginPatch, type BoxPatch } from "../../core/document-model/box";
 import { GRID_SIZES, type Settings } from "../../services/settings/settingsStore";
-import { MAX_OBJECT_SIZE, MIN_OBJECT_SIZE, MIN_VISIBLE, type Rect } from "../../core/geometry/rect";
+import { SHAPE_INFO } from "../../core/document-model/shapes";
+import type { ShapeKind } from "../../core/document-model/types";
+import { MAX_OBJECT_SIZE, MIN_VISIBLE, type Rect } from "../../core/geometry/rect";
 import {
   DEFAULT_FONT_FAMILY,
   DEFAULT_TEXT_COLOR,
@@ -58,6 +60,9 @@ interface Props {
   onBox: (patch: BoxPatch) => void;
   /** Position and size of the selected object (any kind), or null. */
   position: Rect | null;
+  /** Smallest width and height of the selected object (a flat line may be 0). */
+  positionMin: { width: number; height: number };
+  onAddShape: (shape: ShapeKind) => void;
   slideSize: { width: number; height: number };
   onRect: (rect: Rect) => void;
   viewOptions: Pick<Settings, "showRulers" | "showGrid" | "gridSize" | "snapToGrid" | "snapToObjects">;
@@ -424,8 +429,8 @@ export function Ribbon(p: Props) {
               label="X position"
               short="X"
               value={p.position?.x ?? 0}
-              min={p.position ? MIN_VISIBLE - p.position.width : 0}
-              max={p.slideSize.width - MIN_VISIBLE}
+              min={p.position ? Math.min(MIN_VISIBLE, p.position.width) - p.position.width : 0}
+              max={p.slideSize.width - Math.min(MIN_VISIBLE, p.position?.width ?? MIN_VISIBLE)}
               decimals={2}
               disabled={!p.position}
               onCommit={(v) => p.position && p.onRect({ ...p.position, x: v })}
@@ -434,8 +439,8 @@ export function Ribbon(p: Props) {
               label="Y position"
               short="Y"
               value={p.position?.y ?? 0}
-              min={p.position ? MIN_VISIBLE - p.position.height : 0}
-              max={p.slideSize.height - MIN_VISIBLE}
+              min={p.position ? Math.min(MIN_VISIBLE, p.position.height) - p.position.height : 0}
+              max={p.slideSize.height - Math.min(MIN_VISIBLE, p.position?.height ?? MIN_VISIBLE)}
               decimals={2}
               disabled={!p.position}
               onCommit={(v) => p.position && p.onRect({ ...p.position, y: v })}
@@ -444,7 +449,7 @@ export function Ribbon(p: Props) {
               label="Width"
               short="W"
               value={p.position?.width ?? 0}
-              min={MIN_OBJECT_SIZE}
+              min={p.positionMin.width}
               max={MAX_OBJECT_SIZE}
               decimals={2}
               disabled={!p.position}
@@ -454,7 +459,7 @@ export function Ribbon(p: Props) {
               label="Height"
               short="H"
               value={p.position?.height ?? 0}
-              min={MIN_OBJECT_SIZE}
+              min={p.positionMin.height}
               max={MAX_OBJECT_SIZE}
               decimals={2}
               disabled={!p.position}
@@ -477,6 +482,16 @@ export function Ribbon(p: Props) {
             <button className="btn btn--primary" onClick={p.onAddTextBox}>Text box</button>
           </div>
           <span className="rgroup__label">Text</span>
+        </div>
+        <div className="rgroup" role="group" aria-label="Shapes">
+          <div className="rgroup__buttons">
+            {(["rectangle", "roundRect", "ellipse", "line"] as const).map((kind) => (
+              <button key={kind} className="btn" aria-label={SHAPE_INFO[kind].label} onClick={() => p.onAddShape(kind)}>
+                {SHAPE_INFO[kind].label}
+              </button>
+            ))}
+          </div>
+          <span className="rgroup__label">Shapes</span>
         </div>
       </div>
 

@@ -50,6 +50,8 @@ export function describeAction(action: EditorAction): string {
       return "Typing";
     case "addTextBox":
       return "Insert text box";
+    case "addShape":
+      return "Insert shape";
     case "setObjectRect":
     case "setObjectRects":
       return "Move or resize";

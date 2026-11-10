@@ -1,4 +1,5 @@
 import { DEFAULT_FONT_FAMILY, DEFAULT_TEXT_COLOR } from "../document-model/fonts";
+import { defaultShapeStyle } from "../document-model/shapes";
 import { defaultBoxFormat } from "../document-model/box";
 import { defaultParagraphFormat } from "../document-model/paragraph";
 import { validatePresentation, type ValidationResult } from "../validation/validatePresentation";
@@ -153,6 +154,33 @@ function migrateV7(raw: Record<string, unknown>): Record<string, unknown> {
   return { ...raw, schemaVersion: 8, slides };
 }
 
+/** v8 -> v9: every object is a shape; existing ones are plain rectangles with no fill and no outline. */
+function migrateV8(raw: Record<string, unknown>): Record<string, unknown> {
+  const d = defaultShapeStyle();
+  const slides = Array.isArray(raw.slides)
+    ? raw.slides.map((s) =>
+        isRecord(s) && Array.isArray(s.objects)
+          ? {
+              ...s,
+              objects: s.objects.map((o) =>
+                isRecord(o)
+                  ? {
+                      ...o,
+                      shape: typeof o.shape === "string" ? o.shape : d.shape,
+                      fill: o.fill === null || typeof o.fill === "string" ? o.fill : d.fill,
+                      stroke: o.stroke === null || typeof o.stroke === "string" ? o.stroke : d.stroke,
+                      strokeWidth: typeof o.strokeWidth === "number" ? o.strokeWidth : d.strokeWidth,
+                      flipV: typeof o.flipV === "boolean" ? o.flipV : d.flipV,
+                    }
+                  : o,
+              ),
+            }
+          : s,
+      )
+    : raw.slides;
+  return { ...raw, schemaVersion: 9, slides };
+}
+
 /** Upgrades older stored documents to the current schema, then validates. Unknown versions are rejected, not guessed at. */
 export function parsePresentation(raw: unknown): ValidationResult {
   let doc: unknown = raw;
@@ -163,5 +191,6 @@ export function parsePresentation(raw: unknown): ValidationResult {
   if (isRecord(doc) && doc.schemaVersion === 5) doc = migrateV5(doc);
   if (isRecord(doc) && doc.schemaVersion === 6) doc = migrateV6(doc);
   if (isRecord(doc) && doc.schemaVersion === 7) doc = migrateV7(doc);
+  if (isRecord(doc) && doc.schemaVersion === 8) doc = migrateV8(doc);
   return validatePresentation(doc);
 }

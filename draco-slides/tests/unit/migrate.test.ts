@@ -27,7 +27,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation(v1());
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.title).toBe("Legacy");
     expect(r.value.metadata).toEqual({ author: "", description: "", language: "en", createdWith: "before 0.5.0" });
     expect(r.value.slides[0].objects.map((o) => o.name)).toEqual(["Title", "Body"]);
@@ -50,7 +50,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation(v2);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides.map((sl) => sl.objects.map((o) => o.text))).toEqual(base.slides.map((sl) => sl.objects.map((o) => o.text)));
     expect(r.value.slides[0].objects[0]).toMatchObject({ role: "title", bold: true, fontFamily: "Segoe UI", color: "#1d1d1d", fontSize: 44 });
     expect(r.value.slides[0].objects[1]).toMatchObject({ role: "body", bold: false, italic: false, underline: false, strike: false });
@@ -64,7 +64,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation({ ...base, schemaVersion: 3 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides[0].objects[1]).toMatchObject({ italic: true, color: "#ff0000" });
   });
 
@@ -82,9 +82,28 @@ describe("parsePresentation", () => {
     const r = parsePresentation(v4);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides[0].objects[0]).toMatchObject({ align: "center", indent: 0, lineSpacing: 1.2, direction: "ltr" });
     expect(r.value.slides[0].objects[1]).toMatchObject({ align: "left", indent: 0, lineSpacing: 1.2, direction: "ltr" });
+  });
+
+  it("upgrades schema 8 to 9 so existing objects are plain rectangles, keeping any shape settings already present", () => {
+    const base = JSON.parse(JSON.stringify(createPresentation("Eight")));
+    base.schemaVersion = 8;
+    for (const o of base.slides[0].objects as Record<string, unknown>[]) {
+      delete o.shape;
+      delete o.fill;
+      delete o.stroke;
+      delete o.strokeWidth;
+      delete o.flipV;
+    }
+    base.slides[0].objects[1].fill = "#ff0000";
+    const r = parsePresentation(base);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.schemaVersion).toBe(9);
+    expect(r.value.slides[0].objects[0]).toMatchObject({ shape: "rectangle", fill: null, stroke: null, strokeWidth: 2, flipV: false });
+    expect(r.value.slides[0].objects[1]).toMatchObject({ shape: "rectangle", fill: "#ff0000" });
   });
 
   it("upgrades schema 7 to 8 with nothing grouped or locked, keeping existing values", () => {
@@ -98,7 +117,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation(base);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides[0].objects[0]).toMatchObject({ groupId: null, locked: false });
     expect(r.value.slides[0].objects[1]).toMatchObject({ groupId: null, locked: true });
   });
@@ -116,7 +135,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation(base);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides[0].objects[0]).toMatchObject({ margins: { top: 0, right: 0, bottom: 0, left: 0 }, verticalAlign: "top", overflow: "hidden" });
     expect(r.value.slides[0].objects[1]).toMatchObject({ margins: { top: 5, right: 6, bottom: 7, left: 8 }, verticalAlign: "middle", overflow: "hidden" });
   });
@@ -129,7 +148,7 @@ describe("parsePresentation", () => {
     const r = parsePresentation(base);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.schemaVersion).toBe(8);
+    expect(r.value.schemaVersion).toBe(9);
     expect(r.value.slides[0].objects[0].list).toBe("none");
     expect(r.value.slides[0].objects[1].list).toBe("bullet");
   });
@@ -148,7 +167,7 @@ describe("parsePresentation", () => {
   });
 
   it("rejects future or unknown schema versions instead of guessing", () => {
-    expect(parsePresentation({ ...createPresentation(), schemaVersion: 9 }).ok).toBe(false);
+    expect(parsePresentation({ ...createPresentation(), schemaVersion: 10 }).ok).toBe(false);
     expect(parsePresentation({ schemaVersion: 0 }).ok).toBe(false);
   });
 

@@ -1,5 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { boundsOf, expandSelection, minBoundsSize, rectOf, scaleRect } from "../../core/document-model/groups";
+import { minSize } from "../../core/document-model/shapes";
 import type { Alignment, Slide } from "../../core/document-model/types";
 import {
   HANDLE_IDS,
@@ -58,6 +59,14 @@ interface Props {
   /** Grid spacing to draw, or null for no gridlines. */
   gridLines: number | null;
 }
+
+/** Hit boxes of flat lines would be too thin to click, so every hit box is at least this many screen pixels on each side. */
+const MIN_HIT_PX = 12;
+const hitStyle = (o: { x: number; y: number; width: number; height: number }, zoom: number) => {
+  const w = Math.max(o.width * zoom, MIN_HIT_PX);
+  const h = Math.max(o.height * zoom, MIN_HIT_PX);
+  return { left: o.x * zoom - (w - o.width * zoom) / 2, top: o.y * zoom - (h - o.height * zoom) / 2, width: w, height: h };
+};
 
 const PAN_STEP = 40;
 const ARROW_DIRECTIONS: Record<string, [number, number]> = {
@@ -127,7 +136,8 @@ export function CanvasViewport({
     if (!root) return;
     const ids = new Set<string>();
     root.querySelectorAll<HTMLElement>("[data-text-id]").forEach((el) => {
-      if (el.dataset.textId && textOverflows(el)) ids.add(el.dataset.textId);
+      // Shapes without text (and lines) have nothing to overflow.
+      if (el.dataset.textId && el.textContent?.trim() && textOverflows(el)) ids.add(el.dataset.textId);
     });
     setOverflowing((prev) => (prev.size === ids.size && [...ids].every((id) => prev.has(id)) ? prev : ids));
   });
@@ -145,7 +155,7 @@ export function CanvasViewport({
     const origins = objs.map(rectOf);
     const bounds = boundsOf(origins) as Rect;
     const single = objs.length === 1;
-    const minSize = minBoundsSize(origins, bounds);
+    const minBounds = minBoundsSize(origins, bounds, objs.map((o) => minSize(o)));
     const startZoom = zoom;
     let started = false;
     const snapOptions: SnapOptions = {
@@ -154,6 +164,7 @@ export function CanvasViewport({
       objects: snap.objects,
       grid: snap.grid,
       threshold: SNAP_SCREEN_PX / startZoom,
+      minSize: minBounds,
     };
     const apply = (next: Rect) => {
       if (single) onChangeRect(objs[0].id, next);
@@ -196,10 +207,10 @@ export function CanvasViewport({
       } else {
         const fromCenter = e.ctrlKey || e.metaKey;
         const keepAspect = e.shiftKey;
-        let next = resizeRect(bounds, mode, dx, dy, { keepAspect, fromCenter, minWidth: minSize.width, minHeight: minSize.height });
+        let next = resizeRect(bounds, mode, dx, dy, { keepAspect, fromCenter, minWidth: minBounds.width, minHeight: minBounds.height });
         if (snapping && !fromCenter && !(keepAspect && mode.length === 2)) {
           const result = snapResize(next, mode, snapOptions);
-          if (result.rect.width >= minSize.width - 1e-6 && result.rect.height >= minSize.height - 1e-6) {
+          if (result.rect.width >= minBounds.width - 1e-6 && result.rect.height >= minBounds.height - 1e-6) {
             next = result.rect;
             setGuides(result.guides);
           } else setGuides([]);
@@ -313,7 +324,7 @@ export function CanvasViewport({
         if (insideEditor(e.target)) return;
         const objectEl = (e.target as HTMLElement).closest<HTMLElement>("[data-object-id]");
         const o = objectEl && slide.objects.find((x) => x.id === objectEl.dataset.objectId);
-        if (o && o.type === "text") onStartEditing(o.id, { x: e.clientX, y: e.clientY });
+        if (o && o.type === "text" && o.shape !== "line") onStartEditing(o.id, { x: e.clientX, y: e.clientY });
       }}
       onMouseMove={(e) => onPointer(canvas.toSlide(e.clientX, e.clientY))}
       onMouseLeave={() => onPointer(null)}
@@ -365,11 +376,13 @@ export function CanvasViewport({
             const rect = rectOf(selected);
             onChangeRect(
               selected.id,
-              e.shiftKey ? resizeRect(rect, "se", arrow[0] * amount, arrow[1] * amount) : moveRect(rect, arrow[0] * amount, arrow[1] * amount),
+              e.shiftKey
+                ? resizeRect(rect, "se", arrow[0] * amount, arrow[1] * amount, { minWidth: minSize(selected).width, minHeight: minSize(selected).height })
+                : moveRect(rect, arrow[0] * amount, arrow[1] * amount),
             );
           } else if (box) {
             const origins = selectedObjs.map(rectOf);
-            const min = minBoundsSize(origins, box);
+            const min = minBoundsSize(origins, box, selectedObjs.map((o) => minSize(o)));
             const next = e.shiftKey
               ? resizeRect(box, "se", arrow[0] * amount, arrow[1] * amount, { minWidth: min.width, minHeight: min.height })
               : constrainRect(moveRect(box, arrow[0] * amount, arrow[1] * amount), { width, height });
@@ -414,7 +427,7 @@ export function CanvasViewport({
           }
           case "Enter":
           case "F2":
-            if (selected && selected.type === "text") {
+            if (selected && selected.type === "text" && selected.shape !== "line") {
               e.preventDefault();
               onStartEditing(selected.id, null);
             }
@@ -511,7 +524,7 @@ export function CanvasViewport({
                 aria-label={o.name}
                 aria-pressed={idSet.has(o.id)}
                 className={`hit${idSet.has(o.id) ? " hit--selected" : ""}${o.locked ? " hit--locked" : ""}${overflowing.has(o.id) ? " hit--overflow" : ""}`}
-                style={{ left: o.x * zoom, top: o.y * zoom, width: o.width * zoom, height: o.height * zoom }}
+                style={hitStyle(o, zoom)}
               />
             ))}
           {selectedObjs.length > 1 && box && (

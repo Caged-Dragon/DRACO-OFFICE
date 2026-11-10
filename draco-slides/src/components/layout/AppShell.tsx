@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import logoUrl from "../../assets/logo.png";
 import { ReleaseInfo } from "../../features/release/ReleaseInfo";
 import { SettingsDialog } from "../../features/settings/SettingsDialog";
 import { isCloudConfigured } from "../../services/supabase/client";
@@ -16,7 +17,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="shell">
       <a className="skip" href="#main">Skip to main content</a>
       <header className="shell__bar">
-        <span className="brand">Draco Slides</span>
+        <span className="brand">
+          <img className="brand__logo" src={logoUrl} alt="" width={28} height={28} />
+          Draco Slides
+        </span>
         <nav aria-label="Main">
           <button
             className={`navbtn${view === "home" ? " navbtn--active" : ""}`}

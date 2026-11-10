@@ -1,5 +1,5 @@
 /** Bump when the stored shape changes, and add a migration in core/serialization/migrate.ts. */
-export const DOCUMENT_SCHEMA_VERSION = 8;
+export const DOCUMENT_SCHEMA_VERSION = 9;
 
 export const MIN_SLIDE_DIMENSION = 100;
 export const MAX_SLIDE_DIMENSION = 20000;
@@ -80,10 +80,28 @@ export interface BoxFormat {
   overflow: OverflowMode;
 }
 
-export interface TextObject extends BaseObject, TextFormat, ParagraphFormat, BoxFormat {
+export type ShapeKind = "rectangle" | "roundRect" | "ellipse" | "line";
+
+/**
+ * How the object's box is drawn. As in PowerPoint every object is a shape that can hold text: a text box is a
+ * rectangle with no fill and no outline, and a drawn rectangle can have text typed into it. Lines carry no text.
+ */
+export interface ShapeStyle {
+  shape: ShapeKind;
+  /** Lowercase "#rrggbb", or null for no fill. */
+  fill: string | null;
+  /** Lowercase "#rrggbb", or null for no outline. */
+  stroke: string | null;
+  /** Outline width in slide pixels. */
+  strokeWidth: number;
+  /** Lines only: false runs from the top-left to the bottom-right corner of the box, true from the bottom-left to the top-right. */
+  flipV: boolean;
+}
+
+export interface TextObject extends BaseObject, TextFormat, ParagraphFormat, BoxFormat, ShapeStyle {
   type: "text";
   /** "title" and "body" are slide placeholders; "textbox" is a free text box the user inserted. */
-  role: "title" | "body" | "textbox";
+  role: "title" | "body" | "textbox" | "shape";
   text: string;
 }
 

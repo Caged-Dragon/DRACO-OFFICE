@@ -1,3 +1,4 @@
+import logoUrl from "../../assets/logo.png";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { SLIDE_SIZE_IDS, SLIDE_SIZES, type SlideSizeId } from "../../core/document-model/sizes";
 import type { Presentation } from "../../core/document-model/types";
@@ -55,7 +56,10 @@ export function Home({ onNew, onOpen, onImportFile }: Props) {
 
   return (
     <div className="home">
-      <h1>Your presentations</h1>
+      <div className="home__title">
+        <img className="home__logo" src={logoUrl} alt="" width={64} height={64} />
+        <h1>Your presentations</h1>
+      </div>
 
       <form className="newrow" onSubmit={submit}>
         <label className="field">

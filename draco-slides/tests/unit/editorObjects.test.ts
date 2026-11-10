@@ -14,7 +14,7 @@ describe("addTextBox", () => {
     const [box] = boxes(s);
     expect(box).toMatchObject({ name: "Text box 1", x: 330, y: 230, width: 300, height: 80, text: "Text box", visible: true, rotation: 0 });
     expect(s.selectedObjectId).toBe(box.id);
-    expect(s.presentation.schemaVersion).toBe(8);
+    expect(s.presentation.schemaVersion).toBe(9);
     expect(parsePresentation(s.presentation).ok).toBe(true);
   });
 
